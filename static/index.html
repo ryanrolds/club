@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/js/localmedia.js"></script>
+    <script src="/js/peering.js"></script>
+    <script src="/js/signalling.js"></script>
+  </head>
+  <body>
+    <video id="local" autoplay></video>
+    <div id="peers"></div>
+
+    <script type="text/javascript">
+      let local = new LocalMedia("#local")
+      local.setupMedia()
+
+      let peers = new Peering("#peers")
+      let signals = new SignallingServer()
+
+      signals.addEventListener("connected", () => {
+        console.log("connected to signalling server")
+      })
+
+      signals.addEventListener("peer-join", (peer) => {
+        peers.add(peer)
+      })
+
+      signals.addEventListener("peer-leave", (peer) => {
+        peers.remove(peer)
+      })
+
+      signals.addEventListener("disconnect", () => {
+        console.log("disconnected from signalling server")
+      })
+
+      signals.connect("ws://localhost:3000/room")
+    </script>
+  </body>
+</html>
