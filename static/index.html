@@ -6,33 +6,61 @@
     <script src="/js/signalling.js"></script>
   </head>
   <body>
-    <video id="local" autoplay></video>
+    <div id="local">
+      <video autoplay></video>
+    </div>
     <div id="peers"></div>
 
     <script type="text/javascript">
       let local = new LocalMedia("#local")
-      local.setupMedia()
+      local.setupMedia().then(() => {
+        let signals = new SignallingServer()
+        let peers = new Peering("#peers", local.getStream(), signals)
 
-      let peers = new Peering("#peers")
-      let signals = new SignallingServer()
+        signals.addEventListener("connected", async (event) => {
+          console.log("connected to signalling server", event)
+          await local.onConnected()
+          await peers.onConnected()
 
-      signals.addEventListener("connected", () => {
-        console.log("connected to signalling server")
+          signals.sendJoin()
+        })
+
+        signals.addEventListener("join", async (event) => {
+          console.log("got join", event.join)
+          let offer = await peers.onJoin(event.detail)
+          signals.sendOffer(event.detail.peerId, offer)
+        })
+
+        signals.addEventListener("offer", async (event) => {
+          console.log("got offer", event)
+          let answer = await peers.onOffer(event.detail)
+          signals.sendAnswer(event.detail.peerId, answer)
+        })
+
+        signals.addEventListener("icecandidate", async (event) => {
+          console.log("got ice candidate", event)
+          peers.onICECandidate(event.detail)
+        })
+
+        signals.addEventListener("answer", async (event) => {
+          console.log("got answer", event)
+          await peers.onAnswer(event.detail)
+        })
+
+        signals.addEventListener("leave", async (event) => {
+          console.log("got leave", event)
+          await peers.onLeave(event.detail)
+        })
+
+        signals.addEventListener("disconnected", async (event) => {
+          console.log("disconnected from signalling server", event)
+
+          await local.onDisconnected()
+          await peers.onDisconnected()
+        })
+
+        signals.connect("ws://localhost:3000/room")
       })
-
-      signals.addEventListener("peer-join", (peer) => {
-        peers.add(peer)
-      })
-
-      signals.addEventListener("peer-leave", (peer) => {
-        peers.remove(peer)
-      })
-
-      signals.addEventListener("disconnect", () => {
-        console.log("disconnected from signalling server")
-      })
-
-      signals.connect("ws://localhost:3000/room")
     </script>
   </body>
 </html>
