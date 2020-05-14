@@ -10,7 +10,7 @@ Requires Go 1.14+.
 
 ```
 go build
-./virtual_bar
+./club
 ```
 
 Open http://localhost:3000 in your browser.
