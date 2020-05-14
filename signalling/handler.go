@@ -137,7 +137,6 @@ func sendToPeers(sender *Peer, room Room, messageType int, message []byte) {
 
 		if err != nil {
 			log.Println(err)
-			return
 		}
 	}
 }

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: club-${ENV}
+  labels:
+    app: club
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: club
+      env: ${ENV}
+  template:
+    metadata:
+      labels:
+        app: club
+        env: ${ENV}
+    spec:
+      containers:
+      - name: club
+        image: docker.pedanticorderliness.com/club:${TAG_NAME}
+        ports:
+        - containerPort: 3000
+        env:
+        - name: ENV
+          value: ${ENV}
+      imagePullSecrets:
+        - name: regcred

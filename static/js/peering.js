@@ -56,7 +56,7 @@ class Peering {
       }]
     }
 
-    let peer = new RTCPeerConnection()
+    let peer = new RTCPeerConnection(config)
     let video = document.createElement("video")
     video.id = peerId
     video.autoplay = true

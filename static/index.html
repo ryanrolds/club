@@ -7,7 +7,7 @@
   </head>
   <body>
     <div id="local">
-      <video autoplay></video>
+      <video autoplay muted></video>
     </div>
     <div id="peers"></div>
 
@@ -59,7 +59,8 @@
           await peers.onDisconnected()
         })
 
-        signals.connect("ws://localhost:3000/room")
+        let isHTTPS = location.protocol !== 'https:'
+        signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
       })
     </script>
   </body>

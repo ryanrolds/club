@@ -59,16 +59,16 @@ class SignallingServer extends EventTarget {
     }, 30000)
   }
 
+  sendJoin() {
+    this.websocket.send(JSON.stringify({type: "join", destId: "", payload: {}}))
+  }
+
   sendOffer(peerId, offer) {
     this.websocket.send(JSON.stringify({type: "offer", destId: peerId, payload: offer}))
   }
 
   sendAnswer(peerId, answer) {
     this.websocket.send(JSON.stringify({type: "answer", destId: peerId, payload: answer}))
-  }
-
-  sendJoin() {
-    this.websocket.send(JSON.stringify({type: "join", destId: "", payload: {}}))
   }
 
   sendICECandidate(peerId, candidate) {
