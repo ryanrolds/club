@@ -1,4 +1,4 @@
-module github.com/ryanrolds/virtual_bar
+module github.com/ryanrolds/club
 
 go 1.14
 
