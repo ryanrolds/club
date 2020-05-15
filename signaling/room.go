@@ -26,7 +26,7 @@ func (r *Room) Dispatch(source *Peer, message Message) {
 
 	switch message.Type {
 	case "heartbeat":
-		logrus.Infof("heartbeat from %s", source.id)
+		logrus.Infof("heartbeat from %s", source.ID)
 	case "join":
 		r.AddPeer(source)
 
@@ -75,26 +75,26 @@ func (r *Room) GetPeer(peerID PeerID) *Peer {
 }
 
 func (r *Room) AddPeer(peer *Peer) {
-	if r.GetPeer(peer.id) != nil {
-		logrus.Warnf("peer %s already present", peer.id)
+	if r.GetPeer(peer.ID) != nil {
+		logrus.Warnf("peer %s already present", peer.ID)
 		return // Peer already present
 	}
 
 	r.rwLock.Lock()
 	defer r.rwLock.Unlock()
 
-	r.peers[peer.id] = peer
+	r.peers[peer.ID] = peer
 
-	logrus.Debugf("added peer %s", peer.id)
+	logrus.Debugf("added peer %s", peer.ID)
 }
 
 func (r *Room) RemovePeer(peer *Peer) {
 	r.rwLock.Lock()
 	defer r.rwLock.Unlock()
 
-	delete(r.peers, peer.id)
+	delete(r.peers, peer.ID)
 
-	logrus.Debugf("removed peer %s", peer.id)
+	logrus.Debugf("removed peer %s", peer.ID)
 }
 
 func (r *Room) MessagePeer(message Message) error {
@@ -123,7 +123,7 @@ func (r *Room) Broadcast(message Message) error {
 
 	for _, peer := range room.peers {
 		// Don't send messages to source
-		if peer.id == message.SourceID {
+		if peer.ID == message.SourceID {
 			continue
 		}
 

@@ -8,17 +8,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . PeerConnection
+
+type PeerConnection interface {
+	ReadMessage() (int, []byte, error)
+	WriteJSON(interface{}) error
+	Close() error
+}
+
 type PeerID string
 
 type Peer struct {
-	id   PeerID
+	ID   PeerID
 	lock sync.Mutex
-	conn *websocket.Conn
+	conn PeerConnection
 }
 
 func NewPeer(conn *websocket.Conn) *Peer {
 	return &Peer{
-		id:   PeerID(cuid.New()),
+		ID:   PeerID(cuid.New()),
 		lock: sync.Mutex{},
 		conn: conn,
 	}
@@ -31,7 +39,7 @@ func (p *Peer) GetNextMessage() (Message, error) {
 		return Message{}, err
 	}
 
-	message, err := NewMessageFromBytes(p.id, data)
+	message, err := NewMessageFromBytes(p.ID, data)
 	if err != nil {
 		return Message{}, err
 	}
