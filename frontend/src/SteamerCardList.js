@@ -1,12 +1,12 @@
 import React from 'react'
 import { makeStyles, Container, Grid } from '@material-ui/core'
 import StreamerCard from './StreamerCard'
-import SignallingServer from './helpers/signalling'
+import SignalingServer from './helpers/signaling'
 
 export default class StreamerCardList extends React.Component {
     state = {
         peers: {},
-        signals: new SignallingServer(),
+        signals: new SignalingServer(),
         stream: null,
         offer: null,
     }

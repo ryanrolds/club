@@ -16,6 +16,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function Footer() {
+  return (
+    <footer className={classes.footer}>
+      <Typography variant="h6" align="center" gutterBottom>
+        Help contribute
+        </Typography>
+      <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
+        <Link color="inherit" href="https://github.com/ryanrolds/club">
+          <GithubIcon className={classes.icon} />
+        Contribute on GitHub
+        </Link>
+      </Typography>
+    </footer>
+  )
+}
+
 export default function Club() {
   const classes = useStyles();
 
@@ -25,19 +41,7 @@ export default function Club() {
       <main>
         <StreamerCardList />
       </main>
-      {/* Footer */}
-      <footer className={classes.footer}>
-        <Typography variant="h6" align="center" gutterBottom>
-          Help contribute
-        </Typography>
-        <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
-          <Link color="inherit" href="https://github.com/ryanrolds/club">
-            <GithubIcon className={classes.icon} />
-        Contribute on GitHub
-        </Link>
-        </Typography>
-      </footer>
-      {/* End footer */}
+      <Footer />
     </React.Fragment>
   );
 }
