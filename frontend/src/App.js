@@ -17,6 +17,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Footer() {
+  const classes = useStyles();
+
   return (
     <footer className={classes.footer}>
       <Typography variant="h6" align="center" gutterBottom>
@@ -33,8 +35,6 @@ function Footer() {
 }
 
 export default function Club() {
-  const classes = useStyles();
-
   return (
     <React.Fragment>
       <CssBaseline />
