@@ -44,11 +44,10 @@ export default class StreamerCard extends React.Component {
     }
 
     updateVideoStream() {
-        console.log(this.streamRef)
         if (this.streamRef.current.srcObject !== this.props.stream) {
             this.streamRef.current.srcObject = this.props.stream
             this.streamRef.current.autoplay = true
-            this.streamRef.current.muted = true
+            this.streamRef.current.muted = this.props.muted
         }
     }
 }
