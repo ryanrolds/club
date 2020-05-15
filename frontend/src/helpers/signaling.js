@@ -1,6 +1,6 @@
 
 
-export default class SignallngServer extends EventTarget {
+export default class SignalingServer extends EventTarget {
   constructor(mySecret) {
     super()
     this.websocket = null
