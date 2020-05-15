@@ -39,7 +39,7 @@ func main() {
 
 	http.Handle("/room", &signaling.Server{})
 
-	fs := http.FileServer(http.Dir("./static"))
+	fs := http.FileServer(http.Dir("./frontend/build"))
 	http.Handle("/", fs)
 
 	logrus.Info("Listening on :3000...")
