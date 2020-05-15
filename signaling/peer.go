@@ -3,7 +3,6 @@ package signaling
 import (
 	"sync"
 
-	"github.com/gorilla/websocket"
 	"github.com/lucsky/cuid"
 	"github.com/sirupsen/logrus"
 )
@@ -24,7 +23,7 @@ type Peer struct {
 	conn PeerConnection
 }
 
-func NewPeer(conn *websocket.Conn) *Peer {
+func NewPeer(conn PeerConnection) *Peer {
 	return &Peer{
 		ID:   PeerID(cuid.New()),
 		lock: sync.Mutex{},
