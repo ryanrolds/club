@@ -16,7 +16,7 @@ import (
 func main() {
 	env := os.Getenv("ENV")
 	if env == "" {
-		env = "development"
+		env = "dev"
 	}
 
 	if env == "prod" {
