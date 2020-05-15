@@ -60,6 +60,9 @@ func (r *Room) Dispatch(source *Peer, message Message) {
 }
 
 func (r *Room) GetPeer(peerId PeerID) *Peer {
+	r.rwLock.RLock()
+	defer r.rwLock.RUnlock()
+
 	peer, ok := r.peers[peerId]
 	if !ok {
 		return nil
@@ -69,20 +72,21 @@ func (r *Room) GetPeer(peerId PeerID) *Peer {
 }
 
 func (r *Room) AddPeer(peer *Peer) {
-	r.rwLock.Lock()
-	defer r.rwLock.Unlock()
-
 	if r.GetPeer(peer.id) == nil {
 		return // Peer already present
 	}
+
+	r.rwLock.Lock()
+	defer r.rwLock.Unlock()
 
 	r.peers[peer.id] = peer
 }
 
 func (r *Room) RemovePeer(peer *Peer) {
 	r.rwLock.Lock()
+	defer r.rwLock.Unlock()
+
 	delete(r.peers, peer.id)
-	r.rwLock.Unlock()
 }
 
 func (r *Room) MessagePeer(message Message) error {
@@ -101,6 +105,9 @@ func (r *Room) MessagePeer(message Message) error {
 }
 
 func (r *Room) Broadcast(message Message) error {
+	r.rwLock.RLock()
+	defer r.rwLock.RUnlock()
+
 	for _, peer := range room.peers {
 		// Don't send messages to source
 		if peer.id == message.SourceID {

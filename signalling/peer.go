@@ -53,3 +53,13 @@ func (p *Peer) SendMessage(message Message) error {
 
 	return nil
 }
+
+func (p *Peer) Leave() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	err := p.conn.Close()
+	if err != nil {
+		log.Println(err)
+	}
+}
