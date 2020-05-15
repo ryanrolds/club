@@ -3,7 +3,7 @@
   <head>
     <script src="/js/localmedia.js"></script>
     <script src="/js/peering.js"></script>
-    <script src="/js/signalling.js"></script>
+    <script src="/js/signaling.js"></script>
   </head>
   <body>
     <div id="local">
@@ -14,11 +14,11 @@
     <script type="text/javascript">
       let local = new LocalMedia("#local")
       local.setupMedia().then(() => {
-        let signals = new SignallingServer()
+        let signals = new SignalingServer()
         let peers = new Peering("#peers", local.getStream(), signals)
 
         signals.addEventListener("connected", async (event) => {
-          console.log("connected to signalling server", event)
+          console.log("connected to signaling server", event)
           await local.onConnected()
           await peers.onConnected()
 
@@ -53,7 +53,7 @@
         })
 
         signals.addEventListener("disconnected", async (event) => {
-          console.log("disconnected from signalling server", event)
+          console.log("disconnected from signaling server", event)
 
           await local.onDisconnected()
           await peers.onDisconnected()

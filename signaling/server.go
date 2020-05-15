@@ -1,4 +1,4 @@
-package signalling
+package signaling
 
 import (
 	"net/http"
@@ -13,11 +13,11 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type SignallingServer struct{}
+type Server struct{}
 
 var room = NewRoom()
 
-func (s *SignallingServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logrus.Error(errors.Wrap(err, "problem upgrading to websockets"))

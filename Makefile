@@ -12,4 +12,7 @@ lint:
 	./bin/golangci-lint run
 
 run: build
-	./club
+	ENV=prod ./club
+
+run-debug: build
+	ENV=dev ./club

@@ -1,4 +1,4 @@
-package signalling
+package signaling
 
 import (
 	"errors"
@@ -26,7 +26,7 @@ func (r *Room) Dispatch(source *Peer, message Message) {
 
 	switch message.Type {
 	case "heartbeat":
-		logrus.Info("heartbeat from %s", source.id)
+		logrus.Infof("heartbeat from %s", source.id)
 	case "join":
 		r.AddPeer(source)
 
@@ -62,11 +62,11 @@ func (r *Room) Dispatch(source *Peer, message Message) {
 	}
 }
 
-func (r *Room) GetPeer(peerId PeerID) *Peer {
+func (r *Room) GetPeer(peerID PeerID) *Peer {
 	r.rwLock.RLock()
 	defer r.rwLock.RUnlock()
 
-	peer, ok := r.peers[peerId]
+	peer, ok := r.peers[peerID]
 	if !ok {
 		return nil
 	}
@@ -105,8 +105,8 @@ func (r *Room) MessagePeer(message Message) error {
 	}
 
 	err := peer.SendMessage(message)
-	if err == nil {
-		logrus.Warn("problem setting message to peer %s", message.DestinationID)
+	if err != nil {
+		logrus.Warnf("problem setting message to peer %s", message.DestinationID)
 		return nil
 	}
 
@@ -129,7 +129,7 @@ func (r *Room) Broadcast(message Message) error {
 
 		err := peer.SendMessage(message)
 		if err != nil {
-			logrus.Warn("problem broadcasting message to peer %s", message.DestinationID)
+			logrus.Warnf("problem broadcasting message to peer %s", message.DestinationID)
 		}
 	}
 

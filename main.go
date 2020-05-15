@@ -8,7 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ryanrolds/club/signalling"
+	"github.com/ryanrolds/club/signaling"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,7 +37,7 @@ func main() {
 
 	logrus.Infof("Log level: %s", logrus.GetLevel())
 
-	http.Handle("/room", &signalling.SignallingServer{})
+	http.Handle("/room", &signaling.Server{})
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)

@@ -28,4 +28,6 @@ make install
 make run
 ```
 
+For extra debugging information use `make run-debug`
+
 Open http://localhost:3000 in your browser.
