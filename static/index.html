@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <script src="/js/localmedia.js"></script>
+    <script src="/js/peering.js"></script>
+    <script src="/js/signaling.js"></script>
+  </head>
+  <body>
+    <div id="local">
+      <video autoplay muted></video>
+    </div>
+    <div id="peers"></div>
 
-<head>
-  <meta
-  name="viewport"
-  content="minimum-scale=1, initial-scale=1, width=device-width"
-/>
-  <script src="/js/localmedia.js"></script>
-  <script src="/js/peering.js"></script>
-  <script src="/js/signaling.js"></script>
-  <script src="/js/app.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-</head>
+    <script type="text/javascript">
+      let local = new LocalMedia("#local")
+      local.setupMedia().then(() => {
+        let signals = new SignalingServer()
+        let peers = new Peering("#peers", local.getStream(), signals)
 
-<body>
-  <div id="local">
-    <video autoplay muted></video>
-  </div>
-  <div id="peers"></div>
-  <div id="app"></div>
+        signals.addEventListener("connected", async (event) => {
+          console.log("connected to signaling server", event)
+          await local.onConnected()
+          await peers.onConnected()
 
   <script type="text/javascript">
     let local = new LocalMedia("#local")
@@ -57,10 +58,8 @@
         await peers.onAnswer(event.detail)
       })
 
-      signals.addEventListener("leave", async (event) => {
-        console.log("got leave", event)
-        await peers.onLeave(event.detail)
-      })
+        signals.addEventListener("disconnected", async (event) => {
+          console.log("disconnected from signaling server", event)
 
       signals.addEventListener("disconnected", async (event) => {
         console.log("disconnected from signaling server", event)
