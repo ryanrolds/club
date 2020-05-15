@@ -27,29 +27,29 @@ func (r *Room) Dispatch(source *Peer, message Message) {
 	case "join":
 		r.AddPeer(source)
 
-		err := room.Broadcast(message)
+		err := r.Broadcast(message)
 		if err != nil {
 			log.Println(err)
 		}
 	case "leave":
 		r.RemovePeer(source)
 
-		err := room.Broadcast(message)
+		err := r.Broadcast(message)
 		if err != nil {
 			log.Println(err)
 		}
 	case "offer":
-		err := room.MessagePeer(message)
+		err := r.MessagePeer(message)
 		if err != nil {
 			log.Println(err)
 		}
 	case "answer":
-		err := room.MessagePeer(message)
+		err := r.MessagePeer(message)
 		if err != nil {
 			log.Println(err)
 		}
 	case "icecandidate":
-		err := room.MessagePeer(message)
+		err := r.MessagePeer(message)
 		if err != nil {
 			log.Println(err)
 		}
