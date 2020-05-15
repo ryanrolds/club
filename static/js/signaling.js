@@ -1,6 +1,6 @@
 
 
-class SignallingServer extends EventTarget {
+class SignalingServer extends EventTarget {
   constructor(mySecret) {
     super()
     this.websocket = null
