@@ -1,17 +1,11 @@
-.PHONY: install install-node-modules build all lint run
+.PHONY: install build all lint run
 
 TAG_NAME := $(shell git rev-parse --short HEAD)
 
-install: install-node-modules
+install:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
 
-install-node-modules:
-	cd frontend && npm i && cd ..
-
-generate-static:
-	rm -rf static/ && cd frontend && npm run build && cp -rp build/ ../static && cd ..
-
-build: generate-static
+build:
 	go build -race
 
 lint:
