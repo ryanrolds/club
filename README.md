@@ -6,11 +6,14 @@ WebRTC video chat application written in JS and Go.
 
 Requires Go 1.14+.
 
+```
+make install
+```
+
 ## Running
 
 ```
-go build
-./club
+make run
 ```
 
 Open http://localhost:3000 in your browser.

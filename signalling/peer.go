@@ -1,11 +1,11 @@
 package signalling
 
 import (
-	"log"
 	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/lucsky/cuid"
+	"github.com/sirupsen/logrus"
 )
 
 type PeerID string
@@ -27,7 +27,7 @@ func NewPeer(conn *websocket.Conn) *Peer {
 func (p *Peer) GetNextMessage() (Message, error) {
 	_, data, err := p.conn.ReadMessage()
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 		return Message{}, err
 	}
 
@@ -35,8 +35,6 @@ func (p *Peer) GetNextMessage() (Message, error) {
 	if err != nil {
 		return Message{}, err
 	}
-
-	log.Println(string(data))
 
 	return message, nil
 }
@@ -47,7 +45,7 @@ func (p *Peer) SendMessage(message Message) error {
 	p.lock.Unlock()
 
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 		return err
 	}
 
@@ -60,6 +58,6 @@ func (p *Peer) Leave() {
 
 	err := p.conn.Close()
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 	}
 }

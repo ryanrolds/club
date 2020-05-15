@@ -2,8 +2,9 @@ package signalling
 
 import (
 	"errors"
-	"log"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 var ErrPeerNotFound = errors.New("peer not found")
@@ -21,40 +22,42 @@ func NewRoom() *Room {
 }
 
 func (r *Room) Dispatch(source *Peer, message Message) {
+	logrus.Debugf("Message type: %s", message.Type)
+
 	switch message.Type {
 	case "heartbeat":
-		log.Printf("heartbeat from %s", source.id)
+		logrus.Info("heartbeat from %s", source.id)
 	case "join":
 		r.AddPeer(source)
 
 		err := r.Broadcast(message)
 		if err != nil {
-			log.Println(err)
+			logrus.Error(err)
 		}
 	case "leave":
 		r.RemovePeer(source)
 
 		err := r.Broadcast(message)
 		if err != nil {
-			log.Println(err)
+			logrus.Error(err)
 		}
 	case "offer":
 		err := r.MessagePeer(message)
 		if err != nil {
-			log.Println(err)
+			logrus.Error(err)
 		}
 	case "answer":
 		err := r.MessagePeer(message)
 		if err != nil {
-			log.Println(err)
+			logrus.Error(err)
 		}
 	case "icecandidate":
 		err := r.MessagePeer(message)
 		if err != nil {
-			log.Println(err)
+			logrus.Error(err)
 		}
 	default:
-		log.Printf(`unknown message type %s`, message.Type)
+		logrus.Warnf(`unknown message type %s`, message.Type)
 		return
 	}
 }
@@ -72,7 +75,8 @@ func (r *Room) GetPeer(peerId PeerID) *Peer {
 }
 
 func (r *Room) AddPeer(peer *Peer) {
-	if r.GetPeer(peer.id) == nil {
+	if r.GetPeer(peer.id) != nil {
+		logrus.Warnf("peer %s already present", peer.id)
 		return // Peer already present
 	}
 
@@ -80,6 +84,8 @@ func (r *Room) AddPeer(peer *Peer) {
 	defer r.rwLock.Unlock()
 
 	r.peers[peer.id] = peer
+
+	logrus.Debugf("added peer %s", peer.id)
 }
 
 func (r *Room) RemovePeer(peer *Peer) {
@@ -87,19 +93,24 @@ func (r *Room) RemovePeer(peer *Peer) {
 	defer r.rwLock.Unlock()
 
 	delete(r.peers, peer.id)
+
+	logrus.Debugf("removed peer %s", peer.id)
 }
 
 func (r *Room) MessagePeer(message Message) error {
 	peer := r.GetPeer(message.DestinationID)
-	if peer != nil {
-		log.Printf("cannot find peer %s", message.DestinationID)
+	if peer == nil {
+		logrus.Warnf("cannot find peer %s", message.DestinationID)
 		return nil // Don't error, just skip
 	}
 
 	err := peer.SendMessage(message)
 	if err == nil {
-		log.Printf("problem setting message to peer %s", message.DestinationID)
+		logrus.Warn("problem setting message to peer %s", message.DestinationID)
+		return nil
 	}
+
+	logrus.Debugf("sent peer %s messsage %s", message.DestinationID, message)
 
 	return nil
 }
@@ -107,6 +118,8 @@ func (r *Room) MessagePeer(message Message) error {
 func (r *Room) Broadcast(message Message) error {
 	r.rwLock.RLock()
 	defer r.rwLock.RUnlock()
+
+	logrus.Debugf("broadcasting message: %s", message)
 
 	for _, peer := range room.peers {
 		// Don't send messages to source
@@ -116,7 +129,7 @@ func (r *Room) Broadcast(message Message) error {
 
 		err := peer.SendMessage(message)
 		if err != nil {
-			log.Printf("problem broadcasting message to peer %s", message.DestinationID)
+			logrus.Warn("problem broadcasting message to peer %s", message.DestinationID)
 		}
 	}
 

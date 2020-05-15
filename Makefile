@@ -1,4 +1,4 @@
-.PHONY: install build all
+.PHONY: install build all lint run
 
 TAG_NAME := $(shell git rev-parse --short HEAD)
 
@@ -10,3 +10,6 @@ build:
 
 lint:
 	./bin/golangci-lint run
+
+run: build
+	./club

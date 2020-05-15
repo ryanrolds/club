@@ -1,21 +1,49 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"os"
+	"path"
+	"runtime"
+	"strings"
 
 	"github.com/ryanrolds/club/signalling"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	if env == "prod" {
+		logrus.SetLevel(logrus.InfoLevel)
+	} else {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
+	// Setup logging
+	logrus.SetReportCaller(true)
+	logrus.SetFormatter(&logrus.JSONFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			s := strings.Split(f.Function, ".")
+			funcName := s[len(s)-1]
+			return funcName, fmt.Sprintf("%s:%d", path.Base(f.File), f.Line)
+		},
+	})
+
+	logrus.Infof("Log level: %s", logrus.GetLevel())
+
 	http.Handle("/room", &signalling.SignallingServer{})
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 
-	log.Println("Listening on :3000...")
+	logrus.Info("Listening on :3000...")
 	err := http.ListenAndServe(":3000", nil)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }

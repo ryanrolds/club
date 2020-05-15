@@ -1,10 +1,11 @@
 package signalling
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 var upgrader = websocket.Upgrader{
@@ -19,20 +20,24 @@ var room = NewRoom()
 func (s *SignallingServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		logrus.Error(errors.Wrap(err, "problem upgrading to websockets"))
 		return
 	}
 
 	client := NewPeer(conn)
 
+	logrus.Debugf("connection established by %s", client.id)
+
 	for {
 		message, err := client.GetNextMessage()
 		if err != nil {
-			log.Println(err)
+			logrus.Error(errors.Wrap(err, "problem getting message from client"))
 
 			// TODO add error handling
 			return
 		}
+
+		logrus.Debugf("got message %v", message)
 
 		room.Dispatch(client, message)
 	}

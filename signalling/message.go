@@ -2,8 +2,8 @@ package signalling
 
 import (
 	"encoding/json"
-	"log"
 
+	"github.com/sirupsen/logrus"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -17,20 +17,20 @@ type Message struct {
 }
 
 func NewMessageFromBytes(sourceID PeerID, data []byte) (Message, error) {
+	logrus.Debugf("Parsing message: %s", data)
+
 	var message Message
 	err := json.Unmarshal(data, &message)
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 		return Message{}, err
 	}
 
 	message.SourceID = sourceID
 
-	log.Println(message)
-
 	err = validate.Struct(message)
 	if err != nil {
-		log.Println(err.Error())
+		logrus.Error(err)
 		return Message{}, err
 	}
 
@@ -40,7 +40,7 @@ func NewMessageFromBytes(sourceID PeerID, data []byte) (Message, error) {
 func (m *Message) ToJSON() ([]byte, error) {
 	b, err := json.Marshal(m)
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 		return []byte{}, err
 	}
 
