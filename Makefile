@@ -16,12 +16,14 @@ fakes:
 test:
 	go test ./...
 
-coverage: coverage-ci
+coverage:
+	go test -v -coverprofile cover.out ./...
+	go tool cover -html=cover.out -o cover.html
 	open cover.html
 
 coverage-ci:
 	go test -v -coverprofile cover.out ./...
-	go tool cover -html=cover.out -o cover.html
+	go tool cover -func=cover.out
 
 lint:
 	./bin/golangci-lint run
