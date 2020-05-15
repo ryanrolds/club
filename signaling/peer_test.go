@@ -22,7 +22,7 @@ var _ = Describe("Peer", func() {
 
 	Context("NewPeer", func() {
 		It("should create new peer", func() {
-			peer := signaling.NewPeer(fakeConn)
+			peer = signaling.NewPeer(fakeConn)
 			Expect(peer).ToNot(BeNil())
 			Expect(peer.ID).ToNot(Equal(signaling.PeerID("")))
 		})
