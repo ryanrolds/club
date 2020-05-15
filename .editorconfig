@@ -14,3 +14,8 @@ indent_size = 2
 [*.md]
 indent_size = 4
 end_of_line = lf
+
+[Makefile]
+indent_style = tab
+indent_size = 2
+end_of_line = lf
