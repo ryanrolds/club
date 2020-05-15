@@ -2,7 +2,7 @@
 
 TAG_NAME := $(shell git rev-parse --short HEAD)
 
-all: build test run
+all: build coverage
 
 install:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
