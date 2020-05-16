@@ -10,3 +10,5 @@ arm/
 powerpc/
 mips/
 bin/
+cover.html
+cover.out
