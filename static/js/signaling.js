@@ -11,20 +11,17 @@ class SignalingServer extends EventTarget {
     this.websocket = websocket
 
     websocket.addEventListener("open", (event) => {
-      console.log("got open", event)
       this.dispatchEvent(new Event("connected"))
     })
 
     websocket.addEventListener("close", (event) => {
-      console.log("got close", event)
       clearInterval(ping)
       this.dispatchEvent(new Event("disconnected"))
     })
 
     websocket.addEventListener("message", (message) => {
-      console.log("received message", message)
-
       if (!message.data) {
+        console.log("message missing data", message)
         return
       }
 
@@ -40,8 +37,11 @@ class SignalingServer extends EventTarget {
         case "join":
           this.dispatchEvent(new CustomEvent("join", {detail: {peerId: parsed.peerId, join: parsed.payload}}))
           break;
+        case "leave":
+          this.dispatchEvent(new CustomEvent("leave", {detail: {peerId: parsed.peerId, leave: parsed.payload}}))
+          break;
         case "offer":
-          this.dispatchEvent(new CustomEvent("offer",  {detail: {peerId: parsed.peerId,offer: parsed.payload}}))
+          this.dispatchEvent(new CustomEvent("offer",  {detail: {peerId: parsed.peerId, offer: parsed.payload}}))
           break;
         case "answer":
           this.dispatchEvent(new CustomEvent("answer", {detail: {peerId: parsed.peerId, answer: parsed.payload}}))
@@ -61,6 +61,10 @@ class SignalingServer extends EventTarget {
 
   sendJoin() {
     this.websocket.send(JSON.stringify({type: "join", destId: "", payload: {}}))
+  }
+
+  sendLeave() {
+    this.websocket.send(JSON.stringify({type: "leave", destId: "", payload: {"reason": "exit"}}))
   }
 
   sendOffer(peerId, offer) {

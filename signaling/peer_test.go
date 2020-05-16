@@ -24,7 +24,7 @@ var _ = Describe("Peer", func() {
 		It("should create new peer", func() {
 			peer = signaling.NewPeer(fakeConn)
 			Expect(peer).ToNot(BeNil())
-			Expect(peer.ID).ToNot(Equal(signaling.PeerID("")))
+			Expect(peer.ID()).ToNot(Equal(signaling.PeerID("")))
 		})
 	})
 
@@ -34,8 +34,8 @@ var _ = Describe("Peer", func() {
 
 			message, err := peer.GetNextMessage()
 			Expect(err).To(BeNil())
-			Expect(message.Type).To(Equal(("type")))
-			Expect(message.SourceID).To(Equal(peer.ID))
+			Expect(message.Type).To(Equal(signaling.MessageType("type")))
+			Expect(message.SourceID).To(Equal(peer.ID()))
 		})
 	})
 
@@ -43,7 +43,7 @@ var _ = Describe("Peer", func() {
 		It("should send JSON message", func() {
 			message := signaling.Message{
 				Type:          "join",
-				SourceID:      peer.ID,
+				SourceID:      peer.ID(),
 				DestinationID: signaling.PeerID("destination"),
 				Payload: map[string]interface{}{
 					"foo": "bar",
@@ -57,9 +57,9 @@ var _ = Describe("Peer", func() {
 		})
 	})
 
-	Context("Leave", func() {
+	Context("Close", func() {
 		It("should close connection", func() {
-			peer.Leave()
+			peer.Close()
 			Expect(fakeConn.CloseCallCount()).To(Equal(1))
 		})
 	})

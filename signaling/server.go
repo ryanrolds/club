@@ -13,9 +13,15 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type Server struct{}
+type Server struct {
+	room *Room
+}
 
-var room = NewRoom()
+func NewServer(room *Room) *Server {
+	return &Server{
+		room: room,
+	}
+}
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -26,12 +32,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	client := NewPeer(conn)
 
-	logrus.Debugf("connection established by %s", client.ID)
+	logrus.Debugf("connection established by %s", client.ID())
 
 	for {
 		message, err := client.GetNextMessage()
 		if err != nil {
-			logrus.Error(errors.Wrap(err, "problem getting message from client"))
+			logrus.Warn(errors.Wrap(err, "problem getting message from client"))
 
 			// TODO add error handling
 			return
@@ -39,6 +45,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		logrus.Debugf("got message %v", message)
 
-		room.Dispatch(client, message)
+		if message.Type == MessageTypeHeartbeat {
+			client.Heartbeat()
+			continue
+		}
+
+		s.room.Dispatch(client, message)
 	}
 }
