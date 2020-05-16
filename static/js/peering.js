@@ -25,6 +25,19 @@ class Peering {
     return offer
   }
 
+  async onLeave(leave) {
+    let peer = this.removePeer(leave.peerId)
+    if (!peer) {
+      return
+    }
+
+    let peersElm = document.getElementById("peers")
+    let videoElm = document.getElementById(leave.peerId)
+    peersElm.removeChild(videoElm)
+
+    peer.close()
+  }
+
   async onOffer(offer) {
     let peer = this.getPeer(offer.peerId)
     peer.setRemoteDescription(offer.offer)
@@ -82,6 +95,17 @@ class Peering {
     }
 
     return this.peers[peerId]
+  }
+
+  removePeer(peerId) {
+    if (this.peers[peerId] === undefined) {
+      return null
+    }
+
+    let peer = this.peers[peerId]
+    delete this.peers[peerId]
+
+    return peer
   }
 
   onConnected() {}

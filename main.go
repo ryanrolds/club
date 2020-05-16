@@ -37,7 +37,10 @@ func main() {
 
 	logrus.Infof("Log level: %s", logrus.GetLevel())
 
-	http.Handle("/room", &signaling.Server{})
+	var room = signaling.NewRoom()
+	room.StartReaper()
+
+	http.Handle("/room", signaling.NewServer(room))
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
