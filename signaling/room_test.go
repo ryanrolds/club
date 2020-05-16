@@ -13,9 +13,9 @@ import (
 var _ = Describe("Room", func() {
 	Context("NewRoom", func() {
 		var (
-			room				*signaling.Room
-			fakeMember			*signalingfakes.FakeRoomMember
-			fakeSecondMember 	*signalingfakes.FakeRoomMember
+			room             *signaling.Room
+			fakeMember       *signalingfakes.FakeRoomMember
+			fakeSecondMember *signalingfakes.FakeRoomMember
 		)
 
 		BeforeEach(func() {
@@ -79,7 +79,7 @@ var _ = Describe("Room", func() {
 			room = signaling.NewRoom()
 
 			room.AddMember(fakeMember)
-			room.AddMember(fakeSecondMember)			
+			room.AddMember(fakeSecondMember)
 			Expect(room.GetMemberCount()).To(Equal(2))
 
 			room.RemoveMember(fakeMember)
