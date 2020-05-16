@@ -20,7 +20,11 @@ var _ = Describe("Room", func() {
 
 		BeforeEach(func() {
 			fakeMember = &signalingfakes.FakeRoomMember{}
+			fakeMember.IDReturns(signaling.PeerID("123"))
+
 			fakeSecondMember = &signalingfakes.FakeRoomMember{}
+			fakeSecondMember.IDReturns(signaling.PeerID("124"))
+
 		})
 
 		It("should create new room", func() {
@@ -44,7 +48,7 @@ var _ = Describe("Room", func() {
 			Expect(room.GetMemberCount()).To(Equal(1))
 		})
 
-		It("should have two unique ID members", func() {
+		It("should guarantee unique member IDs", func() {
 			room = signaling.NewRoom()
 
 			room.AddMember(fakeMember)
@@ -84,7 +88,6 @@ var _ = Describe("Room", func() {
 			Expect(room.GetMember(fakeSecondMember.ID())).ToNot(BeNil())
 		})
 	})
-
 
 	Context("StartReaper", func() {
 		var (
