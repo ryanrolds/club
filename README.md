@@ -1,5 +1,7 @@
 # Club
 
+![Travis Build Status](https://travis-ci.org/ryanrolds/club.svg?branch=master)
+
 WebRTC video chat application written in JS and Go.
 
 ## Todos

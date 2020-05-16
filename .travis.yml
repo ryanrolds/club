@@ -1,0 +1,4 @@
+language: go
+script: make ci
+go:
+- 1.14.x

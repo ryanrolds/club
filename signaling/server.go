@@ -32,7 +32,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	client := NewPeer(conn)
 
-	logrus.Debugf("connection established by %s", client.id)
+	logrus.Debugf("connection established by %s", client.ID)
 
 	for {
 		message, err := client.GetNextMessage()

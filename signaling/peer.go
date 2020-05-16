@@ -4,28 +4,35 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/lucsky/cuid"
 	"github.com/sirupsen/logrus"
 )
+
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . PeerConnection
+
+type PeerConnection interface {
+	ReadMessage() (int, []byte, error)
+	WriteJSON(interface{}) error
+	Close() error
+}
 
 type PeerID string
 
 const timeout = time.Second * 30
 
 type Peer struct {
-	id PeerID
+	ID PeerID
 
 	heartbeat     time.Time
 	heartbeatLock sync.Mutex
 
-	conn     *websocket.Conn
+	conn     PeerConnection
 	connLock sync.Mutex
 }
 
-func NewPeer(conn *websocket.Conn) *Peer {
+func NewPeer(conn PeerConnection) *Peer {
 	return &Peer{
-		id: PeerID(cuid.New()),
+		ID: PeerID(cuid.New()),
 
 		heartbeat:     time.Now(),
 		heartbeatLock: sync.Mutex{},
@@ -57,7 +64,7 @@ func (p *Peer) GetNextMessage() (Message, error) {
 		return Message{}, err
 	}
 
-	message, err := NewMessageFromBytes(p.id, data)
+	message, err := NewMessageFromBytes(p.ID, data)
 	if err != nil {
 		return Message{}, err
 	}

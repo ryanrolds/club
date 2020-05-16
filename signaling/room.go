@@ -35,13 +35,13 @@ func (r *Room) StartReaper() {
 				if member.Timedout() {
 					member.Close()
 
-					delete(r.peers, member.id)
+					delete(r.peers, member.ID)
 
 					for _, peer := range r.peers {
 						message := Message{
 							Type:          MessageTypeLeave,
-							SourceID:      member.id,
-							DestinationID: peer.id,
+							SourceID:      member.ID,
+							DestinationID: peer.ID,
 							Payload: map[string]interface{}{
 								"reason": "timeout",
 							},
@@ -49,7 +49,7 @@ func (r *Room) StartReaper() {
 
 						err := peer.SendMessage(message)
 						if err != nil {
-							logrus.Warnf("problem broadcasting message to peer %s", peer.id)
+							logrus.Warnf("problem broadcasting message to peer %s", peer.ID)
 						}
 					}
 				}
@@ -114,26 +114,26 @@ func (r *Room) GetPeer(peerID PeerID) *Peer {
 }
 
 func (r *Room) AddPeer(peer *Peer) {
-	if r.GetPeer(peer.id) != nil {
-		logrus.Warnf("peer %s already present", peer.id)
+	if r.GetPeer(peer.ID) != nil {
+		logrus.Warnf("peer %s already present", peer.ID)
 		return // Peer already present
 	}
 
 	r.peersLock.Lock()
 	defer r.peersLock.Unlock()
 
-	r.peers[peer.id] = peer
+	r.peers[peer.ID] = peer
 
-	logrus.Debugf("added peer %s", peer.id)
+	logrus.Debugf("added peer %s", peer.ID)
 }
 
 func (r *Room) RemovePeer(peer *Peer) {
 	r.peersLock.Lock()
 	defer r.peersLock.Unlock()
 
-	delete(r.peers, peer.id)
+	delete(r.peers, peer.ID)
 
-	logrus.Debugf("removed peer %s", peer.id)
+	logrus.Debugf("removed peer %s", peer.ID)
 }
 
 func (r *Room) MessagePeer(message Message) error {
@@ -161,14 +161,14 @@ func (r *Room) Broadcast(message Message) error {
 	logrus.Debugf("broadcasting message: %s", message)
 
 	for _, peer := range r.peers {
-		// We don't want to send the message to the source
-		if peer.id == message.SourceID {
+		// Don't send messages to source
+		if peer.ID == message.SourceID {
 			continue
 		}
 
 		err := peer.SendMessage(message)
 		if err != nil {
-			logrus.Warnf("problem broadcasting message to peer %s", peer.id)
+			logrus.Warnf("problem broadcasting message to peer %s", peer.ID)
 		}
 	}
 
