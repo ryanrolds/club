@@ -32,6 +32,11 @@ make install
 make run
 ```
 
+## Running Tests
+```
+make tests
+```
+
 For extra debugging information use `make run-debug`
 
 Open http://localhost:3000 in your browser.

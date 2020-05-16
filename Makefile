@@ -13,8 +13,8 @@ build:
 fakes:
 	go generate ./...
 
-test:
-	go test ./...
+tests:
+	go test ./signaling/*_test.go
 
 coverage:
 	go test -v -coverprofile cover.out ./...

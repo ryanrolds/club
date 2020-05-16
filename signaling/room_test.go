@@ -11,12 +11,80 @@ import (
 )
 
 var _ = Describe("Room", func() {
-	Context("NewServer", func() {
-		It("should create new server", func() {
-			room := signaling.NewRoom()
+	Context("NewRoom", func() {
+		var (
+			room				*signaling.Room
+			fakeMember			*signalingfakes.FakeRoomMember
+			fakeSecondMember 	*signalingfakes.FakeRoomMember
+		)
+
+		BeforeEach(func() {
+			fakeMember = &signalingfakes.FakeRoomMember{}
+			fakeSecondMember = &signalingfakes.FakeRoomMember{}
+		})
+
+		It("should create new room", func() {
+			room = signaling.NewRoom()
 			Expect(room).ToNot(BeNil())
 		})
+
+		It("should add member", func() {
+			room = signaling.NewRoom()
+
+			room.AddMember(fakeMember)
+			Expect(room.GetMemberCount()).To(Equal(1))
+		})
+
+		It("should not add existing member", func() {
+			room = signaling.NewRoom()
+
+			room.AddMember(fakeMember)
+			room.AddMember(fakeMember)
+
+			Expect(room.GetMemberCount()).To(Equal(1))
+		})
+
+		It("should have two unique ID members", func() {
+			room = signaling.NewRoom()
+
+			room.AddMember(fakeMember)
+			room.AddMember(fakeSecondMember)
+
+			Expect(fakeMember.ID()).ToNot(Equal(fakeSecondMember.ID()))
+		})
+
+		It("Should get member", func() {
+			room = signaling.NewRoom()
+
+			room.AddMember(fakeMember)
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+		})
+
+		It("should remove member", func() {
+			room = signaling.NewRoom()
+
+			room.AddMember(fakeMember)
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+
+			room.RemoveMember(fakeMember)
+			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
+			Expect(room.GetMemberCount()).To(Equal(0))
+		})
+
+		It("should remove only one member", func() {
+			room = signaling.NewRoom()
+
+			room.AddMember(fakeMember)
+			room.AddMember(fakeSecondMember)			
+			Expect(room.GetMemberCount()).To(Equal(2))
+
+			room.RemoveMember(fakeMember)
+			Expect(room.GetMemberCount()).To(Equal(1))
+			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
+			Expect(room.GetMember(fakeSecondMember.ID())).ToNot(BeNil())
+		})
 	})
+
 
 	Context("StartReaper", func() {
 		var (
