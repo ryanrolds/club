@@ -21,7 +21,7 @@ type PeerID string
 const timeout = time.Second * 30
 
 type Peer struct {
-	ID PeerID
+	id PeerID
 
 	heartbeat     time.Time
 	heartbeatLock sync.Mutex
@@ -32,7 +32,7 @@ type Peer struct {
 
 func NewPeer(conn PeerConnection) *Peer {
 	return &Peer{
-		ID: PeerID(cuid.New()),
+		id: PeerID(cuid.New()),
 
 		heartbeat:     time.Now(),
 		heartbeatLock: sync.Mutex{},
@@ -40,6 +40,10 @@ func NewPeer(conn PeerConnection) *Peer {
 		conn:     conn,
 		connLock: sync.Mutex{},
 	}
+}
+
+func (p *Peer) ID() PeerID {
+	return p.id
 }
 
 func (p *Peer) Heartbeat() {
@@ -60,11 +64,10 @@ func (p *Peer) GetNextMessage() (Message, error) {
 	_, data, err := p.conn.ReadMessage()
 
 	if err != nil {
-		logrus.Error(err)
 		return Message{}, err
 	}
 
-	message, err := NewMessageFromBytes(p.ID, data)
+	message, err := NewMessageFromBytes(p.ID(), data)
 	if err != nil {
 		return Message{}, err
 	}

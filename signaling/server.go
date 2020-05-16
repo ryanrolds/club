@@ -32,12 +32,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	client := NewPeer(conn)
 
-	logrus.Debugf("connection established by %s", client.ID)
+	logrus.Debugf("connection established by %s", client.ID())
 
 	for {
 		message, err := client.GetNextMessage()
 		if err != nil {
-			logrus.Error(errors.Wrap(err, "problem getting message from client"))
+			logrus.Warn(errors.Wrap(err, "problem getting message from client"))
 
 			// TODO add error handling
 			return

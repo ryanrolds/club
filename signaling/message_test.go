@@ -15,7 +15,7 @@ var _ = Describe("Message", func() {
 		It("should create message from bytes", func() {
 			message, err := signaling.NewMessageFromBytes(peerID, validMessage)
 			Expect(err).To(BeNil())
-			Expect(message.Type).To(Equal("type"))
+			Expect(message.Type).To(Equal(signaling.MessageType("type")))
 			Expect(message.DestinationID).To(Equal(signaling.PeerID("destID")))
 			Expect(message.SourceID).To(Equal(peerID))
 			Expect(message.Payload).To(Equal(map[string]interface{}{}))

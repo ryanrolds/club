@@ -7,11 +7,14 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/ryanrolds/club/signaling"
 
 	"github.com/sirupsen/logrus"
 )
+
+const reaperInterval = time.Second * 15
 
 func main() {
 	env := os.Getenv("ENV")
@@ -38,7 +41,7 @@ func main() {
 	logrus.Infof("Log level: %s", logrus.GetLevel())
 
 	var room = signaling.NewRoom()
-	room.StartReaper()
+	room.StartReaper(reaperInterval)
 
 	http.Handle("/room", signaling.NewServer(room))
 
