@@ -1,9 +1,11 @@
 version: '3'
 services:
-  pedantic:
-    build: .
+  club:
+    build: golang/.
     ports:
       - "3000:3000"
+      - "3001:3000"
     volumes:
-      - ".:/club"
+      - ".:/golang"
+    command: "./club"
 

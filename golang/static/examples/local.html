@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      video {
+        height: 320px;
+        width: 480px;
+      }
+    </style>
+    <script type="text/javascript">
+      async function start() {
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true})
+
+        const localMedia = document.querySelector('#local')
+        localMedia.srcObject = stream
+
+        const remoteMedia = document.querySelector('#remote')
+
+        const pc1 = new RTCPeerConnection() 
+        const pc2 = new RTCPeerConnection()
+
+        pc1.addEventListener('icecandidate', ({candidate}) => {
+          if (candidate) {
+            pc2.addIceCandidate(candidate)
+          }
+        })
+
+        pc2.addEventListener('icecandidate', ({candidate}) => {
+          if (candidate) {
+            pc1.addIceCandidate(candidate)
+          }
+        })
+        
+        pc2.addEventListener("track", (track) => {
+          remoteMedia.srcObject = track.streams[0]
+        })
+
+        stream.getTracks().forEach((track) => {
+          pc1.addTrack(track, stream)
+        })
+
+        const offer = await pc1.createOffer({
+          offerToReceiveVideo: 1,
+          offerToReceiveAudio: 1,
+        })
+        await pc1.setLocalDescription(offer)
+        await pc2.setRemoteDescription(offer)
+
+        const answer = await pc2.createAnswer();
+        await pc2.setLocalDescription(answer)
+        await pc1.setRemoteDescription(answer)
+      }
+    </script>
+  </head>
+  <body>
+    <video id="local" autoplay controls></video>
+    <video id="remote" autoplay controls></video>
+    <input type="button" value="Start" onclick="start()"/>
+  </body>
+</html>
