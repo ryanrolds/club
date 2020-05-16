@@ -7,10 +7,21 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
+type MessageType string
+
+const (
+	MessageTypeHeartbeat    = MessageType("heartbeat")
+	MessageTypeJoin         = MessageType("join")
+	MessageTypeLeave        = MessageType("leave")
+	MessageTypeOffer        = MessageType("offer")
+	MessageTypeAnswer       = MessageType("answer")
+	MessageTypeICECandidate = MessageType("icecandidate")
+)
+
 var validate = validator.New()
 
 type Message struct {
-	Type          string                 `json:"type" validate:"required"`
+	Type          MessageType            `json:"type" validate:"required"`
 	SourceID      PeerID                 `json:"peerId" validate:"required"`
 	DestinationID PeerID                 `json:"destId"`
 	Payload       map[string]interface{} `json:"payload" validate:"required"`
