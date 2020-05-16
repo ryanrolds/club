@@ -13,7 +13,7 @@ build:
 fakes:
 	go generate ./...
 
-tests:
+test:
 	go test ./signaling/*_test.go
 
 coverage:

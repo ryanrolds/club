@@ -34,7 +34,7 @@ make run
 
 ## Running Tests
 ```
-make tests
+make test
 ```
 
 For extra debugging information use `make run-debug`
