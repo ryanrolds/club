@@ -12,7 +12,9 @@ WebRTC video chat application written in JS and Go.
 * Add mute buttons for self and other users
 * Add video off button for self
 * Add leave button and join button
-* Implement join password
+* Implement multiple rooms
+* Implement join password for rooms
+* Create UI for providing room ID and password (if passworded room)
 * Get ICE Server(s) from env var
 * Get ICE Servers (STUN/TURN) from successful join response (don't store in client)
 
