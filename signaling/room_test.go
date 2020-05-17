@@ -78,12 +78,6 @@ var _ = Describe("Room", func() {
 		})
 	})
 
-	Context("Dispatch", func() {
-		It("should setup dipatch", func() {
-
-		})
-	})
-
 	Context("GetMember", func() {
 		var (
 			room          *signaling.Room
