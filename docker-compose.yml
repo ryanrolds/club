@@ -1,10 +1,17 @@
 version: '3'
 services:
+  frontend:
+    build: frontend/.
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./frontend:/frontend"
+    command: "npm start"
   club:
     build: golang/.
     ports:
       - "3001:3001"
     volumes:
-      - ".:/golang"
+      - "./golang:/golang"
     command: "./club"
 

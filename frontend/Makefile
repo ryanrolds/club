@@ -1,12 +1,10 @@
 .PHONY: install build all run
 
-TAG_NAME := $(shell git rev-parse --short HEAD)
-
 install:
 	npm i
 
 build: 
-	npm run build
+	npm build
 
 lint:
 	# todo

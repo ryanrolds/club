@@ -3,10 +3,10 @@ FROM golang:1.14-alpine
 RUN apk add --update make git
 RUN apk --no-cache add ca-certificates
 
-COPY . /club
-WORKDIR /club
+COPY . /club/
+WORKDIR /club/
 
-RUN go build ./cmd/...
+RUN make build
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates

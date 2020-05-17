@@ -1,7 +1,5 @@
 .PHONY: install build all lint run
 
-TAG_NAME := $(shell git rev-parse --short HEAD)
-
 all: build coverage
 
 install:
