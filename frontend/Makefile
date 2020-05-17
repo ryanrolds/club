@@ -1,4 +1,4 @@
-.PHONY: install build run
+.PHONY: install build all run
 
 TAG_NAME := $(shell git rev-parse --short HEAD)
 

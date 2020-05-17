@@ -1,6 +1,0 @@
-**/node_modules
-docs/**
-Dockerrun.aws.json
-buildspec.yml
-Dockerfile*
-.dockerignore

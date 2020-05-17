@@ -34,7 +34,7 @@ function Footer() {
   )
 }
 
-export default () => {
+export default function Club() {
   return (
     <React.Fragment>
       <CssBaseline />
