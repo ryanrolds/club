@@ -14,6 +14,7 @@ WebRTC video chat application written in JS and Go.
   * Add leave button and join button
 * Implement multiple rooms
 * Implement join password for rooms
+* Decide if we should switch WebSocket and server interactions to channels
 * Create UI for providing room ID and password (if passworded room)
 * Get ICE Server(s) from env var
 * Get ICE Servers (STUN/TURN) from successful join response (don't store in client)
