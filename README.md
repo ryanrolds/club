@@ -7,8 +7,8 @@ WebRTC video chat application written in JS and Go.
 ## Todos
 
 * ~~~Propagate "leaves" and update client to remove peers/videos that left~~~
-* See if there are audio options that can be implemented
-* Create grid UI using Material UI https://github.com/ryanrolds/club/issues/1
+* See if there are audio options that can be implemented - https://github.com/ryanrolds/club/issues/10
+* Create grid UI using Material UI - https://github.com/ryanrolds/club/issues/1
 * Add mute buttons for self and other users
 * Add video off button for self
 * Add leave button and join button
