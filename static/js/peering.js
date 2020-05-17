@@ -1,7 +1,7 @@
 
 class Peering {
   constructor(elmID, stream, signals) {
-    this.peerElm = document.querySelector(elmID)
+    this.videosElm = document.querySelector(elmID)
     this.stream = stream
     this.signals = signals
     this.offer = null
@@ -31,9 +31,9 @@ class Peering {
       return
     }
 
-    let peersElm = document.getElementById("peers")
+    let videosElm = document.getElementById("videos")
     let videoElm = document.getElementById(leave.peerId)
-    peersElm.removeChild(videoElm)
+    videosElm.removeChild(videoElm)
 
     peer.close()
   }
@@ -74,7 +74,7 @@ class Peering {
     video.id = peerId
     video.autoplay = true
 
-    this.peerElm.appendChild(video)
+    this.videosElm.appendChild(video)
 
     peer.addEventListener('icecandidate', ({candidate}) => {
       if (candidate) {
