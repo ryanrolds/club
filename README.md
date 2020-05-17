@@ -20,7 +20,7 @@ WebRTC video chat application written in JS and Go.
 
 ## Setup
 
-Requires Go 1.14+.
+Requires Go 1.14+ and Node 10+ 
 
 ```
 make install
