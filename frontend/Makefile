@@ -1,12 +1,15 @@
-.PHONY: install build all run
+.PHONY: install build all run ci
 
 install:
 	npm i
 
-build: 
-	npm build
+build:
+	npm run build
 
 lint:
+	# todo
+
+ci:
 	# todo
 
 run:

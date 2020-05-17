@@ -20,7 +20,7 @@ WebRTC video chat application written in JS and Go.
 
 ## Setup
 
-Requires Go 1.14+ and Node 10+ 
+Requires Go 1.14+ and Node 10+
 
 ```
 make install
@@ -34,4 +34,4 @@ make run
 
 For extra debugging information use `make run-debug`
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:3000 for React Client and http://localhost:3001 for prototype.

@@ -6,7 +6,7 @@ install:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
 
 build:
-	go build -race ./...
+	go build ./cmd/club
 
 fakes:
 	go generate ./...
