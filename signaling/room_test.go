@@ -13,87 +13,20 @@ import (
 var _ = Describe("Room", func() {
 	Context("NewRoom", func() {
 		var (
-			room             *signaling.Room
-			fakeMember       *signalingfakes.FakeRoomMember
-			fakeSecondMember *signalingfakes.FakeRoomMember
+			room *signaling.Room
 		)
-
-		BeforeEach(func() {
-			fakeMember = &signalingfakes.FakeRoomMember{}
-			fakeMember.IDReturns(signaling.PeerID("123"))
-
-			fakeSecondMember = &signalingfakes.FakeRoomMember{}
-			fakeSecondMember.IDReturns(signaling.PeerID("124"))
-
-		})
 
 		It("should create new room", func() {
 			room = signaling.NewRoom()
 			Expect(room).ToNot(BeNil())
 		})
-
-		It("should add member", func() {
-			room = signaling.NewRoom()
-
-			room.AddMember(fakeMember)
-			Expect(room.GetMemberCount()).To(Equal(1))
-		})
-
-		It("should not add existing member", func() {
-			room = signaling.NewRoom()
-
-			room.AddMember(fakeMember)
-			room.AddMember(fakeMember)
-
-			Expect(room.GetMemberCount()).To(Equal(1))
-		})
-
-		It("should guarantee unique member IDs", func() {
-			room = signaling.NewRoom()
-
-			room.AddMember(fakeMember)
-			room.AddMember(fakeSecondMember)
-
-			Expect(fakeMember.ID()).ToNot(Equal(fakeSecondMember.ID()))
-		})
-
-		It("Should get member", func() {
-			room = signaling.NewRoom()
-
-			room.AddMember(fakeMember)
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-		})
-
-		It("should remove member", func() {
-			room = signaling.NewRoom()
-
-			room.AddMember(fakeMember)
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-
-			room.RemoveMember(fakeMember)
-			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(room.GetMemberCount()).To(Equal(0))
-		})
-
-		It("should remove only one member", func() {
-			room = signaling.NewRoom()
-
-			room.AddMember(fakeMember)
-			room.AddMember(fakeSecondMember)
-			Expect(room.GetMemberCount()).To(Equal(2))
-
-			room.RemoveMember(fakeMember)
-			Expect(room.GetMemberCount()).To(Equal(1))
-			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(room.GetMember(fakeSecondMember.ID())).ToNot(BeNil())
-		})
 	})
 
 	Context("StartReaper", func() {
 		var (
+			room          *signaling.Room
 			fakeMember    *signalingfakes.FakeRoomMember
 			anotherMember *signalingfakes.FakeRoomMember
-			room          *signaling.Room
 		)
 
 		BeforeEach(func() {
@@ -142,6 +75,171 @@ var _ = Describe("Room", func() {
 
 			message := anotherMember.SendMessageArgsForCall(0)
 			Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
+		})
+	})
+
+	Context("Dispatch", func() {
+		It("should setup dipatch", func() {
+
+		})
+	})
+
+	Context("GetMember", func() {
+		var (
+			room          *signaling.Room
+			fakeMember    *signalingfakes.FakeRoomMember
+			anotherMember *signalingfakes.FakeRoomMember
+		)
+
+		BeforeEach(func() {
+			room = signaling.NewRoom()
+
+			fakeMember = &signalingfakes.FakeRoomMember{}
+			fakeMember.IDReturns(signaling.PeerID("123"))
+			room.AddMember(fakeMember)
+		})
+
+		It("should get one member", func() {
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+		})
+
+		It("should get two members", func() {
+			anotherMember = &signalingfakes.FakeRoomMember{}
+			anotherMember.IDReturns(signaling.PeerID("124"))
+			room.AddMember(anotherMember)
+
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+			Expect(room.GetMember(anotherMember.ID())).To(Equal(anotherMember))
+		})
+
+		It("should get two members with unique IDs", func() {
+			anotherMember = &signalingfakes.FakeRoomMember{}
+			anotherMember.IDReturns(signaling.PeerID("124"))
+			room.AddMember(anotherMember)
+
+			Expect(fakeMember.ID()).ToNot(Equal(anotherMember.ID()))
+		})
+	})
+
+	Context("GetMemberCount", func() {
+		var (
+			room          *signaling.Room
+			fakeMember    *signalingfakes.FakeRoomMember
+			anotherMember *signalingfakes.FakeRoomMember
+		)
+
+		BeforeEach(func() {
+			room = signaling.NewRoom()
+			fakeMember = &signalingfakes.FakeRoomMember{}
+			fakeMember.IDReturns(signaling.PeerID("123"))
+
+			room.AddMember(fakeMember)
+		})
+
+		It("should get member count equal to one", func() {
+			Expect(room.GetMemberCount()).To(Equal(1))
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+		})
+
+		It("should get member count equal to two", func() {
+			anotherMember = &signalingfakes.FakeRoomMember{}
+			anotherMember.IDReturns(signaling.PeerID("124"))
+			room.AddMember(anotherMember)
+
+			Expect(room.GetMemberCount()).To(Equal(2))
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+		})
+
+		It("should get member count equal to zero", func() {
+			room.RemoveMember(fakeMember)
+			Expect(room.GetMemberCount()).To(Equal(0))
+		})
+	})
+
+	Context("AddMember", func() {
+		var (
+			room       *signaling.Room
+			fakeMember *signalingfakes.FakeRoomMember
+		)
+
+		BeforeEach(func() {
+			room = signaling.NewRoom()
+			fakeMember = &signalingfakes.FakeRoomMember{}
+			fakeMember.IDReturns(signaling.PeerID("123"))
+
+			room.AddMember(fakeMember)
+		})
+
+		It("should add member", func() {
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+			Expect(room.GetMemberCount()).To(Equal(1))
+		})
+
+		It("should not add existing member", func() {
+			room.AddMember(fakeMember)
+
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+			Expect(room.GetMemberCount()).To(Equal(1))
+		})
+	})
+
+	Context("RemoveMember", func() {
+		var (
+			room          *signaling.Room
+			fakeMember    *signalingfakes.FakeRoomMember
+			anotherMember *signalingfakes.FakeRoomMember
+		)
+
+		BeforeEach(func() {
+			room = signaling.NewRoom()
+
+			fakeMember = &signalingfakes.FakeRoomMember{}
+			fakeMember.IDReturns(signaling.PeerID("123"))
+
+			room.AddMember(fakeMember)
+		})
+
+		It("should remove member", func() {
+			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+
+			room.RemoveMember(fakeMember)
+			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
+			Expect(room.GetMemberCount()).To(Equal(0))
+		})
+
+		It("should remove only one member", func() {
+			anotherMember = &signalingfakes.FakeRoomMember{}
+			anotherMember.IDReturns(signaling.PeerID("124"))
+
+			room.AddMember(fakeMember)
+			room.AddMember(anotherMember)
+
+			Expect(room.GetMemberCount()).To(Equal(2))
+
+			room.RemoveMember(fakeMember)
+			Expect(room.GetMemberCount()).To(Equal(1))
+			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
+			Expect(room.GetMember(anotherMember.ID())).ToNot(BeNil())
+		})
+
+		It("should remove only two members", func() {
+			anotherMember = &signalingfakes.FakeRoomMember{}
+			anotherMember.IDReturns(signaling.PeerID("124"))
+
+			room.AddMember(anotherMember)
+
+			Expect(room.GetMemberCount()).To(Equal(2))
+
+			room.RemoveMember(fakeMember)
+			Expect(room.GetMemberCount()).To(Equal(1))
+			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
+			Expect(room.GetMember(anotherMember.ID())).ToNot(BeNil())
+			Expect(room.GetMember(anotherMember.ID())).To(Equal(anotherMember))
+
+			room.RemoveMember(anotherMember)
+			Expect(room.GetMemberCount()).To(Equal(0))
+			Expect(room.GetMember(anotherMember.ID())).To(BeNil())
+			Expect(room.GetMember(anotherMember.ID())).To(BeNil())
 		})
 	})
 })
