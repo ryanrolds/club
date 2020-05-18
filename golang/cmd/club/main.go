@@ -46,11 +46,18 @@ func main() {
 	http.Handle("/room", signaling.NewServer(room))
 
 	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fs)
+	http.Handle("/", NoCache(fs))
 
 	logrus.Info("Listening on :3001...")
 	err := http.ListenAndServe(":3001", nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
+}
+
+func NoCache(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Cache-Control", "max-age=0, public, must-revalidate, proxy-revalidate")
+		h.ServeHTTP(w, r)
+	})
 }

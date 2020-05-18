@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <style type="text/css">
+      div > video {
+        display: inline-block;
+        width: 33%;
+      }
+    </style>
     <script src="/js/localmedia.js"></script>
     <script src="/js/peering.js"></script>
     <script src="/js/signaling.js"></script>
   </head>
   <body>
-    <div id="local">
-      <video autoplay muted></video>
+    <div id="videos">
+      <video id="local" autoplay muted></video>
     </div>
-    <div id="peers"></div>
-
     <script type="text/javascript">
-      let local = new LocalMedia("#local")
+      let local = new LocalMedia("local")
       local.setupMedia().then(() => {
         let signals = new SignalingServer()
-        let peers = new Peering("#peers", local.getStream(), signals)
+        let peers = new Peering("videos", local.getStream(), signals)
 
         signals.addEventListener("connected", async (event) => {
           await local.onConnected()
