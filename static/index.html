@@ -16,10 +16,10 @@
       <video id="local" autoplay muted></video>
     </div>
     <script type="text/javascript">
-      let local = new LocalMedia("#local")
+      let local = new LocalMedia("local")
       local.setupMedia().then(() => {
         let signals = new SignalingServer()
-        let peers = new Peering("#videos", local.getStream(), signals)
+        let peers = new Peering("videos", local.getStream(), signals)
 
         signals.addEventListener("connected", async (event) => {
           await local.onConnected()

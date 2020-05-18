@@ -10,7 +10,7 @@ class LocalMedia {
     const stream = await navigator.mediaDevices.getUserMedia(opts)
     this.stream = stream
 
-    const videoElm = document.querySelector(`#videos > ${this.id}`)
+    const videoElm = document.getElementById(this.id)
     videoElm.srcObject = stream
   }
 

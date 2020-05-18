@@ -1,7 +1,7 @@
 
 class Peering {
   constructor(elmID, stream, signals) {
-    this.videosElm = document.querySelector(elmID)
+    this.videosElm = document.getElementById(elmID)
     this.stream = stream
     this.signals = signals
     this.offer = null
