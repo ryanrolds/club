@@ -1,54 +1,54 @@
 import React from 'react'
 import { makeStyles, Card, CardMedia } from '@material-ui/core'
 
-export default class StreamerCard extends React.Component {
-  static useStyles() {
-    return makeStyles(() => ({
-      card: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      },
-      cardMedia: {
-        paddingTop: '100%', // 16:9
-      },
-    }))
+export default StreamerCard((props) => {
+  this.state = {
+    streamRef: React.createRef()
   }
+  this.useEffect = this.useEffect.bind(this);
+})
 
-  constructor(props) {
-    super(props)
-    this.streamRef = React.createRef()
+StreamerCard.prototype.render(() => {
+  const { streamRef } = this.state
+
+  if(!streamRef)
+    return
+
+  const classes = makeStyles(() => ({
+    card: {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    cardMedia: {
+      paddingTop: '100%', // 16:9
+    },
+  }))
+  return (
+    <Card className={classes.card}>
+      <CardMedia
+        component='video'
+        className={classes.cardMedia}
+        ref={streamRef}
+        title='A streamer'
+      />
+    </Card>
+  )
+})
+
+StreamerCard.prototype.useEffect(() => {
+  const { stream, muted } = this.props
+
+  if (!this.state.streamRef)
+    return
+
+  const { current } = this.state.streamRef
+
+  if (current.srcObject !== stream) {
+    current.srcObject = stream
+    current.autoplay = true
+    current.muted = muted
   }
+})
 
-  componentDidMount() {
-    this.updateVideoStream()
-  }
-
-  componentDidUpdate() {
-    this.updateVideoStream()
-  }
-
-  updateVideoStream() {
-    const { stream, muted } = this.props
-    if (this.streamRef.current.srcObject !== stream) {
-      this.streamRef.current.srcObject = stream
-      this.streamRef.current.autoplay = true
-      this.streamRef.current.muted = muted
-    }
-  }
-
-  render() {
-    const classes = StreamerCard.useStyles()
-
-    return (
-      <Card className={classes.card}>
-        <CardMedia
-          component='video'
-          className={classes.cardMedia}
-          ref={this.streamRef}
-          title='A streamer'
-        />
-      </Card>
-    )
-  }
-}
+Object.setPrototypeOf(StreamerCard.prototype, React.Component.prototype);
