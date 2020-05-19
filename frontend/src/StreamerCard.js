@@ -2,52 +2,53 @@ import React from 'react'
 import { makeStyles, Card, CardMedia } from '@material-ui/core'
 
 export default class StreamerCard extends React.Component {
-    constructor(props) {
-        super(props)
-        this.streamRef = React.createRef()
-    }
+  static useStyles() {
+    return makeStyles(() => ({
+      card: {
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      },
+      cardMedia: {
+        paddingTop: '100%', // 16:9
+      },
+    }))
+  }
 
-    useStyles() {
-        return makeStyles(() => ({
-            card: {
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-            },
-            cardMedia: {
-                paddingTop: '100%', // 16:9
-            },
-        }))
-    }
+  constructor(props) {
+    super(props)
+    this.streamRef = React.createRef()
+  }
 
-    render() {
-        const classes = this.useStyles();
+  componentDidMount() {
+    this.updateVideoStream()
+  }
 
-        return (
-            <Card className={classes.card}>
-                <CardMedia
-                    component="video"
-                    className={classes.cardMedia}
-                    ref={this.streamRef}
-                    title="A streamer"
-                />
-            </Card>
-        )
-    }
+  componentDidUpdate() {
+    this.updateVideoStream()
+  }
 
-    componentDidMount() {
-        this.updateVideoStream()
+  updateVideoStream() {
+    const { stream, muted } = this.props
+    if (this.streamRef.current.srcObject !== stream) {
+      this.streamRef.current.srcObject = stream
+      this.streamRef.current.autoplay = true
+      this.streamRef.current.muted = muted
     }
+  }
 
-    componentDidUpdate() {
-        this.updateVideoStream()
-    }
+  render() {
+    const classes = StreamerCard.useStyles()
 
-    updateVideoStream() {
-        if (this.streamRef.current.srcObject !== this.props.stream) {
-            this.streamRef.current.srcObject = this.props.stream
-            this.streamRef.current.autoplay = true
-            this.streamRef.current.muted = this.props.muted
-        }
-    }
+    return (
+      <Card className={classes.card}>
+        <CardMedia
+          component='video'
+          className={classes.cardMedia}
+          ref={this.streamRef}
+          title='A streamer'
+        />
+      </Card>
+    )
+  }
 }
