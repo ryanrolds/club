@@ -1,18 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { makeStyles, Card, CardMedia } from '@material-ui/core'
+import PropTypes from 'prop-types'
 
-export default function StreamerCard(props) {
-  this.state = {
-    streamRef: React.createRef(),
-  }
-  this.useEffect = this.useEffect.bind(this)
-}
-
-StreamerCard.prototype.render = function () {
-  const { streamRef } = this.state
-
-  if (!streamRef) return
-
+const StreamerCard = ({ stream, muted }) => {
+  const [streamRef, setStreamRef] = useState({ streamRef: React.createRef() })
   const classes = makeStyles(() => ({
     card: {
       height: '100%',
@@ -23,6 +14,17 @@ StreamerCard.prototype.render = function () {
       paddingTop: '100%', // 16:9
     },
   }))
+
+  useEffect(() => {
+    if (streamRef.current.srcObject !== stream) {
+      const newStreamRef = streamRef.current
+      newStreamRef.srcObject = stream
+      newStreamRef.autoplay = true
+      newStreamRef.muted = muted
+      setStreamRef(newStreamRef)
+    }
+  })
+
   return (
     <Card className={classes.card}>
       <CardMedia
@@ -35,18 +37,13 @@ StreamerCard.prototype.render = function () {
   )
 }
 
-StreamerCard.prototype.useEffect = function () {
-  const { stream, muted } = this.props
-
-  if (!this.state.streamRef) return
-
-  const { current } = this.state.streamRef
-
-  if (current.srcObject !== stream) {
-    current.srcObject = stream
-    current.autoplay = true
-    current.muted = muted
-  }
+StreamerCard.propTypes = {
+  stream: PropTypes.node.isRequired,
+  muted: PropTypes.bool,
 }
 
-Object.setPrototypeOf(StreamerCard.prototype, React.Component.prototype)
+StreamerCard.defaultProps = {
+  muted: false,
+}
+
+export default StreamerCard
