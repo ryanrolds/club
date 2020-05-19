@@ -3,7 +3,7 @@ import { makeStyles, Container, Grid } from '@material-ui/core'
 import StreamerCard from './StreamerCard'
 import SignalingServer from './helpers/signaling'
 
-export default StreamerCardList(() => {
+export default function StreamerCardList() {
   this.state = {
     peers: {},
     signals: new SignalingServer(),
@@ -20,10 +20,10 @@ export default StreamerCardList(() => {
   this.onICECandidate = this.onICECandidate.bind(this)
   this.newPeer = this.newPeer.bind(this)
   this.getPeer = this.getPeer.bind(this)
-})
+}
 
-StreamerCardList.prototype.render(() => {
-  const { stream, peers }
+StreamerCardList.prototype.render = function(){
+  const { stream, peers } = this.state
 
   const classes = makeStyles((theme) => ({
     cardGrid: {
@@ -47,16 +47,16 @@ StreamerCardList.prototype.render(() => {
       </Grid>
     </Container>
   )
-})
+}
 
-StreamerCardList.prototype.useEffect(async () => {
+StreamerCardList.prototype.useEffect = async () => {
   const opts = { audio: true, video: true }
   const stream = await navigator.mediaDevices.getUserMedia(opts)
   this.setState({ stream })
   this.setupSignalEventHandlers()
-})
+}
 
-StreamerCardList.prototype.setupSignalEventHandlers(async () => {
+StreamerCardList.prototype.setupSignalEventHandlers = async function(){
   const { signals } = this.state
 
   signals.addEventListener('connected', async (event) => {
@@ -105,14 +105,14 @@ StreamerCardList.prototype.setupSignalEventHandlers(async () => {
   signals.connect(
     (isHTTPS ? 'ws' : 'wss') + '://' + window.location.host + '/room'
   )
-})
+}
 
 
-StreamerCardList.prototype.onConnected(async () => { })
+StreamerCardList.prototype.onConnected = async () => { }
 
-StreamerCardList.prototype.onDisconnected(async () => { })
+StreamerCardList.prototype.onDisconnected = async () => { }
 
-StreamerCardList.prototype.onJoin(async (join) => {
+StreamerCardList.prototype.onJoin = async function(join){
   const { stream } = this.state
   let peer = this.getPeer(join.peerId)
 
@@ -128,9 +128,9 @@ StreamerCardList.prototype.onJoin(async (join) => {
   await peer.setLocalDescription(offer)
 
   return offer
-})
+}
 
-StreamerCardList.prototype.onOffer(async (offer) => {
+StreamerCardList.prototype.onOffer = async function(offer){
   const { stream } = this.state
   let peer = this.getPeer(offer.peerId)
   peer.setRemoteDescription(offer.offer)
@@ -143,19 +143,19 @@ StreamerCardList.prototype.onOffer(async (offer) => {
   peer.setLocalDescription(answer)
 
   return answer
-})
+}
 
-StreamerCardList.prototype.onAnswer(async (answer) => {
+StreamerCardList.prototype.onAnswer = async (answer) => {
   let peer = this.getPeer(answer.peerId)
   await peer.setRemoteDescription(answer.answer)
-})
+}
 
-StreamerCardList.prototype.onICECandidate(async (candidate) => {
+StreamerCardList.prototype.onICECandidate = async (candidate) => {
   let peer = this.getPeer(candidate.peerId)
   peer.addIceCandidate(candidate.candidate)
-})
+}
 
-StreamerCardList.prototype.newPeer((peerId) => {
+StreamerCardList.prototype.newPeer = function(peerId){
   const { signals } = this.state
   const config = {
     iceServers: [
@@ -178,9 +178,9 @@ StreamerCardList.prototype.newPeer((peerId) => {
   })
 
   return peer
-})
+}
 
-StreamerCardList.prototype.getPeer((peerId) => {
+StreamerCardList.prototype.getPeer = function(peerId){
   const { peers } = this.state
   if (peers[peerId] === undefined) {
     peers[peerId] = this.newPeer(peerId)
@@ -188,6 +188,6 @@ StreamerCardList.prototype.getPeer((peerId) => {
   }
 
   return peers[peerId]
-})
+}
 
-Object.setPrototypeOf(StreamerCard.prototype, React.Component.prototype);
+Object.setPrototypeOf(StreamerCardList.prototype, React.Component.prototype);
