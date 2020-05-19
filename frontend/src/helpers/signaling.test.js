@@ -11,7 +11,6 @@ describe('Messages', () => {
     await server.connected
     server.send({ type: "GREETING", payload: "hello" });
     client.send(JSON.stringify({ type: 'heartbeat', destId: 'server', payload: {} }))
-    console.log(client.readyState)
     expect(client.readyState)
   })
 })
