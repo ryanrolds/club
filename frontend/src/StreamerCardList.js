@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { makeStyles, Container, Grid } from '@material-ui/core'
-import StreamerCard from './StreamerCard'
+// import StreamerCard from './StreamerCard'
 import SignalingServer from './helpers/signaling'
 
 export default function StreamerCardList() {
@@ -102,7 +102,14 @@ export default function StreamerCardList() {
     return false
   }
 
-  async function setupSignalEventHandlers() {
+  useEffect(() => {
+    const newStream = async () => {
+      const opts = { audio: true, video: true }
+      const userStream = await navigator.mediaDevices.getUserMedia(opts)
+      return userStream
+    }
+    setStream({ newStream })
+
     signals.addEventListener('connected', async (event) => {
       console.log('connected to signalling server', event)
       await onConnected()
@@ -148,25 +155,18 @@ export default function StreamerCardList() {
     const isHTTPS = window.location.protocol !== 'https:'
     if (!isHTTPS) signals.connect(`ws://${window.location.host}/room`)
     signals.connect(`wss://${window.location.host}/room`)
-  }
-
-  useEffect(async () => {
-    const opts = { audio: true, video: true }
-    const newStream = await navigator.mediaDevices.getUserMedia(opts)
-    setStream({ newStream })
-    setupSignalEventHandlers()
   })
 
   return (
     <Container className={classes.cardGrid}>
       <Grid container spacing={1}>
         <Grid item key={stream} xs={12} sm={6}>
-          <StreamerCard stream={stream} muted />
+          {/* <StreamerCard stream={stream} muted /> */}
         </Grid>
         {peers.length &&
           peers.map((peer) => (
             <Grid item key={peer} xs={12} sm={6}>
-              <StreamerCard stream={peer.srcObject} />
+              {/* <StreamerCard stream={peer.srcObject} /> */}
             </Grid>
           ))}
       </Grid>
