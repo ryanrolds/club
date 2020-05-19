@@ -1,18 +1,17 @@
 import React from 'react'
 import { makeStyles, Card, CardMedia } from '@material-ui/core'
 
-export default function StreamerCard(props){
+export default function StreamerCard(props) {
   this.state = {
-    streamRef: React.createRef()
+    streamRef: React.createRef(),
   }
-  this.useEffect = this.useEffect.bind(this);
+  this.useEffect = this.useEffect.bind(this)
 }
 
-StreamerCard.prototype.render = function(){
+StreamerCard.prototype.render = function () {
   const { streamRef } = this.state
 
-  if (!streamRef)
-    return
+  if (!streamRef) return
 
   const classes = makeStyles(() => ({
     card: {
@@ -36,11 +35,10 @@ StreamerCard.prototype.render = function(){
   )
 }
 
-StreamerCard.prototype.useEffect = function(){
+StreamerCard.prototype.useEffect = function () {
   const { stream, muted } = this.props
 
-  if (!this.state.streamRef)
-    return
+  if (!this.state.streamRef) return
 
   const { current } = this.state.streamRef
 
@@ -51,4 +49,4 @@ StreamerCard.prototype.useEffect = function(){
   }
 }
 
-Object.setPrototypeOf(StreamerCard.prototype, React.Component.prototype);
+Object.setPrototypeOf(StreamerCard.prototype, React.Component.prototype)

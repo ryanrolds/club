@@ -22,7 +22,7 @@ export default function StreamerCardList() {
   this.getPeer = this.getPeer.bind(this)
 }
 
-StreamerCardList.prototype.render = function(){
+StreamerCardList.prototype.render = function () {
   const { stream, peers } = this.state
 
   const classes = makeStyles((theme) => ({
@@ -56,7 +56,7 @@ StreamerCardList.prototype.useEffect = async () => {
   this.setupSignalEventHandlers()
 }
 
-StreamerCardList.prototype.setupSignalEventHandlers = async function(){
+StreamerCardList.prototype.setupSignalEventHandlers = async function () {
   const { signals } = this.state
 
   signals.addEventListener('connected', async (event) => {
@@ -102,17 +102,14 @@ StreamerCardList.prototype.setupSignalEventHandlers = async function(){
   })
 
   let isHTTPS = window.location.protocol !== 'https:'
-  signals.connect(
-    (isHTTPS ? 'ws' : 'wss') + '://' + window.location.host + '/room'
-  )
+  signals.connect((isHTTPS ? 'ws' : 'wss') + '://' + window.location.host + '/room')
 }
 
+StreamerCardList.prototype.onConnected = async () => {}
 
-StreamerCardList.prototype.onConnected = async () => { }
+StreamerCardList.prototype.onDisconnected = async () => {}
 
-StreamerCardList.prototype.onDisconnected = async () => { }
-
-StreamerCardList.prototype.onJoin = async function(join){
+StreamerCardList.prototype.onJoin = async function (join) {
   const { stream } = this.state
   let peer = this.getPeer(join.peerId)
 
@@ -130,7 +127,7 @@ StreamerCardList.prototype.onJoin = async function(join){
   return offer
 }
 
-StreamerCardList.prototype.onOffer = async function(offer){
+StreamerCardList.prototype.onOffer = async function (offer) {
   const { stream } = this.state
   let peer = this.getPeer(offer.peerId)
   peer.setRemoteDescription(offer.offer)
@@ -155,7 +152,7 @@ StreamerCardList.prototype.onICECandidate = async (candidate) => {
   peer.addIceCandidate(candidate.candidate)
 }
 
-StreamerCardList.prototype.newPeer = function(peerId){
+StreamerCardList.prototype.newPeer = function (peerId) {
   const { signals } = this.state
   const config = {
     iceServers: [
@@ -180,7 +177,7 @@ StreamerCardList.prototype.newPeer = function(peerId){
   return peer
 }
 
-StreamerCardList.prototype.getPeer = function(peerId){
+StreamerCardList.prototype.getPeer = function (peerId) {
   const { peers } = this.state
   if (peers[peerId] === undefined) {
     peers[peerId] = this.newPeer(peerId)
@@ -190,4 +187,4 @@ StreamerCardList.prototype.getPeer = function(peerId){
   return peers[peerId]
 }
 
-Object.setPrototypeOf(StreamerCardList.prototype, React.Component.prototype);
+Object.setPrototypeOf(StreamerCardList.prototype, React.Component.prototype)
