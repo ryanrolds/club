@@ -93,26 +93,25 @@
               }
             }
           }
-           navigator.mediaDevices.getUserMedia (constraints)
-              .then(
-                function(stream) {
-                  source = audioCtx.createMediaStreamSource(stream);
-                  source.connect(distortion);
-                  distortion.connect(biquadFilter);
-                  biquadFilter.connect(gainNode);
-                  gainNode.connect(delay);
-                  delay.connect(audioCtx.destination);
+          navigator.mediaDevices.getUserMedia(constraints)
+            .then(function(stream) {
+              source = audioCtx.createMediaStreamSource(stream);
+              source.connect(distortion);
+              distortion.connect(biquadFilter);
+              biquadFilter.connect(gainNode);
+              gainNode.connect(delay);
+              delay.connect(audioCtx.destination);
 
-                  range.oninput = function() {
-                    gainNode.gain.value = range.value;
-                  }
-                  // Delay time needs to between 0, 1 but the slider only returns integers
-                  delayrange.oninput = function() {
-                    delay.delayTime.value = delayrange.value / 10;
-                  }
-                  voiceChange();
-              })
-              .catch( function(err) { console.log('The following gUM error occured: ' + err);})
+              range.oninput = function() {
+                gainNode.gain.value = range.value;
+              }
+              // Delay time needs to between 0, 1 but the slider only returns integers
+              delayrange.oninput = function() {
+                delay.delayTime.value = delayrange.value / 10;
+              }
+              voiceChange();
+            })
+            .catch( function(err) { console.log('The following gUM error occured: ' + err);})
         } else {
           console.log('getUserMedia not supported on your browser!');
         }
