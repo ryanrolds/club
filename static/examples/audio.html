@@ -62,7 +62,7 @@
         // see also https://github.com/k15z/pitch-perfect-auto-tune
 
         function makeDistortionCurve(amount) {
-          var k = typeof amount === 'number' ? amount : 50,
+          let k = typeof amount === 'number' ? amount : 50,
             n_samples = 44100,
             curve = new Float32Array(n_samples),
             deg = Math.PI / 180,
@@ -77,7 +77,7 @@
 
 
         if (navigator.mediaDevices.getUserMedia) {
-           var constraints = {
+           const constraints = {
             audio: {
               echoCancellation: true,
               noiseSupression: false,
@@ -122,7 +122,7 @@
           distortion.oversample = '4x';
           biquadFilter.gain.setTargetAtTime(0, audioCtx.currentTime, 0)
 
-          var voiceSetting = voiceSelect.value;
+          let voiceSetting = voiceSelect.value;
 
             biquadFilter.disconnect(0);
             biquadFilter.connect(gainNode);
@@ -138,7 +138,7 @@
           }
         }
 
-        var mute = document.getElementById('mute');
+        const mute = document.getElementById('mute');
         voiceSelect.onchange = function() {
           voiceChange();
         };
