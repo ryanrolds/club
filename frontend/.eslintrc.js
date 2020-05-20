@@ -21,7 +21,7 @@ module.exports = {
     ecmaVersion: 11,
     sourceType: 'module',
   },
-  plugins: ['react', 'prettier', 'jest'],
+  plugins: ['react', 'prettier', 'jest', 'react-hooks'],
   rules: {
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'prettier/prettier': 'error',
@@ -31,5 +31,7 @@ module.exports = {
     'no-process-exit': 'off',
     'object-shorthand': 'off',
     'class-methods-use-this': 'off',
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
 }

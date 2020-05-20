@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { makeStyles, Card, CardMedia } from '@material-ui/core'
 import PropTypes from 'prop-types'
 
 const StreamerCard = ({ stream, muted }) => {
-  const [streamRef, setStreamRef] = useState({ streamRef: React.createRef() })
+  const streamRef = React.createRef()
+  if (streamRef.current && streamRef.current.srcObject !== stream) {
+    streamRef.srcObject = stream
+    streamRef.autoplay = true
+    streamRef.muted = muted
+  }
+
   const classes = makeStyles(() => ({
     card: {
       height: '100%',
@@ -14,16 +20,6 @@ const StreamerCard = ({ stream, muted }) => {
       paddingTop: '100%', // 16:9
     },
   }))
-
-  useEffect(() => {
-    if (streamRef.current.srcObject !== stream) {
-      const newStreamRef = streamRef.current
-      newStreamRef.srcObject = stream
-      newStreamRef.autoplay = true
-      newStreamRef.muted = muted
-      setStreamRef(newStreamRef)
-    }
-  })
 
   return (
     <Card className={classes.card}>
@@ -38,7 +34,7 @@ const StreamerCard = ({ stream, muted }) => {
 }
 
 StreamerCard.propTypes = {
-  stream: PropTypes.node.isRequired,
+  stream: PropTypes.func.isRequired,
   muted: PropTypes.bool,
 }
 
