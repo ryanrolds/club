@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      video {
+        height: 320px;
+        width: 480px;
+      }
+      .mute {
+        cursor: pointer;
+      }
+    </style>
+    <script type="text/javascript">
+      async function start() {
+
+        // Older browsers might not implement mediaDevices at all, so we set an empty object first
+        if (navigator.mediaDevices === undefined) {
+          navigator.mediaDevices = {};
+        }
+
+        // Some browsers partially implement mediaDevices. We can't just assign an object
+        // with getUserMedia as it would overwrite existing properties.
+        // Here, we will just add the getUserMedia property if it's missing.
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+          navigator.mediaDevices.getUserMedia = function(constraints) {
+
+            // First get ahold of the legacy getUserMedia, if present
+            let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+            // Some browsers just don't implement it - return a rejected promise with an error
+            // to keep a consistent interface
+            if (!getUserMedia) {
+              return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+            }
+
+            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+            return new Promise(function(resolve, reject) {
+              getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+          }
+        }
+
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let voiceSelect = document.getElementById("voice");
+        let source, stream;
+
+        /* ______________       _______________
+        * | Event Target | <--- | AudioContext |
+        * |  ____________|      |______________|
+         */
+
+        let distortion = audioCtx.createWaveShaper();
+        let gainNode = audioCtx.createGain();
+        let biquadFilter = audioCtx.createBiquadFilter();
+        let delay = audioCtx.createDelay();
+
+        // distortion curve for the waveshaper, thanks to Kevin Ennis
+        // http://stackoverflow.com/questions/22312841/waveshaper-node-in-webaudio-how-to-emulate-distortion
+        // 
+        // it would be cool to change this into a vocoder / DSP for autotuning
+        // http://blogs.zynaptiq.com/bernsee/pitch-shifting-using-the-ft/
+        // see also https://github.com/k15z/pitch-perfect-auto-tune
+
+        function makeDistortionCurve(amount) {
+          var k = typeof amount === 'number' ? amount : 50,
+            n_samples = 44100,
+            curve = new Float32Array(n_samples),
+            deg = Math.PI / 180,
+            i = 0,
+            x;
+          for ( ; i < n_samples; ++i ) {
+            x = i * 2 / n_samples - 1;
+            curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
+          }
+          return curve;
+        };
+
+
+        if (navigator.mediaDevices.getUserMedia) {
+           var constraints = {
+            audio: {
+              echoCancellation: true,
+              noiseSupression: false,
+              volume: {
+                exact: {
+                  min: 0,
+                  max: 90,
+                },
+                ideal: {
+                  min: 0,
+                  max: 90,
+                }
+              }
+            }
+          }
+           navigator.mediaDevices.getUserMedia (constraints)
+              .then(
+                function(stream) {
+                  source = audioCtx.createMediaStreamSource(stream);
+                  source.connect(distortion);
+                  distortion.connect(biquadFilter);
+                  biquadFilter.connect(gainNode);
+                  gainNode.connect(delay);
+                  delay.connect(audioCtx.destination);
+
+                  range.oninput = function() {
+                    gainNode.gain.value = range.value;
+                  }
+                  // Delay time needs to between 0, 1 but the slider only returns integers
+                  delayrange.oninput = function() {
+                    delay.delayTime.value = delayrange.value / 10;
+                  }
+                  voiceChange();
+              })
+              .catch( function(err) { console.log('The following gUM error occured: ' + err);})
+        } else {
+          console.log('getUserMedia not supported on your browser!');
+        }
+
+        function voiceChange() {
+
+          distortion.oversample = '4x';
+          biquadFilter.gain.setTargetAtTime(0, audioCtx.currentTime, 0)
+
+          var voiceSetting = voiceSelect.value;
+
+            biquadFilter.disconnect(0);
+            biquadFilter.connect(gainNode);
+
+          if(voiceSetting == "distortion") {
+            distortion.curve = makeDistortionCurve(400);
+            biquadFilter.disconnect(0);
+            biquadFilter.connect(gainNode);
+          } else if(voiceSetting == "biquad") {
+            biquadFilter.type = "lowshelf";
+            biquadFilter.frequency.setTargetAtTime(1000, audioCtx.currentTime, 0)
+            biquadFilter.gain.setTargetAtTime(25, audioCtx.currentTime, 0)
+          }
+        }
+
+        var mute = document.getElementById('mute');
+        voiceSelect.onchange = function() {
+          voiceChange();
+        };
+
+        mute.onclick = voiceMute;
+
+        function voiceMute() {
+          if(mute.id === "") {
+            gainNode.gain.value = 0;
+            mute.id = "activated";
+            mute.innerHTML = "Unmute";
+          } else {
+            gainNode.gain.value = 1;
+            mute.id = "";
+            mute.innerHTML = "Mute";
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <input type="button" value="Start Microphone" onclick="start()"/>
+    <canvas class="visualizer" width="640" height="100"></canvas> 
+    <form class="controls">
+      <div>
+        <label for="voice">Voice setting</label>
+        <select id="voice" name="voice">
+          <option value="distortion">Distortion</option>
+          <option value="biquad">Bass Boost (BiQuad)</option>
+          <option value="off" selected>Off</option>
+        </select>
+      </div>
+      <label for="range">Microphone Gain</label>
+      <div>
+        <input id="range" type="range" min="1" max="40">
+      </div>
+      <label for="delay">Increase Input Delay</label>
+      <div>
+        <input id="delayrange" type="range" min="0" max="10">
+      </div>
+      <div>
+       <div class="mute" id="mute">
+          Mute
+        </div>
+      </div>
+    </form>
+  </body>
+</html>
