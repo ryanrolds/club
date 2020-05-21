@@ -4,7 +4,7 @@ package signalingfakes
 import (
 	"sync"
 
-	"github.com/ryanrolds/club/signaling"
+	"github.com/ryanrolds/club/pkg/signaling"
 )
 
 type FakePeerConnection struct {

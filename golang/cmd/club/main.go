@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ryanrolds/club/signaling"
+	"github.com/ryanrolds/club/pkg/signaling"
 
 	"github.com/sirupsen/logrus"
 )
@@ -48,8 +48,8 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", NoCache(fs))
 
-	logrus.Info("Listening on :3000...")
-	err := http.ListenAndServe(":3000", nil)
+	logrus.Info("Listening on :3001...")
+	err := http.ListenAndServe(":3001", nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}

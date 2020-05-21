@@ -21,7 +21,7 @@ WebRTC video chat application written in JS and Go.
 
 ## Setup
 
-Requires Go 1.14+ and Node 10+ 
+Requires Go 1.14+ and Node 12+.
 
 ```
 make install
@@ -29,10 +29,12 @@ make install
 
 ## Running
 
+Each service can be started seperately with `make run` in the `frontend` and `golang` directories. Otherwise, from the root both services can be started using Docker Compose:
+
 ```
 make run
 ```
 
-For extra debugging information use `make run-debug`
+For extra debugging information use `make run-debug` in the service's directory.
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:3000 for React Client and http://localhost:3001 for the signaling server and examples.
