@@ -76,21 +76,23 @@
 
 
         if (navigator.mediaDevices.getUserMedia) {
-          // Weird non-finite values in Safari here
+          // https://bugs.webkit.org/show_bug.cgi?id=185448
+          // Upcoming in 13.4 Beta
+          // Volume defaults not accepted by Safari non-finite values
            const constraints = {
             audio: {
               echoCancellation: true,
               noiseSupression: false,
-              volume: {
-                exact: {
-                  min: 0,
-                  max: 90,
-                },
-                ideal: {
-                  min: 0,
-                  max: 90,
-                }
-              }
+              // volume: {
+              //   exact: {
+              //     min: 0,
+              //     max: 90,
+              //   },
+              //   ideal: {
+              //     min: 0,
+              //     max: 90,
+              //   }
+              // }
             }
           }
 
