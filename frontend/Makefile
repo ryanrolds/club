@@ -7,7 +7,10 @@ build:
 	npm run build
 
 lint:
-	# todo
+	npm run lint
+
+format:
+	npm run format
 
 ci:
 	# todo

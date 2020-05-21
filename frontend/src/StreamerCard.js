@@ -1,53 +1,45 @@
 import React from 'react'
 import { makeStyles, Card, CardMedia } from '@material-ui/core'
+import PropTypes from 'prop-types'
 
-export default class StreamerCard extends React.Component {
-    constructor(props) {
-        super(props)
-        this.streamRef = React.createRef()
-    }
+const StreamerCard = ({ stream, muted }) => {
+  const streamRef = React.createRef()
+  if (streamRef.current && streamRef.current.srcObject !== stream) {
+    streamRef.srcObject = stream
+    streamRef.autoplay = true
+    streamRef.muted = muted
+  }
 
-    useStyles() {
-        return makeStyles(() => ({
-            card: {
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-            },
-            cardMedia: {
-                paddingTop: '100%', // 16:9
-            },
-        }))
-    }
+  const classes = makeStyles(() => ({
+    card: {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    cardMedia: {
+      paddingTop: '100%', // 16:9
+    },
+  }))
 
-    render() {
-        const classes = this.useStyles();
-
-        return (
-            <Card className={classes.card}>
-                <CardMedia
-                    component="video"
-                    className={classes.cardMedia}
-                    ref={this.streamRef}
-                    title="A streamer"
-                />
-            </Card>
-        )
-    }
-
-    componentDidMount() {
-        this.updateVideoStream()
-    }
-
-    componentDidUpdate() {
-        this.updateVideoStream()
-    }
-
-    updateVideoStream() {
-        if (this.streamRef.current.srcObject !== this.props.stream) {
-            this.streamRef.current.srcObject = this.props.stream
-            this.streamRef.current.autoplay = true
-            this.streamRef.current.muted = this.props.muted
-        }
-    }
+  return (
+    <Card className={classes.card}>
+      <CardMedia
+        component='video'
+        className={classes.cardMedia}
+        ref={streamRef}
+        title='A streamer'
+      />
+    </Card>
+  )
 }
+
+StreamerCard.propTypes = {
+  stream: PropTypes.func.isRequired,
+  muted: PropTypes.bool,
+}
+
+StreamerCard.defaultProps = {
+  muted: false,
+}
+
+export default StreamerCard
