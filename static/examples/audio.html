@@ -6,7 +6,7 @@
         height: 320px;
         width: 480px;
       }
-      .mute {
+      .mute, .start {
         cursor: pointer;
       }
     </style>
@@ -101,15 +101,8 @@
               biquadFilter.connect(gainNode);
               gainNode.connect(delay);
               delay.connect(audioCtx.destination);
-
-              range.oninput = function() {
-                gainNode.gain.value = range.value;
-              }
-              // Delay time needs to between 0, 1 but the slider only returns integers
-              delayrange.oninput = function() {
-                delay.delayTime.value = delayrange.value / 10;
-              }
               voiceChange();
+              console.log('gain: ', gainNode)
             })
             .catch( function(err) { console.log('The following gUM error occured: ' + err);})
         } else {
@@ -137,29 +130,42 @@
           }
         }
 
-        const mute = document.getElementById('mute');
+        const mute = document.getElementsByName('mute')[0];
+
         voiceSelect.onchange = function() {
           voiceChange();
         };
 
-        mute.onclick = voiceMute;
+        range.oninput = function() {
+          // minValue: -3.4028234663852886e+38
+          // maxValue: 3.4028234663852886e+38
+          gainNode.gain.value = range.value / 10;
+        }
+        // Delay time needs to between 0, 1 but the slider only returns integers
+        delayrange.oninput = function() {
+          delay.delayTime.value = delayrange.value / 10;
+        }
+
+        mute.onclick = function(){
+          voiceMute()
+        }
 
         function voiceMute() {
           if(mute.id === "") {
             gainNode.gain.value = 0;
             mute.id = "activated";
-            mute.innerHTML = "Unmute";
+            mute.value = "Unmute";
           } else {
             gainNode.gain.value = 1;
             mute.id = "";
-            mute.innerHTML = "Mute";
+            mute.value = "Mute";
           }
         }
       }
     </script>
   </head>
   <body>
-    <input type="button" value="Start Microphone" onclick="start()"/>
+    <input id="start" class="start" type="button" value="Start Microphone" onclick="start()"/>
     <canvas class="visualizer" width="640" height="100"></canvas> 
     <form class="controls">
       <div>
@@ -172,15 +178,15 @@
       </div>
       <label for="range">Microphone Gain</label>
       <div>
-        <input id="range" type="range" min="1" max="40">
+        <input id="range" type="range" min="-35" max="35" value="1">
       </div>
       <label for="delay">Increase Input Delay</label>
       <div>
         <input id="delayrange" type="range" min="0" max="10">
       </div>
       <div>
-       <div class="mute" id="mute">
-          Mute
+       <div>
+          <input name="mute" class="mute" id="" value="Mute" type="button" />
         </div>
       </div>
     </form>
