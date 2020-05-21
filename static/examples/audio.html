@@ -76,6 +76,7 @@
 
 
         if (navigator.mediaDevices.getUserMedia) {
+          // Weird non-finite values in Safari here
            const constraints = {
             audio: {
               echoCancellation: true,
@@ -91,6 +92,10 @@
                 }
               }
             }
+          }
+
+          if (!constraints) {
+            const constraints = {audio: true}
           }
           navigator.mediaDevices.getUserMedia(constraints)
             .then(function(stream) {
@@ -110,7 +115,6 @@
         function voiceChange() {
 
           distortion.oversample = '4x';
-          console.log(audioCtx);
           biquadFilter.gain.setTargetAtTime(0, audioCtx.currentTime, 0)
 
           let voiceSetting = voiceSelect.value;
