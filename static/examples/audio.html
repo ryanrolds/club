@@ -62,11 +62,11 @@
         // see also https://github.com/k15z/pitch-perfect-auto-tune
 
         function makeDistortionCurve(amount) {
-          let k = typeof amount === 'number' ? amount : 50,
-            n_samples = 44100,
-            curve = new Float32Array(n_samples),
-            deg = Math.PI / 180,
-            i = 0;
+          let k = typeof amount === 'number' ? amount : 50;
+          const n_samples = 44100;
+          let curve = new Float32Array(n_samples);
+          const deg = Math.PI / 180;
+          let i = 0;
           for ( ; i < n_samples; ++i ) {
             const x = i * 2 / n_samples - 1;
             curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
