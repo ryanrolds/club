@@ -1,7 +1,7 @@
 package signaling_test
 
 import (
-	"github.com/ryanrolds/club/signaling"
+	"github.com/ryanrolds/club/pkg/signaling"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
