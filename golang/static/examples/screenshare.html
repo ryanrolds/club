@@ -11,18 +11,20 @@
       }
     </style>
     <script type="text/javascript">
-      async function stopCapture() {
+      function stopCapture() {
         const localMedia = document.querySelector('#local');
         const remoteMedia = document.querySelector('#remote');
+        if (localMedia.srcObject !== null && remoteMedia.srcObject !== null) {
+          let localTracks = localMedia.srcObject.getTracks();
+          let remoteTracks = remoteMedia.srcObject.getTracks();
 
-        let localTracks = localMedia.srcObject.getTracks();
-        let remoteTracks = remoteMedia.srcObject.getTracks();
+          localTracks.forEach(track => track.stop());
+          localMedia.srcObject = null;
 
-        localTracks.forEach(track => track.stop());
-        localMedia.srcObject = null;
-
-        remoteTracks.forEach(track => track.stop());
-        localMedia.srcObject = null;
+          remoteTracks.forEach(track => track.stop());
+          localMedia.srcObject = null;
+        }
+        return;
       }
 
       async function start() {
@@ -60,55 +62,58 @@
 
         getDisplayMedia() is most commonly used to capture video of a user's screen (or parts thereof). However, user agents may allow the capture of audio along with the video content. The source of this audio might be the selected window, the entire computer's audio system, or the user's microphone (or a combination of all of the above).
          */
-        
-        const stream =  await navigator.mediaDevices.getDisplayMedia(
-          {
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              sampleRate: 44100
-            },
-            video: true
-          }
-        )
-        const localMedia = document.querySelector('#local')
-        localMedia.srcObject = stream
+        try {
+          const stream =  await navigator.mediaDevices.getDisplayMedia(
+            {
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                sampleRate: 44100
+              },
+              video: true
+            }
+          )
+          const localMedia = document.querySelector('#local')
+          localMedia.srcObject = stream
 
-        const remoteMedia = document.querySelector('#remote')
+          const remoteMedia = document.querySelector('#remote')
 
-        const pc1 = new RTCPeerConnection() 
-        const pc2 = new RTCPeerConnection()
+          const pc1 = new RTCPeerConnection() 
+          const pc2 = new RTCPeerConnection()
 
-        pc1.addEventListener('icecandidate', ({candidate}) => {
-          if (candidate) {
-            pc2.addIceCandidate(candidate)
-          }
-        })
+          pc1.addEventListener('icecandidate', ({candidate}) => {
+            if (candidate) {
+              pc2.addIceCandidate(candidate)
+            }
+          })
 
-        pc2.addEventListener('icecandidate', ({candidate}) => {
-          if (candidate) {
-            pc1.addIceCandidate(candidate)
-          }
-        })
-        
-        pc2.addEventListener("track", (track) => {
-          remoteMedia.srcObject = track.streams[0]
-        })
+          pc2.addEventListener('icecandidate', ({candidate}) => {
+            if (candidate) {
+              pc1.addIceCandidate(candidate)
+            }
+          })
+          
+          pc2.addEventListener("track", (track) => {
+            remoteMedia.srcObject = track.streams[0]
+          })
 
-        stream.getTracks().forEach((track) => {
-          pc1.addTrack(track, stream)
-        })
+          stream.getTracks().forEach((track) => {
+            pc1.addTrack(track, stream)
+          })
 
-        const offer = await pc1.createOffer({
-          offerToReceiveVideo: 1,
-          offerToReceiveAudio: 1,
-        })
-        await pc1.setLocalDescription(offer)
-        await pc2.setRemoteDescription(offer)
+          const offer = await pc1.createOffer({
+            offerToReceiveVideo: 1,
+            offerToReceiveAudio: 1,
+          })
+          await pc1.setLocalDescription(offer)
+          await pc2.setRemoteDescription(offer)
 
-        const answer = await pc2.createAnswer();
-        await pc2.setLocalDescription(answer)
-        await pc1.setRemoteDescription(answer)
+          const answer = await pc2.createAnswer();
+          await pc2.setLocalDescription(answer)
+          await pc1.setRemoteDescription(answer)
+        } catch (err) {
+          console.warn(err)
+        }
       }
     </script>
   </head>
