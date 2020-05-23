@@ -10,7 +10,7 @@
         cursor: pointer;
       }
     </style>
-    <script type="text/javascript">
+    <script type='text/javascript'>
       async function start() {
         // Poly from https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
         // Older browsers might not implement mediaDevices at all, so we set an empty object first
@@ -41,7 +41,7 @@
         }
 
         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let voiceSelect = document.getElementById("voice");
+        let voiceSelect = document.getElementById('voice');
         let source, stream;
 
         /* ______________       _______________
@@ -121,15 +121,15 @@
 
           let voiceSetting = voiceSelect.value;
 
-            biquadFilter.disconnect(0);
-            biquadFilter.connect(gainNode);
+          biquadFilter.disconnect(0);
+          biquadFilter.connect(gainNode);
 
-          if(voiceSetting == "distortion") {
+          if(voiceSetting === 'distortion') {
             distortion.curve = makeDistortionCurve(400);
             biquadFilter.disconnect(0);
             biquadFilter.connect(gainNode);
-          } else if(voiceSetting == "biquad") {
-            biquadFilter.type = "lowshelf";
+          } else if(voiceSetting === 'biquad') {
+            biquadFilter.type = 'lowshelf';
             biquadFilter.frequency.setTargetAtTime(1000, audioCtx.currentTime, 0)
             biquadFilter.gain.setTargetAtTime(25, audioCtx.currentTime, 0)
           }
@@ -156,14 +156,14 @@
         }
 
         function voiceMute() {
-          if(mute.id === "") {
+          if(mute.id === '') {
             gainNode.gain.value = 0;
-            mute.id = "activated";
-            mute.value = "Unmute";
+            mute.id = 'activated';
+            mute.value = 'Unmute';
           } else {
             gainNode.gain.value = 1;
-            mute.id = "";
-            mute.value = "Mute";
+            mute.id = '';
+            mute.value = 'Mute';
           }
         }
       }
