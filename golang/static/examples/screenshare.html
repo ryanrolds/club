@@ -61,6 +61,10 @@
         https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture#Options_and_constraints
 
         getDisplayMedia() is most commonly used to capture video of a user's screen (or parts thereof). However, user agents may allow the capture of audio along with the video content. The source of this audio might be the selected window, the entire computer's audio system, or the user's microphone (or a combination of all of the above).
+
+        Capturing audio is always optional, and even when web content requests a stream with both audio and video, the returned MediaStream may still have only one video track, with no audio.
+
+        Audio Capture is only available on Chrome 74 and Firefox 79
          */
         try {
           const stream =  await navigator.mediaDevices.getDisplayMedia(
