@@ -11,13 +11,20 @@
       }
     </style>
     <script type="text/javascript">
-      async function stopCapture(evt) {
-        const localMedia = document.querySelector('#local')
-        let tracks = localMedia.srcObject.getTracks();
+      async function stopCapture() {
+        const localMedia = document.querySelector('#local');
+        const remoteMedia = document.querySelector('#remote');
 
-        tracks.forEach(track => track.stop());
+        let localTracks = localMedia.srcObject.getTracks();
+        let remoteTracks = remoteMedia.srcObject.getTracks();
+
+        localTracks.forEach(track => track.stop());
+        localMedia.srcObject = null;
+
+        remoteTracks.forEach(track => track.stop());
         localMedia.srcObject = null;
       }
+
       async function start() {
         // Poly from https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
         // Older browsers might not implement mediaDevices at all, so we set an empty object first
