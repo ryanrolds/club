@@ -59,8 +59,8 @@ class SignalingServer extends EventTarget {
     }, 30000)
   }
 
-  sendJoin() {
-    this.websocket.send(JSON.stringify({type: "join", destId: "", payload: {}}))
+  sendJoin(group) {
+    this.websocket.send(JSON.stringify({type: "join", destId: "", payload: {group}}))
   }
 
   sendLeave() {

@@ -8,6 +8,7 @@ import (
 )
 
 type MessageType string
+type MessagePayloadKey string
 
 const (
 	MessageTypeHeartbeat    = MessageType("heartbeat")
@@ -16,15 +17,18 @@ const (
 	MessageTypeOffer        = MessageType("offer")
 	MessageTypeAnswer       = MessageType("answer")
 	MessageTypeICECandidate = MessageType("icecandidate")
+
+	MessagePayloadKeyGroup  = MessagePayloadKey("group")
+	MessagePayloadKeyReason = MessagePayloadKey("reason")
 )
 
 var validate = validator.New()
 
 type Message struct {
-	Type          MessageType            `json:"type" validate:"required"`
-	SourceID      PeerID                 `json:"peerId" validate:"required"`
-	DestinationID PeerID                 `json:"destId"`
-	Payload       map[string]interface{} `json:"payload" validate:"required"`
+	Type          MessageType                       `json:"type" validate:"required"`
+	SourceID      PeerID                            `json:"peerId" validate:"required"`
+	DestinationID PeerID                            `json:"destId"`
+	Payload       map[MessagePayloadKey]interface{} `json:"payload" validate:"required"`
 }
 
 func NewMessageFromBytes(sourceID PeerID, data []byte) (Message, error) {
@@ -56,4 +60,14 @@ func (m *Message) ToJSON() ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+func GetGroupIDFromMessage(message Message) GroupID {
+	var group GroupID
+	groupString, ok := message.Payload[MessagePayloadKeyGroup]
+	if !ok {
+		return GroupIDDefault
+	}
+
+	return GroupID(groupString.(string))
 }

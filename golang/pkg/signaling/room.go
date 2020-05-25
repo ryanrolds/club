@@ -13,75 +13,65 @@ var ErrPeerNotFound = errors.New("peer not found")
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomMember
 
 type RoomMember interface {
-	ID() PeerID
-	SendMessage(Message) error
-	Timedout() bool
-	Close()
+	GetGroup() *Group
+	SetGroup(*Group)
+
+	GroupMember
 }
 
 type Room struct {
-	members     map[PeerID]RoomMember
-	membersLock *sync.RWMutex
+	groups     map[GroupID]Group
+	groupsLock *sync.RWMutex
 }
 
 func NewRoom() *Room {
 	return &Room{
-		members:     map[PeerID]RoomMember{},
-		membersLock: &sync.RWMutex{},
+		groups:     map[GroupID]Group{},
+		groupsLock: &sync.RWMutex{},
 	}
 }
 
+// Clients can disconenct without a leave event, iterate groups and tell them to
+// remove stale members
 func (r *Room) StartReaper(interval time.Duration) {
 	go func() {
 		for {
 			logrus.Debugf("running reaper")
 
-			r.membersLock.Lock()
+			r.groupsLock.RLock()
 
-			for _, member := range r.members {
-				if member.Timedout() {
-					member.Close()
-
-					delete(r.members, member.ID())
-
-					for _, peer := range r.members {
-						message := Message{
-							Type:          MessageTypeLeave,
-							SourceID:      member.ID(),
-							DestinationID: peer.ID(),
-							Payload: map[string]interface{}{
-								"reason": "timeout",
-							},
-						}
-
-						err := peer.SendMessage(message)
-						if err != nil {
-							logrus.Warnf("problem broadcasting message to peer %s", peer.ID())
-						}
-					}
-				}
+			for _, group := range r.groups {
+				group.PruneStaleMembers()
 			}
 
-			r.membersLock.Unlock()
+			r.groupsLock.RUnlock()
 
 			time.Sleep(interval)
 		}
 	}()
 }
 
-func (r *Room) Dispatch(source RoomMember, message Message) {
+func (r *Room) Dispatch(member RoomMember, message Message) {
 	logrus.Debugf("Message type: %s", message.Type)
 
 	switch message.Type {
 	case MessageTypeJoin:
-		r.AddMember(source)
+		group := member.GetGroup()
+		if group != nil {
+			group.RemoveMember(member)
+			member.SetGroup(nil)
+		}
+
+		group = r.GetGroup(GetGroupIDFromMessage(message))
+		member.SetGroup(group)
+		group.AddMember(member)
 
 		err := r.Broadcast(message)
 		if err != nil {
 			logrus.Error(err)
 		}
 	case MessageTypeLeave:
-		r.RemoveMember(source)
+		group.RemoveMember(member)
 
 		err := r.Broadcast(message)
 		if err != nil {
@@ -108,83 +98,6 @@ func (r *Room) Dispatch(source RoomMember, message Message) {
 	}
 }
 
-func (r *Room) GetMember(peerID PeerID) RoomMember {
-	r.membersLock.RLock()
-	defer r.membersLock.RUnlock()
+func (r *Room) GetGroup() *Group {
 
-	member, ok := r.members[peerID]
-	if !ok {
-		return nil
-	}
-
-	return member
-}
-
-func (r *Room) GetMemberCount() int {
-	r.membersLock.RLock()
-	defer r.membersLock.RUnlock()
-
-	return len(r.members)
-}
-
-func (r *Room) AddMember(member RoomMember) {
-	if r.GetMember(member.ID()) != nil {
-		logrus.Warnf("member %s already present", member.ID())
-		return // members already present
-	}
-
-	r.membersLock.Lock()
-	defer r.membersLock.Unlock()
-
-	r.members[member.ID()] = member
-
-	logrus.Debugf("added member %s", member.ID())
-}
-
-func (r *Room) RemoveMember(members RoomMember) {
-	r.membersLock.Lock()
-	defer r.membersLock.Unlock()
-
-	delete(r.members, members.ID())
-
-	logrus.Debugf("removed members %s", members.ID())
-}
-
-func (r *Room) MessageMember(message Message) error {
-	member := r.GetMember(message.DestinationID)
-	if member == nil {
-		logrus.Warnf("cannot find members %s", message.DestinationID)
-		return nil // Don't error, just skip
-	}
-
-	err := member.SendMessage(message)
-	if err != nil {
-		logrus.Warnf("problem setting message to members %s", message.DestinationID)
-		return nil
-	}
-
-	logrus.Debugf("sent members %s messsage %s", message.DestinationID, message)
-
-	return nil
-}
-
-func (r *Room) Broadcast(message Message) error {
-	r.membersLock.RLock()
-	defer r.membersLock.RUnlock()
-
-	logrus.Debugf("broadcasting message: %s", message)
-
-	for _, member := range r.members {
-		// Don't send messages to source
-		if member.ID() == message.SourceID {
-			continue
-		}
-
-		err := member.SendMessage(message)
-		if err != nil {
-			logrus.Warnf("problem broadcasting message to members %s", member.ID())
-		}
-	}
-
-	return nil
 }
