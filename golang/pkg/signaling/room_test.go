@@ -3,8 +3,8 @@ package signaling_test
 import (
 	"time"
 
-	"github.com/ryanrolds/club/signaling"
-	"github.com/ryanrolds/club/signaling/signalingfakes"
+	"github.com/ryanrolds/club/pkg/signaling"
+	"github.com/ryanrolds/club/pkg/signaling/signalingfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
