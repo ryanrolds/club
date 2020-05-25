@@ -1,37 +1,28 @@
-.PHONY: install build all lint run
+.PHONY: all build ci lint run
 
-TAG_NAME := $(shell git rev-parse --short HEAD)
-
-all: build coverage
+all:
+	make -C golang all
+	make -C frontend all
 
 install:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
+	make -C golang install
+	make -C frontend install
 
 build:
-	go build -race
+	make -C golang build
+	make -C frontend build
 
-fakes:
-	go generate ./...
-
-test:
-	go test ./...
-
-coverage:
-	go test -v -coverprofile cover.out ./...
-	go tool cover -html=cover.out -o cover.html
-	open cover.html
-
-coverage-ci:
-	go test -v -coverprofile cover.out ./...
-	go tool cover -func=cover.out
+ci:
+	make -C golang ci
+	make -C frontend ci
 
 lint:
-	./bin/golangci-lint run
+	make -C golang lint
+	make -C frontend lint
 
-ci: install lint build test coverage-ci
+test:
+	make -C golang test
+	make -C frontend test
 
-run: build
-	ENV=prod ./club
-
-run-debug: build
-	ENV=dev ./club
+run:
+	docker-compose up
