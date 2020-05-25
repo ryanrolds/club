@@ -11,11 +11,21 @@ import (
 )
 
 var _ = Describe("Room", func() {
-	Context("NewRoom", func() {
-		var (
-			room *signaling.Room
-		)
+	var (
+		room          *signaling.Room
+		fakeMember    *signalingfakes.FakeRoomMember
+		anotherMember *signalingfakes.FakeRoomMember
+	)
 
+	BeforeEach(func() {
+		room = signaling.NewRoom()
+
+		fakeMember = &signalingfakes.FakeRoomMember{}
+		fakeMember.IDReturns(signaling.PeerID("123"))
+		room.AddMember(fakeMember)
+	})
+
+	Context("NewRoom", func() {
 		It("should create new room", func() {
 			room = signaling.NewRoom()
 			Expect(room).ToNot(BeNil())
@@ -23,19 +33,8 @@ var _ = Describe("Room", func() {
 	})
 
 	Context("StartReaper", func() {
-		var (
-			room          *signaling.Room
-			fakeMember    *signalingfakes.FakeRoomMember
-			anotherMember *signalingfakes.FakeRoomMember
-		)
 
 		BeforeEach(func() {
-			room = signaling.NewRoom()
-
-			fakeMember = &signalingfakes.FakeRoomMember{}
-			fakeMember.IDReturns(signaling.PeerID("123"))
-			room.AddMember(fakeMember)
-
 			anotherMember = &signalingfakes.FakeRoomMember{}
 			anotherMember.IDReturns(signaling.PeerID("42"))
 			room.AddMember(anotherMember)
@@ -79,20 +78,6 @@ var _ = Describe("Room", func() {
 	})
 
 	Context("GetMember", func() {
-		var (
-			room          *signaling.Room
-			fakeMember    *signalingfakes.FakeRoomMember
-			anotherMember *signalingfakes.FakeRoomMember
-		)
-
-		BeforeEach(func() {
-			room = signaling.NewRoom()
-
-			fakeMember = &signalingfakes.FakeRoomMember{}
-			fakeMember.IDReturns(signaling.PeerID("123"))
-			room.AddMember(fakeMember)
-		})
-
 		It("should get one member", func() {
 			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
 		})
@@ -116,20 +101,6 @@ var _ = Describe("Room", func() {
 	})
 
 	Context("GetMemberCount", func() {
-		var (
-			room          *signaling.Room
-			fakeMember    *signalingfakes.FakeRoomMember
-			anotherMember *signalingfakes.FakeRoomMember
-		)
-
-		BeforeEach(func() {
-			room = signaling.NewRoom()
-			fakeMember = &signalingfakes.FakeRoomMember{}
-			fakeMember.IDReturns(signaling.PeerID("123"))
-
-			room.AddMember(fakeMember)
-		})
-
 		It("should get member count equal to one", func() {
 			Expect(room.GetMemberCount()).To(Equal(1))
 			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
@@ -151,19 +122,6 @@ var _ = Describe("Room", func() {
 	})
 
 	Context("AddMember", func() {
-		var (
-			room       *signaling.Room
-			fakeMember *signalingfakes.FakeRoomMember
-		)
-
-		BeforeEach(func() {
-			room = signaling.NewRoom()
-			fakeMember = &signalingfakes.FakeRoomMember{}
-			fakeMember.IDReturns(signaling.PeerID("123"))
-
-			room.AddMember(fakeMember)
-		})
-
 		It("should add member", func() {
 			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
 			Expect(room.GetMemberCount()).To(Equal(1))
@@ -178,21 +136,6 @@ var _ = Describe("Room", func() {
 	})
 
 	Context("RemoveMember", func() {
-		var (
-			room          *signaling.Room
-			fakeMember    *signalingfakes.FakeRoomMember
-			anotherMember *signalingfakes.FakeRoomMember
-		)
-
-		BeforeEach(func() {
-			room = signaling.NewRoom()
-
-			fakeMember = &signalingfakes.FakeRoomMember{}
-			fakeMember.IDReturns(signaling.PeerID("123"))
-
-			room.AddMember(fakeMember)
-		})
-
 		It("should remove member", func() {
 			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
 
