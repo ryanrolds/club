@@ -120,6 +120,13 @@ func (r *Room) GetMember(peerID PeerID) RoomMember {
 	return member
 }
 
+func (r *Room) GetMemberCount() int {
+	r.membersLock.RLock()
+	defer r.membersLock.RUnlock()
+
+	return len(r.members)
+}
+
 func (r *Room) AddMember(member RoomMember) {
 	if r.GetMember(member.ID()) != nil {
 		logrus.Warnf("member %s already present", member.ID())
@@ -144,13 +151,13 @@ func (r *Room) RemoveMember(members RoomMember) {
 }
 
 func (r *Room) MessageMember(message Message) error {
-	members := r.GetMember(message.DestinationID)
-	if members == nil {
+	member := r.GetMember(message.DestinationID)
+	if member == nil {
 		logrus.Warnf("cannot find members %s", message.DestinationID)
 		return nil // Don't error, just skip
 	}
 
-	err := members.SendMessage(message)
+	err := member.SendMessage(message)
 	if err != nil {
 		logrus.Warnf("problem setting message to members %s", message.DestinationID)
 		return nil
