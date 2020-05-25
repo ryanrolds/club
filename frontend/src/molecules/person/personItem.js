@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-function PersonCard({ personId }) {
+function PersonItem({ personId }) {
   const classes = useStyles()
 
   return (
@@ -28,8 +28,8 @@ function PersonCard({ personId }) {
   )
 }
 
-PersonCard.propTypes = {
+PersonItem.propTypes = {
   personId: PropTypes.any.isRequired
 }
 
-export default PersonCard
+export default PersonItem
