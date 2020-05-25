@@ -6,7 +6,11 @@ import PersonVideo from './personVideo'
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    height: '100%',
+    transform: 'translateZ(0px)',
     flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
   },
 }))
 

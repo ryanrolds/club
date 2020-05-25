@@ -27,7 +27,7 @@ export default function TopBar() {
           <Typography variant="h6" className={classes.title}>
             Club Name > Group
           </Typography>
-          <Button color="inherit" disabled>Join Queue</Button>
+          <Button variant="outlined" className={classes.menuButton}>Join Queue</Button>
         </Toolbar>
       </AppBar>
     </div>
