@@ -25,9 +25,9 @@ export default function TopBar() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" className={classes.title}>
-            Club Name
+            Club Name > Group
           </Typography>
-          <Button color="inherit">Join Queue</Button>
+          <Button color="inherit" disabled>Join Queue</Button>
         </Toolbar>
       </AppBar>
     </div>

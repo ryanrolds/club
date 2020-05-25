@@ -1,6 +1,7 @@
 import React from 'react'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TopBar from '../../components/appBar/topBar'
+import GroupGridList from '../../molecules/group/groupGridList'
 
 export default function App() {
   return (
@@ -8,7 +9,7 @@ export default function App() {
       <CssBaseline />
       <main>
         <TopBar />
-        {/* Paper or Main Page Component Here */}
+        <GroupGridList />
       </main>
     </>
   )
