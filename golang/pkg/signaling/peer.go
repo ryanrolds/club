@@ -50,6 +50,14 @@ func (p *Peer) ID() PeerID {
 	return p.id
 }
 
+func (p *Peer) GetGroup() *Group {
+	return p.group
+}
+
+func (p *Peer) SetGroup(group *Group) {
+	p.group = group
+}
+
 func (p *Peer) Heartbeat() {
 	p.heartbeatLock.Lock()
 	defer p.heartbeatLock.Unlock()

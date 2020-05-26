@@ -12,6 +12,8 @@ const (
 	GroupIDDefault = GroupID("default")
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . GroupMember
+
 type GroupMember interface {
 	ID() PeerID
 	SendMessage(Message) error
@@ -20,47 +22,53 @@ type GroupMember interface {
 }
 
 type Group struct {
-  ID GroupID
+	id          GroupID
+	memberLimit int
 
 	members     map[PeerID]GroupMember
 	membersLock *sync.RWMutex
 }
 
-func NewGroup(group GroupID) *Group {
-  return &Group{
-    ID: group,
-    members: map[PeerID]GroupMember{},
-    membersLock: &sync.RWMutex{},
-  }
+func NewGroup(group GroupID, limit int) *Group {
+	return &Group{
+		id:          group,
+		memberLimit: limit,
+		members:     map[PeerID]GroupMember{},
+		membersLock: &sync.RWMutex{},
+	}
 }
 
 func (g *Group) PruneStaleMembers() {
-  g.membersLock.Lock()
-  defer g.membersLock.Unlock()
+	g.membersLock.Lock()
+	defer g.membersLock.Unlock()
 
-  for _, member := range g.members {
-    if member.Timedout() {
-      member.Close()
+	for _, member := range g.members {
+		if member.Timedout() {
+			member.Close()
 
-      delete(g.members, member.ID())
+			delete(g.members, member.ID())
 
-      for _, peer := range g.members {
-        message := Message{
-          Type:          MessageTypeLeave,
-          SourceID:      member.ID(),
-          DestinationID: peer.ID(),
-          Payload: map[MessagePayloadKey]interface{}{
-            MessagePayloadKeyReason: "timeout",
-          },
-        }
+			for _, peer := range g.members {
+				message := Message{
+					Type:          MessageTypeLeave,
+					SourceID:      member.ID(),
+					DestinationID: peer.ID(),
+					Payload: map[MessagePayloadKey]interface{}{
+						MessagePayloadKeyReason: "timeout",
+					},
+				}
 
-        err := peer.SendMessage(message)
-        if err != nil {
-          logrus.Warnf("problem broadcasting message to peer %s", peer.ID())
-        }
-      }
-    }
-  }
+				err := peer.SendMessage(message)
+				if err != nil {
+					logrus.Warnf("problem broadcasting message to peer %s", peer.ID())
+				}
+			}
+		}
+	}
+}
+
+func (g *Group) ID() GroupID {
+	return g.id
 }
 
 func (g *Group) GetMember(peerID PeerID) GroupMember {

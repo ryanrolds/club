@@ -49,6 +49,10 @@ class SignalingServer extends EventTarget {
         case "icecandidate":
           this.dispatchEvent(new CustomEvent("icecandidate", {detail: {peerId: parsed.peerId, candidate: parsed.payload}}))
           break;
+        case "error":
+          console.log("Error processing message:", parsed.payload.error)
+          console.log(parsed)
+          break;
         default:
           console.log("unknown message type", parsed)
       }

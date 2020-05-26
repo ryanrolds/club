@@ -50,6 +50,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		s.room.Dispatch(client, message)
+		err = s.room.Dispatch(client, message)
+		if err != nil {
+			orignal, jsonError := message.ToJSON()
+			if jsonError != nil {
+				logrus.WithError(err).Warnf("problem marshaling original message to JSON", client.ID())
+				continue
+			}
+
+			err = client.SendMessage(Message{
+				Type:          MessageTypeError,
+				SourceID:      PeerID("server"),
+				DestinationID: client.ID(),
+				Payload: MessagePayload{
+					MessagePayloadKeyError:   err.Error(),
+					MessagePayloadKeyMessage: string(orignal),
+				},
+			})
+			if err != nil {
+				logrus.WithError(err).Warnf("problem sending error message to client %s", client.ID())
+				continue
+			}
+		}
 	}
 }
