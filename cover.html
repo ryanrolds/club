@@ -1,0 +1,517 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/ryanrolds/club/signaling/message.go (88.2%)</option>
+				
+				<option value="file1">github.com/ryanrolds/club/signaling/peer.go (59.3%)</option>
+				
+				<option value="file2">github.com/ryanrolds/club/signaling/room.go (45.5%)</option>
+				
+				<option value="file3">github.com/ryanrolds/club/signaling/server.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package signaling
+
+import (
+        "encoding/json"
+
+        "github.com/sirupsen/logrus"
+        "gopkg.in/go-playground/validator.v9"
+)
+
+type MessageType string
+
+const (
+        MessageTypeHeartbeat    = MessageType("heartbeat")
+        MessageTypeJoin         = MessageType("join")
+        MessageTypeLeave        = MessageType("leave")
+        MessageTypeOffer        = MessageType("offer")
+        MessageTypeAnswer       = MessageType("answer")
+        MessageTypeICECandidate = MessageType("icecandidate")
+)
+
+var validate = validator.New()
+
+type Message struct {
+        Type          MessageType            `json:"type" validate:"required"`
+        SourceID      PeerID                 `json:"peerId" validate:"required"`
+        DestinationID PeerID                 `json:"destId"`
+        Payload       map[string]interface{} `json:"payload" validate:"required"`
+}
+
+func NewMessageFromBytes(sourceID PeerID, data []byte) (Message, error) <span class="cov8" title="1">{
+        logrus.Debugf("Parsing message: %s", data)
+
+        var message Message
+        err := json.Unmarshal(data, &amp;message)
+        if err != nil </span><span class="cov8" title="1">{
+                logrus.Error(err)
+                return Message{}, err
+        }</span>
+
+        <span class="cov8" title="1">message.SourceID = sourceID
+
+        err = validate.Struct(message)
+        if err != nil </span><span class="cov8" title="1">{
+                logrus.Error(err)
+                return Message{}, err
+        }</span>
+
+        <span class="cov8" title="1">return message, nil</span>
+}
+
+func (m *Message) ToJSON() ([]byte, error) <span class="cov8" title="1">{
+        b, err := json.Marshal(m)
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Error(err)
+                return []byte{}, err
+        }</span>
+
+        <span class="cov8" title="1">return b, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package signaling
+
+import (
+        "sync"
+        "time"
+
+        "github.com/lucsky/cuid"
+        "github.com/sirupsen/logrus"
+)
+
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . PeerConnection
+
+type PeerConnection interface {
+        ReadMessage() (int, []byte, error)
+        WriteJSON(interface{}) error
+        Close() error
+}
+
+type PeerID string
+
+const timeout = time.Second * 30
+
+type Peer struct {
+        id PeerID
+
+        heartbeat     time.Time
+        heartbeatLock sync.Mutex
+
+        conn     PeerConnection
+        connLock sync.Mutex
+}
+
+func NewPeer(conn PeerConnection) *Peer <span class="cov8" title="1">{
+        return &amp;Peer{
+                id: PeerID(cuid.New()),
+
+                heartbeat:     time.Now(),
+                heartbeatLock: sync.Mutex{},
+
+                conn:     conn,
+                connLock: sync.Mutex{},
+        }
+}</span>
+
+func (p *Peer) ID() PeerID <span class="cov8" title="1">{
+        return p.id
+}</span>
+
+func (p *Peer) Heartbeat() <span class="cov0" title="0">{
+        p.heartbeatLock.Lock()
+        defer p.heartbeatLock.Unlock()
+
+        p.heartbeat = time.Now()
+}</span>
+
+func (p *Peer) Timedout() bool <span class="cov0" title="0">{
+        p.heartbeatLock.Lock()
+        defer p.heartbeatLock.Unlock()
+
+        return p.heartbeat.Before(time.Now().Add(-timeout))
+}</span>
+
+func (p *Peer) GetNextMessage() (Message, error) <span class="cov8" title="1">{
+        _, data, err := p.conn.ReadMessage()
+
+        if err != nil </span><span class="cov0" title="0">{
+                return Message{}, err
+        }</span>
+
+        <span class="cov8" title="1">message, err := NewMessageFromBytes(p.ID(), data)
+        if err != nil </span><span class="cov0" title="0">{
+                return Message{}, err
+        }</span>
+
+        <span class="cov8" title="1">return message, nil</span>
+}
+
+func (p *Peer) SendMessage(message Message) error <span class="cov8" title="1">{
+        p.connLock.Lock()
+        defer p.connLock.Unlock()
+
+        err := p.conn.WriteJSON(message)
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Error(err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p *Peer) Close() <span class="cov8" title="1">{
+        p.connLock.Lock()
+        defer p.connLock.Unlock()
+
+        err := p.conn.Close()
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Error(err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package signaling
+
+import (
+        "errors"
+        "sync"
+        "time"
+
+        "github.com/sirupsen/logrus"
+)
+
+var ErrPeerNotFound = errors.New("peer not found")
+
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomMember
+
+type RoomMember interface {
+        ID() PeerID
+        SendMessage(Message) error
+        Timedout() bool
+        Close()
+}
+
+type Room struct {
+        members     map[PeerID]RoomMember
+        membersLock *sync.RWMutex
+}
+
+func NewRoom() *Room <span class="cov8" title="1">{
+        return &amp;Room{
+                members:     map[PeerID]RoomMember{},
+                membersLock: &amp;sync.RWMutex{},
+        }
+}</span>
+
+func (r *Room) StartReaper(interval time.Duration) <span class="cov8" title="1">{
+        go func() </span><span class="cov8" title="1">{
+                for </span><span class="cov8" title="1">{
+                        logrus.Debugf("running reaper")
+
+                        r.membersLock.Lock()
+
+                        for _, member := range r.members </span><span class="cov8" title="1">{
+                                if member.Timedout() </span><span class="cov8" title="1">{
+                                        member.Close()
+
+                                        delete(r.members, member.ID())
+
+                                        for _, peer := range r.members </span><span class="cov8" title="1">{
+                                                message := Message{
+                                                        Type:          MessageTypeLeave,
+                                                        SourceID:      member.ID(),
+                                                        DestinationID: peer.ID(),
+                                                        Payload: map[string]interface{}{
+                                                                "reason": "timeout",
+                                                        },
+                                                }
+
+                                                err := peer.SendMessage(message)
+                                                if err != nil </span><span class="cov0" title="0">{
+                                                        logrus.Warnf("problem broadcasting message to peer %s", peer.ID())
+                                                }</span>
+                                        }
+                                }
+                        }
+
+                        <span class="cov8" title="1">r.membersLock.Unlock()
+
+                        time.Sleep(interval)</span>
+                }
+        }()
+}
+
+func (r *Room) Dispatch(source RoomMember, message Message) <span class="cov0" title="0">{
+        logrus.Debugf("Message type: %s", message.Type)
+
+        switch message.Type </span>{
+        case MessageTypeJoin:<span class="cov0" title="0">
+                r.AddMember(source)
+
+                err := r.Broadcast(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Error(err)
+                }</span>
+        case MessageTypeLeave:<span class="cov0" title="0">
+                r.RemoveMember(source)
+
+                err := r.Broadcast(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Error(err)
+                }</span>
+        case MessageTypeOffer:<span class="cov0" title="0">
+                err := r.MessageMember(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Error(err)
+                }</span>
+        case MessageTypeAnswer:<span class="cov0" title="0">
+                err := r.MessageMember(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Error(err)
+                }</span>
+        case MessageTypeICECandidate:<span class="cov0" title="0">
+                err := r.MessageMember(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Error(err)
+                }</span>
+        default:<span class="cov0" title="0">
+                logrus.Warnf(`unknown message type %s`, message.Type)
+                return</span>
+        }
+}
+
+func (r *Room) GetMember(peerID PeerID) RoomMember <span class="cov8" title="1">{
+        r.membersLock.RLock()
+        defer r.membersLock.RUnlock()
+
+        member, ok := r.members[peerID]
+        if !ok </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">return member</span>
+}
+
+func (r *Room) GetMemberCount() int <span class="cov8" title="1">{
+        r.membersLock.RLock()
+        defer r.membersLock.RUnlock()
+
+        return len(r.members)
+}</span>
+
+func (r *Room) AddMember(member RoomMember) <span class="cov8" title="1">{
+        if r.GetMember(member.ID()) != nil </span><span class="cov8" title="1">{
+                logrus.Warnf("member %s already present", member.ID())
+                return // members already present
+        }</span>
+
+        <span class="cov8" title="1">r.membersLock.Lock()
+        defer r.membersLock.Unlock()
+
+        r.members[member.ID()] = member
+
+        logrus.Debugf("added member %s", member.ID())</span>
+}
+
+func (r *Room) RemoveMember(members RoomMember) <span class="cov8" title="1">{
+        r.membersLock.Lock()
+        defer r.membersLock.Unlock()
+
+        delete(r.members, members.ID())
+
+        logrus.Debugf("removed members %s", members.ID())
+}</span>
+
+func (r *Room) MessageMember(message Message) error <span class="cov0" title="0">{
+        member := r.GetMember(message.DestinationID)
+        if member == nil </span><span class="cov0" title="0">{
+                logrus.Warnf("cannot find members %s", message.DestinationID)
+                return nil // Don't error, just skip
+        }</span>
+
+        <span class="cov0" title="0">err := member.SendMessage(message)
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Warnf("problem setting message to members %s", message.DestinationID)
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">logrus.Debugf("sent members %s messsage %s", message.DestinationID, message)
+
+        return nil</span>
+}
+
+func (r *Room) Broadcast(message Message) error <span class="cov0" title="0">{
+        r.membersLock.RLock()
+        defer r.membersLock.RUnlock()
+
+        logrus.Debugf("broadcasting message: %s", message)
+
+        for _, member := range r.members </span><span class="cov0" title="0">{
+                // Don't send messages to source
+                if member.ID() == message.SourceID </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">err := member.SendMessage(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Warnf("problem broadcasting message to members %s", member.ID())
+                }</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package signaling
+
+import (
+        "net/http"
+
+        "github.com/gorilla/websocket"
+        "github.com/pkg/errors"
+        "github.com/sirupsen/logrus"
+)
+
+var upgrader = websocket.Upgrader{
+        ReadBufferSize:  1024,
+        WriteBufferSize: 1024,
+}
+
+type Server struct {
+        room *Room
+}
+
+func NewServer(room *Room) *Server <span class="cov0" title="0">{
+        return &amp;Server{
+                room: room,
+        }
+}</span>
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        conn, err := upgrader.Upgrade(w, r, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Error(errors.Wrap(err, "problem upgrading to websockets"))
+                return
+        }</span>
+
+        <span class="cov0" title="0">client := NewPeer(conn)
+
+        logrus.Debugf("connection established by %s", client.ID())
+
+        for </span><span class="cov0" title="0">{
+                message, err := client.GetNextMessage()
+                if err != nil </span><span class="cov0" title="0">{
+                        logrus.Warn(errors.Wrap(err, "problem getting message from client"))
+
+                        // TODO add error handling
+                        return
+                }</span>
+
+                <span class="cov0" title="0">logrus.Debugf("got message %v", message)
+
+                if message.Type == MessageTypeHeartbeat </span><span class="cov0" title="0">{
+                        client.Heartbeat()
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">s.room.Dispatch(client, message)</span>
+        }
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
