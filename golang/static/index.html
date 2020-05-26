@@ -56,8 +56,7 @@
         })
 
         let isHTTPS = location.protocol !== 'https:'
-        signals.connect((isHTTPS ? "ws" : "wss") + "://localhost:3001/room")
-        console.log(location.host)
+        signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
         window.addEventListener("unload", function() {
           signals.sendLeave()
         });
