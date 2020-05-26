@@ -7,15 +7,16 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-function PersonVideo({person}){
+function PersonVideo({ person }) {
   const classes = useStyles()
 
   return (
     <video
       ref={video => { video.srcObject = person.stream }}
       autoPlay
+      muted={person.muted}
       className={classes.video}
-      />
+    />
   )
 }
 

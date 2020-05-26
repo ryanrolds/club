@@ -16,8 +16,23 @@ const useStyles = makeStyles({
 const App = () => {
   const classes = useStyles()
   const local = useLocalMedia()
-  const peers = usePeers()
   let signals = new SignalingServer()
+  const peers = usePeers(local, signals)
+
+  signals.addEventListener("connected", async (event) => {
+    signals.sendJoin()
+  })
+
+  signals.addEventListener("disconnected", async (event) => {
+    console.log('disconnected')
+  })
+
+  let isHTTPS = window.location.protocol !== 'https:'
+  signals.connect((isHTTPS ? "ws" : "wss") + "://localhost:3001/room")
+
+  window.addEventListener("unload", () => {
+    signals.sendLeave()
+  })
 
   return (
     <>
@@ -25,7 +40,7 @@ const App = () => {
       <main>
         <TopBar />
         <Paper className={classes.root}>
-          {local ? <PersonGridList local={local} peers={peers} /> : null}
+          {local ? <PersonGridList local={local} peers={peers.peers} /> : null}
         </Paper>
       </main>
     </>

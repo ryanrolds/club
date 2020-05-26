@@ -3,7 +3,7 @@ import { Grid } from '@material-ui/core'
 import PropTypes from 'prop-types'
 import PersonItem from './personItem'
 
-function PersonGridList({ singer, local, peers }) {
+function PersonGridList({ local, peers }) {
   return (
     <Grid container spacing={2}>
       <Grid key={local.id} item xs={6}>

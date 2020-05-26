@@ -5,7 +5,9 @@ export default function useLocalMedia(){
 
   async function fetchData(){
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-    setLocalMedia({id: stream.id, stream})
+    const onConnected = () => { return }
+    const onDisconnected = () => { return }
+    setLocalMedia({id: stream.id, stream, muted: true, onConnected, onDisconnected})
   }
 
   useEffect(()=> {fetchData()},[])
