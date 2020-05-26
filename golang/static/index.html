@@ -7,9 +7,9 @@
         width: 33%;
       }
     </style>
-    <script src="/js/localmedia.js"></script>
-    <script src="/js/peering.js"></script>
-    <script src="/js/signaling.js"></script>
+    <script src="./js/localmedia.js"></script>
+    <script src="./js/peering.js"></script>
+    <script src="./js/signaling.js"></script>
   </head>
   <body>
     <div id="videos">
@@ -56,8 +56,8 @@
         })
 
         let isHTTPS = location.protocol !== 'https:'
-        signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
-
+        signals.connect((isHTTPS ? "ws" : "wss") + "://localhost:3001/room")
+        console.log(location.host)
         window.addEventListener("unload", function() {
           signals.sendLeave()
         });

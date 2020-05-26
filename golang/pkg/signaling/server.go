@@ -13,6 +13,12 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+upgrader.CheckOrigin = func(r *http.Request) bool {
+  // do some kind of validation logic here
+  logrus.Debugf("Header contains origin %s", r.Header["Origin"]) // file://file:///Users/adam/Projects/adam-club/golang/static/index.html
+  return true
+}
+
 type Server struct {
 	room *Room
 }
