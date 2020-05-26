@@ -7,9 +7,13 @@ import PersonItem from '../person/personItem'
 function GroupGridList({ singer, local, peers }) {
   return (
     <Grid container spacing={2}>
-      <Grid key={singer.id} item xs={4}>
-        <PersonItem personId={singer.id} />
-      </Grid>
+      {singer ?
+          <Grid key={singer.id} item xs={4}>
+            <PersonItem personId={singer.id} />
+          </Grid>
+          :
+          null
+      }
       <Grid key={local.id} item xs={4}>
         <PersonItem personId={local.id} />
       </Grid>
