@@ -8,10 +8,6 @@ import (
 
 type GroupID string
 
-const (
-	GroupIDDefault = GroupID("default")
-)
-
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . GroupMember
 
 type GroupMember interface {

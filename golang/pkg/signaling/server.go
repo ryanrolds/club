@@ -13,11 +13,17 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type Server struct {
-	room *Room
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Dispatcher
+
+type Dispatcher {
+  Dispatch(Message) error
 }
 
-func NewServer(room *Room) *Server {
+type Server struct {
+	room Dispatcher
+}
+
+func NewServer(room Dispatcher) *Server {
 	return &Server{
 		room: room,
 	}

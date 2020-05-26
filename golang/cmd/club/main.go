@@ -42,7 +42,7 @@ func main() {
 
 	var room = signaling.NewRoom()
 	room.StartReaper(reaperInterval)
-	room.AddGroup(signaling.NewGroup("default", 12))
+	room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, 12))
 	room.AddGroup(signaling.NewGroup("test", 3))
 
 	http.Handle("/room", signaling.NewServer(room))

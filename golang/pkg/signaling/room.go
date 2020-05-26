@@ -15,6 +15,10 @@ var ErrMemberLacksGroup = errors.New("member lacks group")
 var ErrInvalidMessageType = errors.New("invalid message type")
 var ErrNonNilGroupRequired = errors.New("non-nil group required")
 
+const (
+	RoomDefaultGroupID = GroupID("default")
+)
+
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomMember
 
 type RoomMember interface {
@@ -68,7 +72,7 @@ func (r *Room) Dispatch(member RoomMember, message Message) error {
 			member.SetGroup(nil)
 		}
 
-		groupID := GetGroupIDFromMessage(message)
+		groupID := GetGroupIDFromMessage(message, RoomDefaultGroupID)
 		group = r.GetGroup(groupID)
 		if group == nil {
 			return ErrGroupNotFound

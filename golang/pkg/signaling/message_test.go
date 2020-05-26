@@ -64,4 +64,14 @@ var _ = Describe("Message", func() {
 			Expect(data).To(Equal([]byte(`{"type":"type","peerId":"peerID","destId":"destID","payload":{}}`)))
 		})
 	})
+
+	Context("GetGroupIDFromMessage", func() {
+		It("should return the default group if group key not in payload", func() {
+
+		})
+
+		It("should return the group ID if group key present", func() {
+
+		})
+	})
 })

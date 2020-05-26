@@ -28,6 +28,41 @@ var _ = Describe("Peer", func() {
 		})
 	})
 
+	Context("ID", func() {
+		It("should return ID", func() {
+
+		})
+
+	})
+
+	Context("GetGroup", func() {
+		It("should return group", func() {
+
+		})
+	})
+
+	Context("SetGroup", func() {
+		It("should set the group", func() {
+
+		})
+	})
+
+	Context("Heartbeat", func() {
+		It("should update the heartbeat", func() {
+
+		})
+	})
+
+	Context("Timedout", func() {
+		It("should return true if heartbeat older than timeout", func() {
+
+		})
+
+		It("should return false if heartbeat younger than timeout", func() {
+
+		})
+	})
+
 	Context("GetNextMessage", func() {
 		It("should return next message", func() {
 			fakeConn.ReadMessageReturns(1, validMessage, nil)
@@ -45,7 +80,7 @@ var _ = Describe("Peer", func() {
 				Type:          "join",
 				SourceID:      peer.ID(),
 				DestinationID: signaling.PeerID("destination"),
-				Payload: map[string]interface{}{
+				Payload: signaling.MessagePayload{
 					"foo": "bar",
 				},
 			}

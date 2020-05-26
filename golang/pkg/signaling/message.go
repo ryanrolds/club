@@ -66,10 +66,10 @@ func (m *Message) ToJSON() ([]byte, error) {
 	return b, nil
 }
 
-func GetGroupIDFromMessage(message Message) GroupID {
+func GetGroupIDFromMessage(message Message, defaultGroup GroupID) GroupID {
 	groupString, ok := message.Payload[MessagePayloadKeyGroup]
 	if !ok {
-		return GroupIDDefault
+		return defaultGroup
 	}
 
 	return GroupID(groupString.(string))
