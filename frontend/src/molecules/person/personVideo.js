@@ -1,4 +1,4 @@
-import React, { createRef } from 'react'
+import React from 'react'
 import { makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles(() => ({
@@ -9,18 +9,10 @@ const useStyles = makeStyles(() => ({
 
 function PersonVideo({person}){
   const classes = useStyles()
-  const streamRef = createRef()
-  if(streamRef.current && streamRef.current.srcObject !== person.stream) {
-    streamRef.current.srcObject = person.stream
-    streamRef.current.autoplay = true
-    streamRef.current.muted = true
-  }
-
-  console.log(streamRef)
 
   return (
     <video
-      ref={streamRef}
+      ref={video => { video.srcObject = person.stream }}
       autoPlay
       className={classes.video}
       />

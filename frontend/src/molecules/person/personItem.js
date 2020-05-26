@@ -13,26 +13,7 @@ const useStyles = makeStyles((theme) => ({
 
 function PersonItem({ person }) {
   const classes = useStyles()
-  const peerConnection = new RTCPeerConnection()
-
-  peerConnection.addEventListener('icecandidate', ({candidate}) => {
-    if (candidate) {
-      // add ice candidate to peers
-    }
-  })
-
-  // person.stream.forEach((track) => {
-  //   peerConnection.addTrack(track, person.stream)
-  // })
-
-  // const offer = await peerConnection.createOffer({
-  //   offerToReceiveVideo: 1,
-  //   offerToReceiveAudio: 1,
-  // })
-
-  // await peerConnection.setLocalDescription(offer)
-
-  return (
+  return ( person.stream ? (
     <Paper
       variant="outlined"
       className={classes.root}
@@ -40,7 +21,7 @@ function PersonItem({ person }) {
       <PersonVideo person={person}/>
       <PersonActions />
     </Paper>
-  )
+  ) : null )
 }
 
 PersonItem.propTypes = {
