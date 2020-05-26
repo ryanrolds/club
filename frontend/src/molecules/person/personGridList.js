@@ -2,9 +2,9 @@ import React from 'react'
 import { Grid } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton'
 import PropTypes from 'prop-types'
-import PersonItem from '../person/personItem'
+import PersonItem from './personItem'
 
-function GroupGridList({ singer, local, peers }) {
+function PersonGridList({ singer, local, peers }) {
   return (
     <Grid container spacing={2}>
       {singer ?
@@ -28,10 +28,10 @@ function GroupGridList({ singer, local, peers }) {
   )
 }
 
-GroupGridList.propTypes = {
+PersonGridList.propTypes = {
   singer: PropTypes.object,
   local: PropTypes.object.isRequired,
   peers: PropTypes.array,
 }
 
-export default GroupGridList
+export default PersonGridList

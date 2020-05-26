@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TopBar from '../../components/appBar/topBar'
-import GroupGridList from '../../molecules/group/groupGridList'
+import PersonGridList from '../../molecules/person/personGridList'
 import { Paper, makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles({
@@ -28,7 +28,7 @@ export default function App() {
       <main>
         <TopBar />
         <Paper className={classes.root}>
-          <GroupGridList singer={singerData} local={localData} peers={peersData} />
+          <PersonGridList singer={singerData} local={localData} peers={peersData} />
         </Paper>
       </main>
     </>
