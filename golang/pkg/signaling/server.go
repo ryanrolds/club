@@ -15,8 +15,8 @@ var upgrader = websocket.Upgrader{
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Dispatcher
 
-type Dispatcher {
-  Dispatch(Message) error
+type Dispatcher interface {
+	Dispatch(RoomMember, Message) error
 }
 
 type Server struct {
@@ -60,7 +60,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			orignal, jsonError := message.ToJSON()
 			if jsonError != nil {
-				logrus.WithError(err).Warnf("problem marshaling original message to JSON", client.ID())
+				logrus.WithError(err).Warnf("problem marshaling original message to JSON")
 				continue
 			}
 

@@ -42,8 +42,15 @@ func main() {
 
 	var room = signaling.NewRoom()
 	room.StartReaper(reaperInterval)
-	room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, 12))
-	room.AddGroup(signaling.NewGroup("test", 3))
+	err := room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, 12))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	err = room.AddGroup(signaling.NewGroup("test", 3))
+	if err != nil {
+		logrus.Fatal(err)
+	}
 
 	http.Handle("/room", signaling.NewServer(room))
 
@@ -51,7 +58,7 @@ func main() {
 	http.Handle("/", NoCache(fs))
 
 	logrus.Info("Listening on :3001...")
-	err := http.ListenAndServe(":3001", nil)
+	err = http.ListenAndServe(":3001", nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}

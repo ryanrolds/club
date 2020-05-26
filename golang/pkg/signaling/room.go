@@ -41,7 +41,7 @@ func NewRoom() *Room {
 	}
 }
 
-// Clients can disconenct without a leave event, iterate groups and tell them to
+// Clients can disconnect without a leave event, iterate groups and tell them to
 // remove stale members
 func (r *Room) StartReaper(interval time.Duration) {
 	go func() {

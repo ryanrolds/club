@@ -20,8 +20,10 @@ var _ = Describe("Room", func() {
 		groupA = signaling.NewGroup("groupA", 12)
 		groupB = signaling.NewGroup("groupB", 42)
 
-		room.AddGroup(groupA)
-		room.AddGroup(groupB)
+		err := room.AddGroup(groupA)
+		Expect(err).To(BeNil())
+		err = room.AddGroup(groupB)
+		Expect(err).To(BeNil())
 	})
 
 	Context("NewRoom", func() {

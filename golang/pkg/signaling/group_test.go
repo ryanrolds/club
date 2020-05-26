@@ -29,22 +29,33 @@ var _ = Describe("Group", func() {
 			group = signaling.NewGroup("id", 42)
 			Expect(group).ToNot(BeNil())
 		})
-  })
+	})
 
-  Context("PruneStaleMembers", func() {
-    var (
-      anotherMember *signalingfakes.FakeRoomMember{}
-    )
-
+	Context("PruneStaleMembers", func() {
 		BeforeEach(func() {
 			anotherMember = &signalingfakes.FakeRoomMember{}
 			anotherMember.IDReturns(signaling.PeerID("42"))
-			groupA.AddMember(anotherMember)
+			group.AddMember(anotherMember)
 		})
 
-    It("should prune stale members", func() {
+		It("should prune stale members", func() {
+			anotherMember.TimedoutReturns(true)
 
-    })
+			Expect(group.GetMemberCount()).To(Equal(2))
+
+			group.PruneStaleMembers()
+
+			Expect(group.GetMemberCount()).To(Equal(1))
+			message := fakeMember.SendMessageArgsForCall(0)
+			Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
+			Expect(message.SourceID).To(Equal(signaling.PeerID("42")))
+		})
+	})
+
+	Context("ID", func() {
+		It("should return ID", func() {
+			Expect(group.ID()).To(Equal(signaling.GroupID("foo")))
+		})
 	})
 
 	Context("GetMember", func() {
@@ -147,6 +158,18 @@ var _ = Describe("Group", func() {
 			Expect(group.GetMemberCount()).To(Equal(0))
 			Expect(group.GetMember(anotherMember.ID())).To(BeNil())
 			Expect(group.GetMember(anotherMember.ID())).To(BeNil())
+		})
+	})
+
+	Context("MessageMember", func() {
+		It("should message member", func() {
+
+		})
+	})
+
+	Context("Broadcast", func() {
+		It("should message all mambers except source", func() {
+
 		})
 	})
 })

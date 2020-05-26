@@ -18,7 +18,7 @@ var _ = Describe("Message", func() {
 			Expect(message.Type).To(Equal(signaling.MessageType("type")))
 			Expect(message.DestinationID).To(Equal(signaling.PeerID("destID")))
 			Expect(message.SourceID).To(Equal(peerID))
-			Expect(message.Payload).To(Equal(map[string]interface{}{}))
+			Expect(message.Payload).To(Equal(signaling.MessagePayload{}))
 		})
 
 		It("should error if invalid JSON", func() {
