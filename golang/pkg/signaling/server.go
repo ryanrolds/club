@@ -13,12 +13,6 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-upgrader.CheckOrigin = func(r *http.Request) bool {
-  // do some kind of validation logic here
-  logrus.Debugf("Header contains origin %s", r.Header["Origin"]) // file://file:///Users/adam/Projects/adam-club/golang/static/index.html
-  return true
-}
-
 type Server struct {
 	room *Room
 }
@@ -30,6 +24,11 @@ func NewServer(room *Room) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		// do some kind of validation logic here.
+		logrus.Debugf("Header contains origin %s", r.Header["Origin"])
+		return true
+	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logrus.Error(errors.Wrap(err, "problem upgrading to websockets"))
