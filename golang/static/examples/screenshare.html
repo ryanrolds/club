@@ -12,16 +12,17 @@
     </style>
     <script type="text/javascript">
       function stopCapture() {
-        const localMedia = document.querySelector('#local');
-        const remoteMedia = document.querySelector('#remote');
-        if (localMedia.srcObject !== null && remoteMedia.srcObject !== null) {
-          let localTracks = localMedia.srcObject.getTracks();
-          let remoteTracks = remoteMedia.srcObject.getTracks();
+        const localMedia = document.querySelector('#local')
+        const remoteMedia = document.querySelector('#remote')
 
-          localTracks.forEach(track => track.stop());
+        if (!!localMedia.srcObject && !!remoteMedia.srcObject) {
+          let localTracks = localMedia.srcObject.getTracks()
+          let remoteTracks = remoteMedia.srcObject.getTracks()
+
+          localTracks.forEach(track => track.stop())
           localMedia.srcObject = null;
 
-          remoteTracks.forEach(track => track.stop());
+          remoteTracks.forEach(track => track.stop())
           localMedia.srcObject = null;
         }
         return;
@@ -41,17 +42,17 @@
           navigator.mediaDevices.getDisplayMedia = function(constraints) {
 
             // First get ahold of the legacy getDisplayMedia, if present
-            let getDisplayMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            let getDisplayMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
             // Some browsers just don't implement it - return a rejected promise with an error
             // to keep a consistent interface
             if (!getDisplayMedia) {
-              return Promise.reject(new Error('getDisplayMedia is not implemented in this browser'));
+              return Promise.reject(new Error('getDisplayMedia is not implemented in this browser'))
             }
 
             // Otherwise, wrap the call to the old navigator.getDisplayMedia with a Promise
             return new Promise(function(resolve, reject) {
-              getDisplayMedia.call(navigator, constraints, resolve, reject);
+              getDisplayMedia.call(navigator, constraints, resolve, reject)
             });
           }
         }
@@ -67,6 +68,13 @@
         Audio Capture is only available on Chrome 74 and Firefox 79
          */
         try {
+          const localMedia = document.querySelector('#local')
+          const remoteMedia = document.querySelector('#remote')
+
+          if (localMedia.srcObject) {
+            stopCapture()
+          }
+
           const stream =  await navigator.mediaDevices.getDisplayMedia(
             {
               audio: {
@@ -77,10 +85,8 @@
               video: true
             }
           )
-          const localMedia = document.querySelector('#local')
-          localMedia.srcObject = stream
 
-          const remoteMedia = document.querySelector('#remote')
+          localMedia.srcObject = stream
 
           const pc1 = new RTCPeerConnection() 
           const pc2 = new RTCPeerConnection()
@@ -112,7 +118,7 @@
           await pc1.setLocalDescription(offer)
           await pc2.setRemoteDescription(offer)
 
-          const answer = await pc2.createAnswer();
+          const answer = await pc2.createAnswer()
           await pc2.setLocalDescription(answer)
           await pc1.setRemoteDescription(answer)
         } catch (err) {
