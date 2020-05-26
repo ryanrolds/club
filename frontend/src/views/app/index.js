@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useReducer, useEffect } from 'react'
 import CssBaseline from '@material-ui/core/CssBaseline'
+import { Paper, makeStyles } from '@material-ui/core'
 import TopBar from '../../components/appBar/topBar'
 import PersonGridList from '../../molecules/person/personGridList'
-import { Paper, makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles({
   root: {
@@ -10,17 +10,54 @@ const useStyles = makeStyles({
   }
 })
 
-export default function App() {
+const App = () => {
   const classes = useStyles()
-  const [singerData, setSingerData] = useState({ id: '123' })
-  const [localData, setLocalData] = useState({ id: '9999' })
-  const [peersData, setPeersData] = useState([
-    { id: '1' },
-    { id: '2' },
-    { id: '3' },
-    { id: '4' },
-    { id: '5' },
-  ])
+  const initialState = {
+    localData: null,
+    singerData: null,
+    peersData: null,
+    error: null,
+    loaded: false,
+    fetching: false,
+  }
+  const reducer = (state, newState) => ({ ...state, ...newState })
+  const [state, setState] = useReducer(reducer, initialState)
+
+  async function fetchData() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    const localData = {
+      id: stream.id,
+      stream
+    }
+    const peersData = []
+    const singerData = {}
+
+    // error?
+    if (!localData.stream) {
+      return setState({
+        localData,
+        singerData,
+        peersData,
+        error: true,
+        loaded: true,
+        fetching: false
+      })
+    }
+
+    //no error
+    setState({
+      localData,
+      singerData,
+      peersData,
+      error: null,
+      loaded: true,
+      fetching: false,
+    })
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   return (
     <>
@@ -28,9 +65,11 @@ export default function App() {
       <main>
         <TopBar />
         <Paper className={classes.root}>
-          <PersonGridList singer={singerData} local={localData} peers={peersData} />
+          {state.loaded ? <PersonGridList singer={state.singerData} local={state.localData} peers={state.peersData} /> : null }
         </Paper>
       </main>
     </>
   )
 }
+
+export default App

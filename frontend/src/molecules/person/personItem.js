@@ -6,30 +6,45 @@ import PersonVideo from './personVideo'
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: '100%',
     transform: 'translateZ(0px)',
     flexGrow: 1,
-    display: 'flex',
-    flexDirection: 'column',
   },
 }))
 
-function PersonItem({ personId }) {
+function PersonItem({ person }) {
   const classes = useStyles()
+  const peerConnection = new RTCPeerConnection()
+
+  peerConnection.addEventListener('icecandidate', ({candidate}) => {
+    if (candidate) {
+      // add ice candidate to peers
+    }
+  })
+
+  // person.stream.forEach((track) => {
+  //   peerConnection.addTrack(track, person.stream)
+  // })
+
+  // const offer = await peerConnection.createOffer({
+  //   offerToReceiveVideo: 1,
+  //   offerToReceiveAudio: 1,
+  // })
+
+  // await peerConnection.setLocalDescription(offer)
 
   return (
     <Paper
       variant="outlined"
       className={classes.root}
     >
-      <PersonVideo />
+      <PersonVideo person={person}/>
       <PersonActions />
     </Paper>
   )
 }
 
 PersonItem.propTypes = {
-  personId: PropTypes.any.isRequired
+  person: PropTypes.object.isRequired
 }
 
 export default PersonItem

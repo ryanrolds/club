@@ -1,25 +1,28 @@
 import React, { createRef } from 'react'
 import { makeStyles } from '@material-ui/core'
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    paddingTop: '100%',
+const useStyles = makeStyles(() => ({
+  video: {
+    width: '100%',
   }
 }))
 
-function PersonVideo({srcObject}){
+function PersonVideo({person}){
   const classes = useStyles()
   const streamRef = createRef()
-  if(streamRef.current && streamRef.current.srcObject !== srcObject) {
-    streamRef.srcObject = srcObject
-    streamRef.autoplay = true
-    streamRef.muted = true
+  if(streamRef.current && streamRef.current.srcObject !== person.stream) {
+    streamRef.current.srcObject = person.stream
+    streamRef.current.autoplay = true
+    streamRef.current.muted = true
   }
+
+  console.log(streamRef)
 
   return (
     <video
-      className={classes.root}
       ref={streamRef}
+      autoPlay
+      className={classes.video}
       />
   )
 }

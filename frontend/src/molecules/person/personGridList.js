@@ -1,29 +1,26 @@
 import React from 'react'
 import { Grid } from '@material-ui/core'
-import Skeleton from '@material-ui/lab/Skeleton'
 import PropTypes from 'prop-types'
 import PersonItem from './personItem'
 
 function PersonGridList({ singer, local, peers }) {
   return (
     <Grid container spacing={2}>
-      {singer ?
+      {singer.stream ?
           <Grid key={singer.id} item xs={4}>
-            <PersonItem personId={singer.id} />
+            <PersonItem person={singer} />
           </Grid>
           :
           null
       }
       <Grid key={local.id} item xs={4}>
-        <PersonItem personId={local.id} />
+        <PersonItem person={local} />
       </Grid>
-      {peers.length ? peers.map((peer) => (
+      {peers.map((peer) => (
         <Grid key={peer.id} item xs={4}>
-          <PersonItem personId={peer.id} />
+          <PersonItem person={peer} />
         </Grid>
-      )) : <Grid item xs={4}>
-          <Skeleton />
-        </Grid>}
+      ))}
     </Grid>
   )
 }
