@@ -31,5 +31,6 @@ module.exports = {
     'class-methods-use-this': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'semi': [2, 'never']
   },
 }
