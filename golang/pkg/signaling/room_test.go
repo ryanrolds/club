@@ -41,7 +41,8 @@ var _ = Describe("Room", func() {
 			room = signaling.NewRoom()
 
 			fakeGroup := &signalingfakes.FakeRoomGroup{}
-			room.AddGroup(fakeGroup)
+			err := room.AddGroup(fakeGroup)
+			Expect(err).To(BeNil())
 
 			room.StartReaper(time.Millisecond * 50)
 
@@ -123,7 +124,8 @@ var _ = Describe("Room", func() {
 				Payload:  signaling.MessagePayload{},
 			}
 
-			room.Dispatch(member, message)
+			err := room.Dispatch(member, message)
+			Expect(err).To(BeNil())
 
 			Expect(defaultGroup.GetMemberCount()).To(Equal(0))
 		})
