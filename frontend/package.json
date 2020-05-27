@@ -20,7 +20,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.+(js|jsx|json|yml|yaml|css|md|vue)\"",
+    "format": "./node_modules/prettier/bin-prettier.js --write \"**/*.+(js|jsx|json|yml|yaml|css|md|vue)\"",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

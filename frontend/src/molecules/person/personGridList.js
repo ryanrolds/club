@@ -9,11 +9,13 @@ function PersonGridList({ local, peers }) {
       <Grid key={local.id} item xs={6}>
         <PersonItem person={local} />
       </Grid>
-      {peers ? peers.map((peer) => (
-        <Grid key={peer.id} item xs={4}>
-          <PersonItem person={peer} />
-        </Grid>
-      )): null}
+      {peers
+        ? peers.map((peer) => (
+            <Grid key={peer.id} item xs={4}>
+              <PersonItem person={peer} />
+            </Grid>
+          ))
+        : null}
     </Grid>
   )
 }

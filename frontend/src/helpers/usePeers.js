@@ -56,14 +56,16 @@ export default function usePeers(local, signals) {
 
     const newPeer = (peerId) => {
       const config = {
-        iceServers: [{
-          urls: "stun:stun1.l.google.com:19302"
-        }]
+        iceServers: [
+          {
+            urls: 'stun:stun1.l.google.com:19302',
+          },
+        ],
       }
 
       let peer = new RTCPeerConnection(config)
 
-      peer.addEventListener("icecandidate", ({ candidate }) => {
+      peer.addEventListener('icecandidate', ({ candidate }) => {
         if (candidate) {
           signals.sendICECandidate(peerId, candidate)
         }
@@ -91,13 +93,24 @@ export default function usePeers(local, signals) {
       return peer
     }
 
-    const onConnected = () => { }
-    const onDisconnected = () => { }
+    const onConnected = () => {}
+    const onDisconnected = () => {}
 
-    setPeers({ peers, onConnected, onDisconnected, onJoin, onLeave, onOffer, onAnswer, onICECandidate })
+    setPeers({
+      peers,
+      onConnected,
+      onDisconnected,
+      onJoin,
+      onLeave,
+      onOffer,
+      onAnswer,
+      onICECandidate,
+    })
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   return peers
 }

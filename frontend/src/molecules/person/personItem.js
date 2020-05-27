@@ -13,19 +13,16 @@ const useStyles = makeStyles((theme) => ({
 
 function PersonItem({ person }) {
   const classes = useStyles()
-  return ( person.stream ? (
-    <Paper
-      variant="outlined"
-      className={classes.root}
-    >
-      <PersonVideo person={person}/>
+  return person.stream ? (
+    <Paper variant='outlined' className={classes.root}>
+      <PersonVideo person={person} />
       <PersonActions />
     </Paper>
-  ) : null )
+  ) : null
 }
 
 PersonItem.propTypes = {
-  person: PropTypes.object.isRequired
+  person: PropTypes.object.isRequired,
 }
 
 export default PersonItem
