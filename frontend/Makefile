@@ -1,5 +1,7 @@
 .PHONY: install build all run ci
 
+all: build
+
 install:
 	npm i
 
