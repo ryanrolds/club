@@ -1,4 +1,20 @@
-language: go
-script: make ci
-go:
-- 1.14.x
+matrix:
+  include:
+    - language: go
+      go:
+        - 1.14.x
+      before_install:
+        - cd golang/
+      script:
+        - make ci
+
+    - language: node_js
+      node_js:
+        - 12
+      before_install:
+        - cd frontend/
+      script:
+        - npm run ci
+
+notifications:
+  email: false
