@@ -1,12 +1,12 @@
 matrix:
   include:
     - language: go
-    go:
-      - 1.14.x
-    before_install:
-      - cd golang/
-    script:
-      - make ci
+      go:
+        - 1.14.x
+      before_install:
+        - cd golang/
+      script:
+        - make ci
 
     - language: node_js
       node_js:
