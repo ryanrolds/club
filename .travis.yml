@@ -9,7 +9,6 @@ matrix:
         - . $HOME/.nvm/nvm.sh
         - nvm install 12
         - nvm use 12
-        - cd static/ && yarn install && cd ..
       script:
         - make ci
 
