@@ -1,6 +1,8 @@
 package signaling_test
 
 import (
+	"time"
+
 	"github.com/ryanrolds/club/pkg/signaling"
 	"github.com/ryanrolds/club/pkg/signaling/signalingfakes"
 
@@ -30,36 +32,42 @@ var _ = Describe("Peer", func() {
 
 	Context("ID", func() {
 		It("should return ID", func() {
-
+			Expect(len(peer.ID())).To(Equal(25))
 		})
-
 	})
 
 	Context("GetGroup", func() {
 		It("should return group", func() {
-
+			group := signaling.NewGroup("test", 12)
+			peer.SetGroup(group)
+			Expect(peer.GetGroup()).To(Equal(group))
 		})
 	})
 
 	Context("SetGroup", func() {
 		It("should set the group", func() {
+			group := signaling.NewGroup("test", 12)
+			peer.SetGroup(group)
+			Expect(peer.GetGroup()).To(Equal(group))
+		})
 
+		It("should return nil if no group set", func() {
+			Expect(peer.GetGroup()).To(BeNil())
 		})
 	})
 
 	Context("Heartbeat", func() {
 		It("should update the heartbeat", func() {
-
+			lastHeartbeat := peer.GetHeartbeat()
+			peer.Heartbeat()
+			Expect(peer.GetHeartbeat()).ToNot(Equal(lastHeartbeat))
 		})
 	})
 
-	Context("Timedout", func() {
-		It("should return true if heartbeat older than timeout", func() {
-
-		})
-
-		It("should return false if heartbeat younger than timeout", func() {
-
+	Context("GetHeartbeat", func() {
+		It("should return heartbeat", func() {
+			lastHeartbeat := peer.GetHeartbeat()
+			Expect(lastHeartbeat).To(BeAssignableToTypeOf(time.Time{}))
 		})
 	})
 

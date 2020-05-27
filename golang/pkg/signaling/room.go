@@ -22,20 +22,33 @@ const (
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomMember
 
 type RoomMember interface {
-	GetGroup() *Group
-	SetGroup(*Group)
+	GetGroup() RoomGroup
+	SetGroup(RoomGroup)
 
 	GroupMember
 }
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomGroup
+
+type RoomGroup interface {
+	ID() GroupID
+	PruneStaleMembers()
+	AddMember(member GroupMember)
+	GetMember(peerID PeerID) GroupMember
+	RemoveMember(member GroupMember)
+
+	Broadcast(message Message) error
+	MessageMember(message Message) error
+}
+
 type Room struct {
-	groups     map[GroupID]*Group
+	groups     map[GroupID]RoomGroup
 	groupsLock *sync.RWMutex
 }
 
 func NewRoom() *Room {
 	return &Room{
-		groups: map[GroupID]*Group{},
+		groups: map[GroupID]RoomGroup{},
 		// If we avoid creating groups, except for during startup, this mutex won't be needed
 		groupsLock: &sync.RWMutex{},
 	}
@@ -115,7 +128,7 @@ func (r *Room) Dispatch(member RoomMember, message Message) error {
 	return nil
 }
 
-func (r *Room) AddGroup(group *Group) error {
+func (r *Room) AddGroup(group RoomGroup) error {
 	if group == nil {
 		return ErrNonNilGroupRequired
 	}
@@ -133,7 +146,7 @@ func (r *Room) AddGroup(group *Group) error {
 	return nil
 }
 
-func (r *Room) GetGroup(groupID GroupID) *Group {
+func (r *Room) GetGroup(groupID GroupID) RoomGroup {
 	r.groupsLock.RLock()
 	defer r.groupsLock.RUnlock()
 

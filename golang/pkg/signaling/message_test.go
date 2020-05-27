@@ -67,11 +67,23 @@ var _ = Describe("Message", func() {
 
 	Context("GetGroupIDFromMessage", func() {
 		It("should return the default group if group key not in payload", func() {
+			message := signaling.Message{
+				Payload: signaling.MessagePayload{
+					signaling.MessagePayloadKeyGroup: "test",
+				},
+			}
 
+			groupID := signaling.GetGroupIDFromMessage(message, signaling.GroupID("default"))
+			Expect(groupID).To(Equal(signaling.GroupID("test")))
 		})
 
 		It("should return the group ID if group key present", func() {
+			message := signaling.Message{
+				Payload: signaling.MessagePayload{},
+			}
 
+			groupID := signaling.GetGroupIDFromMessage(message, signaling.GroupID("default"))
+			Expect(groupID).To(Equal(signaling.GroupID("default")))
 		})
 	})
 })

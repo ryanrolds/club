@@ -24,7 +24,7 @@ const (
 
 type Peer struct {
 	id    PeerID
-	group *Group
+	group RoomGroup
 
 	heartbeat     time.Time
 	heartbeatLock sync.Mutex
@@ -50,11 +50,11 @@ func (p *Peer) ID() PeerID {
 	return p.id
 }
 
-func (p *Peer) GetGroup() *Group {
+func (p *Peer) GetGroup() RoomGroup {
 	return p.group
 }
 
-func (p *Peer) SetGroup(group *Group) {
+func (p *Peer) SetGroup(group RoomGroup) {
 	p.group = group
 }
 
@@ -63,6 +63,13 @@ func (p *Peer) Heartbeat() {
 	defer p.heartbeatLock.Unlock()
 
 	p.heartbeat = time.Now()
+}
+
+func (p *Peer) GetHeartbeat() time.Time {
+	p.heartbeatLock.Lock()
+	defer p.heartbeatLock.Unlock()
+
+	return p.heartbeat
 }
 
 func (p *Peer) Timedout() bool {
