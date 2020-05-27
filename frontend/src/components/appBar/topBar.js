@@ -15,21 +15,21 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
-}));
+}))
 
 export default function TopBar() {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      <AppBar position='static'>
         <Toolbar>
-          <Typography variant="h6" className={classes.title}>
+          <Typography variant='h6' className={classes.title}>
             Club Name
           </Typography>
-          <Button color="inherit">Join Queue</Button>
+          <Button color='inherit'>Join Queue</Button>
         </Toolbar>
       </AppBar>
     </div>
-  );
+  )
 }
