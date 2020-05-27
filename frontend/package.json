@@ -19,10 +19,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "lint": "./node_modules/eslint/bin/eslint.js .",
     "format": "./node_modules/prettier/bin-prettier.js --write \"**/*.+(js|jsx|json|yml|yaml|css|md|vue)\"",
     "eject": "react-scripts eject",
-    "lint": "./node_modules/eslint/bin/eslint.js .",
-    "ci": "yarn install && npm run lint && npm run build",
+    "ci": "yarn install && npm run lint && npm run build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -42,6 +42,7 @@
   "devDependencies": {
     "eslint": "^6.6.0",
     "eslint-config-airbnb": "^18.1.0",
+    "eslint-config-esnext": "^4.0.0",
     "eslint-config-node": "^4.0.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.20.2",
