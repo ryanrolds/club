@@ -8,9 +8,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+func NewUpgrader() websocket.Upgrader {
+	return websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			// TODO: Validate env var list of origins here
+			return true
+		},
+	}
 }
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Dispatcher
@@ -20,17 +26,19 @@ type Dispatcher interface {
 }
 
 type Server struct {
-	room Dispatcher
+	room     Dispatcher
+	upgrader websocket.Upgrader
 }
 
 func NewServer(room Dispatcher) *Server {
 	return &Server{
-		room: room,
+		room:     room,
+		upgrader: NewUpgrader(),
 	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := s.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logrus.Error(errors.Wrap(err, "problem upgrading to websockets"))
 		return
