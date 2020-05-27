@@ -7,7 +7,6 @@ module.exports = {
   extends: [
     'plugin:react/recommended',
     'airbnb',
-    'prettier',
     'plugin:jest/recommended',
   ],
   globals: {
@@ -21,10 +20,9 @@ module.exports = {
     ecmaVersion: 11,
     sourceType: 'module',
   },
-  plugins: ['react', 'prettier', 'jest', 'react-hooks'],
+  plugins: ['react', 'jest', 'react-hooks'],
   rules: {
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
-    'prettier/prettier': 'error',
     'no-unused-vars': 'warn',
     'no-console': 'off',
     'func-names': 'off',

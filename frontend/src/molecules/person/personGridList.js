@@ -1,7 +1,7 @@
-import React from 'react'
-import { Grid } from '@material-ui/core'
-import PropTypes from 'prop-types'
-import PersonItem from './personItem'
+import React from 'react';
+import { Grid } from '@material-ui/core';
+import PropTypes from 'prop-types';
+import PersonItem from './personItem';
 
 function PersonGridList({ local, peers }) {
   return (
@@ -11,19 +11,24 @@ function PersonGridList({ local, peers }) {
       </Grid>
       {peers
         ? peers.map((peer) => (
-            <Grid key={peer.id} item xs={4}>
-              <PersonItem person={peer} />
-            </Grid>
-          ))
+          <Grid key={peer.id} item xs={4}>
+            <PersonItem person={peer} />
+          </Grid>
+        ))
         : null}
     </Grid>
-  )
+  );
 }
 
 PersonGridList.propTypes = {
-  singer: PropTypes.object,
-  local: PropTypes.object.isRequired,
-  peers: PropTypes.array,
-}
+  // singer: PropTypes.objectOf(PropTypes.object),
+  local: PropTypes.objectOf(PropTypes.object).isRequired,
+  peers: PropTypes.arrayOf(PropTypes.object()),
+};
 
-export default PersonGridList
+PersonGridList.defaultProps = {
+  // singer: {},
+  peers: [],
+};
+
+export default PersonGridList;

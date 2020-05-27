@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
-import { makeStyles } from '@material-ui/core'
-import SpeedDial from '@material-ui/lab/SpeedDial'
-import SpeedDialAction from '@material-ui/lab/SpeedDialAction'
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon'
-import VolumeOffRounded from '@material-ui/icons/VolumeOffRounded'
+import React, { useState } from 'react';
+import { makeStyles } from '@material-ui/core';
+import SpeedDial from '@material-ui/lab/SpeedDial';
+import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import VolumeOffRounded from '@material-ui/icons/VolumeOffRounded';
 
 const useStyles = makeStyles((theme) => ({
   speedDial: {
@@ -11,25 +11,25 @@ const useStyles = makeStyles((theme) => ({
     bottom: theme.spacing(2),
     right: theme.spacing(2),
   },
-}))
+}));
 
-const actions = [{ icon: <VolumeOffRounded />, name: 'Mute' }]
+const actions = [{ icon: <VolumeOffRounded />, name: 'Mute' }];
 
 function PersonActions() {
-  const classes = useStyles()
-  const [open, setOpen] = useState(false)
+  const classes = useStyles();
+  const [open, setOpen] = useState(false);
 
   const handleOpen = () => {
-    setOpen(true)
-  }
+    setOpen(true);
+  };
 
   const handleClose = () => {
-    setOpen(false)
-  }
+    setOpen(false);
+  };
 
   return (
     <SpeedDial
-      ariaLabel='Streamer Options'
+      ariaLabel="Streamer Options"
       className={classes.speedDial}
       icon={<SpeedDialIcon />}
       onClose={handleClose}
@@ -46,7 +46,7 @@ function PersonActions() {
         />
       ))}
     </SpeedDial>
-  )
+  );
 }
 
-export default PersonActions
+export default PersonActions;

@@ -9,7 +9,6 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "prettier": "^2.0.5",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -20,7 +19,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "lint": "./node_modules/eslint/bin/eslint.js .",
-    "format": "./node_modules/prettier/bin-prettier.js --write \"**/*.+(js|jsx|json|yml|yaml|css|md|vue)\"",
+    "format": "./node_modules/.bin/eslint --fix --ignore-path .gitignore .",
     "eject": "react-scripts eject",
     "ci": "yarn install && npm run lint && npm run build"
   },
@@ -40,18 +39,8 @@
     ]
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
     "eslint-config-airbnb": "^18.1.0",
-    "eslint-config-esnext": "^4.0.0",
-    "eslint-config-node": "^4.0.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jest": "^23.13.1",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.1.3",
-    "eslint-plugin-react": "^7.20.0",
-    "eslint-plugin-react-hooks": "^4.0.2",
+    "eslint-plugin-jest": "^23.13.2",
     "jest-websocket-mock": "^2.0.2",
     "mock-socket": "^9.0.3"
   }
