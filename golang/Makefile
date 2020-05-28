@@ -4,7 +4,6 @@ all: build coverage
 
 install:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
-	cd static/ && yarn install
 
 build:
 	go build ./cmd/club

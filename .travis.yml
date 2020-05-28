@@ -5,10 +5,6 @@ matrix:
         - 1.14.x
       before_install:
         - cd golang/
-      install:
-        - . $HOME/.nvm/nvm.sh
-        - nvm install 12
-        - nvm use 12
       script:
         - make ci
 
