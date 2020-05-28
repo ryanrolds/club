@@ -1,6 +1,5 @@
-
-
-export default class SignalingServer extends EventTarget {
+// eslint-disable-next-line no-unused-vars
+class SignalingServer extends EventTarget {
   constructor() {
     super()
     this.websocket = null
