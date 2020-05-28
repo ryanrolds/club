@@ -22,5 +22,3 @@ class LocalMedia {
   async onConnected() {}
   async onDisconnected() {}
 }
-
-export default LocalMedia
