@@ -53,7 +53,7 @@ class SignalingServer extends EventTarget {
         case "error":
           console.log("Error processing message:", parsed.payload.error)
           console.log(parsed)
-          break;
+          break
         default:
           console.log("unknown message type", parsed)
       }
