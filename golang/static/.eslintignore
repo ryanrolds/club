@@ -1,3 +1,0 @@
-# Ignore built files except build/index.js
-node_modules/*
-js/adapter-latest.js
