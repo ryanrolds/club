@@ -1,5 +1,5 @@
-
-export default class Peering {
+// eslint-disable-next-line no-unused-vars
+class Peering {
   constructor(elmID, stream, signals) {
     this.videosElm = document.getElementById(elmID)
     this.stream = stream

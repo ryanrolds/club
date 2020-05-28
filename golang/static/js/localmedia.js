@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line no-unused-vars
 class LocalMedia {
   constructor(id) {
     this.id = id
@@ -21,5 +22,3 @@ class LocalMedia {
   async onConnected() {}
   async onDisconnected() {}
 }
-
-export default LocalMedia

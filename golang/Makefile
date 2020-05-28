@@ -26,6 +26,7 @@ coverage-ci:
 
 lint:
 	./bin/golangci-lint run
+	cd static/ && npm run lint
 
 ci: install lint build test coverage-ci
 
