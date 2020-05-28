@@ -1,7 +1,7 @@
 .PHONY: install build all run ci
 
 install:
-	npm i
+	yarn install
 
 build:
 	npm run build
@@ -13,7 +13,7 @@ format:
 	npm run format
 
 ci:
-	# todo
+	npm run ci
 
 run:
 	npm run start

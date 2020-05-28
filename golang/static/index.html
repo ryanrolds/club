@@ -1,66 +1,69 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <style type="text/css">
-      div > video {
-        display: inline-block;
-        width: 33%;
-      }
-    </style>
-    <script src="./js/localmedia.js"></script>
-    <script src="./js/peering.js"></script>
-    <script src="./js/signaling.js"></script>
-  </head>
-  <body>
-    <div id="videos">
-      <video id="local" autoplay muted></video>
-    </div>
-    <script type="text/javascript">
-      let local = new LocalMedia("local")
-      local.setupMedia().then(() => {
-        let signals = new SignalingServer()
-        let peers = new Peering("videos", local.getStream(), signals)
 
-        signals.addEventListener("connected", async (event) => {
-          await local.onConnected()
-          await peers.onConnected()
+<head>
+  <style type="text/css">
+    div>video {
+      display: inline-block;
+      width: 33%;
+    }
+  </style>
+  <script src="./js/localmedia.js"></script>
+  <script src="./js/peering.js"></script>
+  <script src="./js/signaling.js"></script>
+</head>
 
-          signals.sendJoin()
-        })
+<body>
+  <div id="videos">
+    <video id="local" autoplay muted></video>
+  </div>
+  <script type="text/javascript">
+    let local = new LocalMedia("local")
+    local.setupMedia().then(() => {
+      let signals = new SignalingServer()
+      let peers = new Peering("videos", local.getStream(), signals)
 
-        signals.addEventListener("join", async (event) => {
-          let offer = await peers.onJoin(event.detail)
-          signals.sendOffer(event.detail.peerId, offer)
-        })
+      signals.addEventListener("connected", async (event) => {
+        await local.onConnected()
+        await peers.onConnected()
 
-        signals.addEventListener("leave", async (event) => {
-          await peers.onLeave(event.detail)
-        })
-
-        signals.addEventListener("offer", async (event) => {
-            let answer = await peers.onOffer(event.detail)
-          signals.sendAnswer(event.detail.peerId, answer)
-        })
-
-        signals.addEventListener("icecandidate", async (event) => {
-          peers.onICECandidate(event.detail)
-        })
-
-        signals.addEventListener("answer", async (event) => {
-          await peers.onAnswer(event.detail)
-        })
-
-        signals.addEventListener("disconnected", async (event) => {
-          await local.onDisconnected()
-          await peers.onDisconnected()
-        })
-
-        let isHTTPS = location.protocol !== 'https:'
-        signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
-        window.addEventListener("unload", function() {
-          signals.sendLeave()
-        });
+        signals.sendJoin()
       })
-    </script>
-  </body>
+
+      signals.addEventListener("join", async (event) => {
+        let offer = await peers.onJoin(event.detail)
+        signals.sendOffer(event.detail.peerId, offer)
+      })
+
+      signals.addEventListener("leave", async (event) => {
+        await peers.onLeave(event.detail)
+      })
+
+      signals.addEventListener("offer", async (event) => {
+        let answer = await peers.onOffer(event.detail)
+        signals.sendAnswer(event.detail.peerId, answer)
+      })
+
+      signals.addEventListener("icecandidate", async (event) => {
+        peers.onICECandidate(event.detail)
+      })
+
+      signals.addEventListener("answer", async (event) => {
+        await peers.onAnswer(event.detail)
+      })
+
+      signals.addEventListener("disconnected", async (event) => {
+        await local.onDisconnected()
+        await peers.onDisconnected()
+      })
+
+      let isHTTPS = location.protocol !== 'https:'
+      signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
+      window.addEventListener("unload", function () {
+        signals.sendLeave()
+      });
+    })
+  </script>
+</body>
+
 </html>
