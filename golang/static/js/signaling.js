@@ -50,6 +50,10 @@ class SignalingServer extends EventTarget {
         case "icecandidate":
           this.dispatchEvent(new CustomEvent("icecandidate", { detail: { peerId: parsed.peerId, candidate: parsed.payload } }))
           break
+        case "error":
+          console.log("Error processing message:", parsed.payload.error)
+          console.log(parsed)
+          break
         default:
           console.log("unknown message type", parsed)
       }
@@ -60,8 +64,8 @@ class SignalingServer extends EventTarget {
     }, 30000)
   }
 
-  sendJoin() {
-    this.websocket.send(JSON.stringify({ type: "join", destId: "", payload: {} }))
+  sendJoin(group) {
+    this.websocket.send(JSON.stringify({ type: "join", destId: "", payload: { group }}))
   }
 
   sendLeave() {

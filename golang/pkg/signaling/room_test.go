@@ -12,17 +12,21 @@ import (
 
 var _ = Describe("Room", func() {
 	var (
-		room          *signaling.Room
-		fakeMember    *signalingfakes.FakeRoomMember
-		anotherMember *signalingfakes.FakeRoomMember
+		room         *signaling.Room
+		defaultGroup *signaling.Group
+		testGroup    *signaling.Group
 	)
 
 	BeforeEach(func() {
 		room = signaling.NewRoom()
 
-		fakeMember = &signalingfakes.FakeRoomMember{}
-		fakeMember.IDReturns(signaling.PeerID("123"))
-		room.AddMember(fakeMember)
+		defaultGroup = signaling.NewGroup(signaling.RoomDefaultGroupID, 12)
+		testGroup = signaling.NewGroup("test", 42)
+
+		err := room.AddGroup(defaultGroup)
+		Expect(err).To(BeNil())
+		err = room.AddGroup(testGroup)
+		Expect(err).To(BeNil())
 	})
 
 	Context("NewRoom", func() {
@@ -33,150 +37,128 @@ var _ = Describe("Room", func() {
 	})
 
 	Context("StartReaper", func() {
+		It("should call prune on each group", func() {
+			room = signaling.NewRoom()
 
-		BeforeEach(func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("42"))
-			room.AddMember(anotherMember)
-		})
-
-		It("should run every interval", func() {
-			room.StartReaper(time.Millisecond * 250)
-			time.Sleep(time.Second)
-			Expect(fakeMember.TimedoutCallCount()).To(Equal(4))
-			Expect(anotherMember.TimedoutCallCount()).To(Equal(4))
-		})
-
-		It("should remove member if timedout and leave non-timedout members", func() {
-			fakeMember.TimedoutReturns(true)
-			anotherMember.TimedoutReturns(false)
-
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(room.GetMember(anotherMember.ID())).To(Equal(anotherMember))
+			fakeGroup := &signalingfakes.FakeRoomGroup{}
+			err := room.AddGroup(fakeGroup)
+			Expect(err).To(BeNil())
 
 			room.StartReaper(time.Millisecond * 50)
 
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 75)
 
-			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(room.GetMember(anotherMember.ID())).To(Equal(anotherMember))
-		})
-
-		It("should inform other members", func() {
-			fakeMember.TimedoutReturns(true)
-
-			room.StartReaper(time.Millisecond * 75)
-
-			time.Sleep(time.Millisecond * 100)
-
-			Expect(fakeMember.SendMessageCallCount()).To(Equal(0))
-			Expect(anotherMember.SendMessageCallCount()).To(Equal(1))
-
-			message := anotherMember.SendMessageArgsForCall(0)
-			Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
+			callCount := fakeGroup.PruneStaleMembersCallCount()
+			Expect(callCount).To(BeNumerically(">", 1))
 		})
 	})
 
-	Context("GetMember", func() {
-		It("should get one member", func() {
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+	Context("Dispatch", func() {
+		var (
+			conn   *signalingfakes.FakePeerConnection
+			member *signaling.Peer
+		)
+
+		BeforeEach(func() {
+			conn = &signalingfakes.FakePeerConnection{}
+			member = signaling.NewPeer(conn)
 		})
 
-		It("should get two members", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-			room.AddMember(anotherMember)
+		It("should add joining member to default group", func() {
+			Expect(defaultGroup.GetMemberCount()).To(Equal(0))
 
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(room.GetMember(anotherMember.ID())).To(Equal(anotherMember))
+			message := signaling.Message{
+				Type:     signaling.MessageTypeJoin,
+				SourceID: member.ID(),
+				Payload:  signaling.MessagePayload{},
+			}
+
+			err := room.Dispatch(member, message)
+			Expect(err).To(BeNil())
+
+			Expect(defaultGroup.GetMemberCount()).To(Equal(1))
+			Expect(defaultGroup.GetMember(member.ID())).To(Equal(member))
 		})
 
-		It("should get two members with unique IDs", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-			room.AddMember(anotherMember)
+		It("should add joining member to requested group", func() {
+			Expect(testGroup.GetMemberCount()).To(Equal(0))
 
-			Expect(fakeMember.ID()).ToNot(Equal(anotherMember.ID()))
+			message := signaling.Message{
+				Type:     signaling.MessageTypeJoin,
+				SourceID: member.ID(),
+				Payload: signaling.MessagePayload{
+					signaling.MessagePayloadKeyGroup: "test",
+				},
+			}
+
+			err := room.Dispatch(member, message)
+			Expect(err).To(BeNil())
+
+			Expect(testGroup.GetMemberCount()).To(Equal(1))
+			Expect(testGroup.GetMember(member.ID())).To(Equal(member))
+		})
+
+		It("should error if group does not exist", func() {
+			Expect(testGroup.GetMemberCount()).To(Equal(0))
+
+			message := signaling.Message{
+				Type:     signaling.MessageTypeJoin,
+				SourceID: member.ID(),
+				Payload: signaling.MessagePayload{
+					signaling.MessagePayloadKeyGroup: "doesnotexist",
+				},
+			}
+
+			err := room.Dispatch(member, message)
+			Expect(err).To(Equal(signaling.ErrGroupNotFound))
+		})
+
+		It("should process leave message", func() {
+			defaultGroup.AddMember(member)
+			member.SetGroup(defaultGroup)
+			Expect(defaultGroup.GetMemberCount()).To(Equal(1))
+
+			message := signaling.Message{
+				Type:     signaling.MessageTypeLeave,
+				SourceID: member.ID(),
+				Payload:  signaling.MessagePayload{},
+			}
+
+			err := room.Dispatch(member, message)
+			Expect(err).To(BeNil())
+
+			Expect(defaultGroup.GetMemberCount()).To(Equal(0))
 		})
 	})
 
-	Context("GetMemberCount", func() {
-		It("should get member count equal to one", func() {
-			Expect(room.GetMemberCount()).To(Equal(1))
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+	Context("AddGroup", func() {
+		It("should add group to room", func() {
+			foo := signaling.NewGroup("foo", 10)
+
+			err := room.AddGroup(foo)
+			Expect(err).To(BeNil())
+
+			Expect(room.GetGroup("foo")).To(Equal(foo))
 		})
 
-		It("should get member count equal to two", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-			room.AddMember(anotherMember)
-
-			Expect(room.GetMemberCount()).To(Equal(2))
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+		It("should error if group is nil", func() {
+			err := room.AddGroup(nil)
+			Expect(err).To(Equal(signaling.ErrNonNilGroupRequired))
 		})
 
-		It("should get member count equal to zero", func() {
-			room.RemoveMember(fakeMember)
-			Expect(room.GetMemberCount()).To(Equal(0))
-		})
-	})
-
-	Context("AddMember", func() {
-		It("should add member", func() {
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(room.GetMemberCount()).To(Equal(1))
-		})
-
-		It("should not add existing member", func() {
-			room.AddMember(fakeMember)
-
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(room.GetMemberCount()).To(Equal(1))
+		It("should error if group is already added to room", func() {
+			err := room.AddGroup(defaultGroup)
+			Expect(err).To(Equal(signaling.ErrGroupAlreadyExists))
 		})
 	})
 
-	Context("RemoveMember", func() {
-		It("should remove member", func() {
-			Expect(room.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-
-			room.RemoveMember(fakeMember)
-			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(room.GetMemberCount()).To(Equal(0))
+	Context("GetGroup", func() {
+		It("should return group if it exists", func() {
+			Expect(room.GetGroup(signaling.RoomDefaultGroupID)).To(Equal(defaultGroup))
 		})
 
-		It("should remove only one member", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-
-			room.AddMember(fakeMember)
-			room.AddMember(anotherMember)
-
-			Expect(room.GetMemberCount()).To(Equal(2))
-
-			room.RemoveMember(fakeMember)
-			Expect(room.GetMemberCount()).To(Equal(1))
-			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(room.GetMember(anotherMember.ID())).ToNot(BeNil())
-		})
-
-		It("should remove only two members", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-
-			room.AddMember(anotherMember)
-
-			Expect(room.GetMemberCount()).To(Equal(2))
-
-			room.RemoveMember(fakeMember)
-			Expect(room.GetMemberCount()).To(Equal(1))
-			Expect(room.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(room.GetMember(anotherMember.ID())).ToNot(BeNil())
-			Expect(room.GetMember(anotherMember.ID())).To(Equal(anotherMember))
-
-			room.RemoveMember(anotherMember)
-			Expect(room.GetMemberCount()).To(Equal(0))
-			Expect(room.GetMember(anotherMember.ID())).To(BeNil())
-			Expect(room.GetMember(anotherMember.ID())).To(BeNil())
+		It("should return nil if group does not exist", func() {
+			Expect(room.GetGroup(signaling.GroupID("doesnotexist"))).To(BeNil())
 		})
 	})
 })

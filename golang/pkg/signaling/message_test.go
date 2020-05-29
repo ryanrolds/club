@@ -18,7 +18,7 @@ var _ = Describe("Message", func() {
 			Expect(message.Type).To(Equal(signaling.MessageType("type")))
 			Expect(message.DestinationID).To(Equal(signaling.PeerID("destID")))
 			Expect(message.SourceID).To(Equal(peerID))
-			Expect(message.Payload).To(Equal(map[string]interface{}{}))
+			Expect(message.Payload).To(Equal(signaling.MessagePayload{}))
 		})
 
 		It("should error if invalid JSON", func() {
@@ -62,6 +62,28 @@ var _ = Describe("Message", func() {
 			data, err := message.ToJSON()
 			Expect(err).To(BeNil())
 			Expect(data).To(Equal([]byte(`{"type":"type","peerId":"peerID","destId":"destID","payload":{}}`)))
+		})
+	})
+
+	Context("GetGroupIDFromMessage", func() {
+		It("should return the default group if group key not in payload", func() {
+			message := signaling.Message{
+				Payload: signaling.MessagePayload{
+					signaling.MessagePayloadKeyGroup: "test",
+				},
+			}
+
+			groupID := signaling.GetGroupIDFromMessage(message, signaling.GroupID("default"))
+			Expect(groupID).To(Equal(signaling.GroupID("test")))
+		})
+
+		It("should return the group ID if group key present", func() {
+			message := signaling.Message{
+				Payload: signaling.MessagePayload{},
+			}
+
+			groupID := signaling.GetGroupIDFromMessage(message, signaling.GroupID("default"))
+			Expect(groupID).To(Equal(signaling.GroupID("default")))
 		})
 	})
 })

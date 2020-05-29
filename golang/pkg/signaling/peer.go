@@ -18,10 +18,13 @@ type PeerConnection interface {
 
 type PeerID string
 
-const timeout = time.Second * 30
+const (
+	timeout = time.Second * 30
+)
 
 type Peer struct {
-	id PeerID
+	id    PeerID
+	group RoomGroup
 
 	heartbeat     time.Time
 	heartbeatLock sync.Mutex
@@ -32,7 +35,8 @@ type Peer struct {
 
 func NewPeer(conn PeerConnection) *Peer {
 	return &Peer{
-		id: PeerID(cuid.New()),
+		id:    PeerID(cuid.New()),
+		group: nil,
 
 		heartbeat:     time.Now(),
 		heartbeatLock: sync.Mutex{},
@@ -46,11 +50,26 @@ func (p *Peer) ID() PeerID {
 	return p.id
 }
 
+func (p *Peer) GetGroup() RoomGroup {
+	return p.group
+}
+
+func (p *Peer) SetGroup(group RoomGroup) {
+	p.group = group
+}
+
 func (p *Peer) Heartbeat() {
 	p.heartbeatLock.Lock()
 	defer p.heartbeatLock.Unlock()
 
 	p.heartbeat = time.Now()
+}
+
+func (p *Peer) GetHeartbeat() time.Time {
+	p.heartbeatLock.Lock()
+	defer p.heartbeatLock.Unlock()
+
+	return p.heartbeat
 }
 
 func (p *Peer) Timedout() bool {
