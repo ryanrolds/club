@@ -41,8 +41,14 @@ class RTCMesh extends Component {
   }
 
   handleOffer = async (data) => {
+  	// Acquire roomkey from req.params.path? lastIndexOf / host?
+  	// Rename->roomKey->group?
     const { localMediaStream, roomKey, socketID } = this.state;
+    debugger
     const { payload } = data;
+    // What format is data in right here?
+    // Transform data into {  detail: { peerId: parsed.peerId, answer: parsed.payload } }))
+
     await this.rtcPeerConnection.setRemoteDescription(payload.message);
     let mediaStream = localMediaStream
     if (!mediaStream) mediaStream = await this.openCamera(true);
@@ -86,8 +92,9 @@ class RTCMesh extends Component {
     const { roomKey, socketID } = this.state;
     if (!roomKey) {
       const key = generateRoomKey();
+      // /room 
       const roomData = createMessage(TYPE_ROOM, createPayload(key, socketID));
-      this.setState({ roomKey: key })
+      this.setState({ roomKey: key, socketID: 1 })
       this.socket.send(JSON.stringify(roomData));
       alert(key);
     }
@@ -119,7 +126,9 @@ class RTCMesh extends Component {
       connectionStarted,
     } = this.state;
     const sendMessage = this.socket.send.bind(this.socket);
-
+    console.log('Socket ReadyState: ', this.socket.readyState)
+    if (this.socket && this.socket.readyState >= 1) this.sendRoomKey()
+    console.log(this.socket)
     return (
       <>
         <Websocket
@@ -131,6 +140,14 @@ class RTCMesh extends Component {
           handleAnswer={this.handleAnswer}
           handleIceCandidate={this.handleIceCandidate}
         />
+        /* TODO
+        * Send Call Offer to Browser 2 (Peer)
+        * Verify remoteMediaStream exists and is applied to RTCVideo id=remote
+        *
+        *
+        *
+        * 
+         */
         <PeerConnection
           rtcPeerConnection={this.rtcPeerConnection}
           iceServers={iceServers}
@@ -140,8 +157,8 @@ class RTCMesh extends Component {
           sendMessage={sendMessage}
           roomInfo={{ socketID, roomKey }}
         />
-        <RTCVideo mediaStream={localMediaStream} />
-        <RTCVideo mediaStream={remoteMediaStream} />
+        <RTCVideo id="local" mediaStream={localMediaStream} />
+        <RTCVideo id="remote" mediaStream={remoteMediaStream} />
 
         <section className='button-container'>
           <div className='button button--start-color' onClick={this.openCamera}>
