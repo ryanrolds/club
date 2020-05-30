@@ -8,7 +8,7 @@ import { generateRoomKey, createMessage, createPayload } from './functions/utils
 class RTCMesh extends Component {
   constructor(props) {
     super(props);
-    const {mediaConstraints, URL } = props;
+    const { mediaConstraints, URL } = props;
     // build iceServers config for RTCPeerConnection
     // const iceServerURLs = buildServers(iceServers);
     this.state = {
@@ -25,24 +25,24 @@ class RTCMesh extends Component {
     this.rtcPeerConnection = new RTCPeerConnection({ iceServers: this.state.iceServers });
   }
 
-  openCamera = async (fromHandleOffer) => {
+  useLocalMedia = async (fromHandleOffer) => {
     const { mediaConstraints, localMediaStream } = this.state;
     try {
       if (!localMediaStream) {
         let mediaStream;
-        if(this.wantCamera) mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        if (this.wantCamera) mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
         else mediaStream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
 
         return fromHandleOffer === true ? mediaStream : this.setState({ localMediaStream: mediaStream });
       }
-    } catch(error) {
+    } catch (error) {
       console.error('getUserMedia Error: ', error)
     }
   }
 
   handleOffer = async (data) => {
-  	// Acquire roomkey from req.params.path? lastIndexOf / host?
-  	// Rename->roomKey->group?
+    // Acquire roomkey from req.params.path? lastIndexOf / host?
+    // Rename->roomKey->group?
     const { localMediaStream, roomKey, socketID } = this.state;
     debugger
     const { payload } = data;
@@ -51,8 +51,8 @@ class RTCMesh extends Component {
 
     await this.rtcPeerConnection.setRemoteDescription(payload.message);
     let mediaStream = localMediaStream
-    if (!mediaStream) mediaStream = await this.openCamera(true);
-    this.setState({ connectionStarted: true, localMediaStream: mediaStream }, async function() {
+    if (!mediaStream) mediaStream = await this.useLocalMedia(true);
+    this.setState({ connectionStarted: true, localMediaStream: mediaStream }, async function () {
       const answer = await this.rtcPeerConnection.createAnswer();
       await this.rtcPeerConnection.setLocalDescription(answer);
       const payload = createPayload(roomKey, socketID, answer);
@@ -72,12 +72,12 @@ class RTCMesh extends Component {
     await this.rtcPeerConnection.addIceCandidate(candidate);
   }
 
-  handleShareDisplay = async() => {
+  handleShareDisplay = async () => {
     this.wantCamera = !this.wantCamera
-    if(this.state.connectionStarted){
+    if (this.state.connectionStarted) {
       const { mediaConstraints, localMediaStream } = this.state;
       let mediaStream;
-      if(this.wantCamera) mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
+      if (this.wantCamera) mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
       else mediaStream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
 
       let screenStream = mediaStream.getVideoTracks()[0]
@@ -92,7 +92,7 @@ class RTCMesh extends Component {
     const { roomKey, socketID } = this.state;
     if (!roomKey) {
       const key = generateRoomKey();
-      // /room 
+      // /room
       const roomData = createMessage(TYPE_ROOM, createPayload(key, socketID));
       this.setState({ roomKey: key, socketID: 1 })
       this.socket.send(JSON.stringify(roomData));
@@ -125,6 +125,8 @@ class RTCMesh extends Component {
       iceServers,
       connectionStarted,
     } = this.state;
+    this.useLocalMedia()
+    console.log('Ready to send video')
     const sendMessage = this.socket.send.bind(this.socket);
     console.log('Socket ReadyState: ', this.socket.readyState)
     if (this.socket && this.socket.readyState >= 1) this.sendRoomKey()
@@ -140,34 +142,36 @@ class RTCMesh extends Component {
           handleAnswer={this.handleAnswer}
           handleIceCandidate={this.handleIceCandidate}
         />
-        /* TODO
+        {/* TODO
         * Send Call Offer to Browser 2 (Peer)
         * Verify remoteMediaStream exists and is applied to RTCVideo id=remote
         *
         *
         *
-        * 
-         */
-        <PeerConnection
-          rtcPeerConnection={this.rtcPeerConnection}
-          iceServers={iceServers}
-          localMediaStream={localMediaStream}
-          addRemoteStream={this.addRemoteStream}
-          startConnection={connectionStarted}
-          sendMessage={sendMessage}
-          roomInfo={{ socketID, roomKey }}
-        />
-        <RTCVideo id="local" mediaStream={localMediaStream} />
-        <RTCVideo id="remote" mediaStream={remoteMediaStream} />
-
-        <section className='button-container'>
-          <div className='button button--start-color' onClick={this.openCamera}>
-            <button onClick={this.openCamera}>Start Video</button>
-          </div>
-          <button onClick={this.handleShareDisplay}>Share Screen</button>
-          <div className='button button--stop-color' onClick={null}>
-          </div>
-        </section>
+        *
+        */}
+        {
+          localMediaStream ?
+            (<>
+              <PeerConnection
+                rtcPeerConnection={this.rtcPeerConnection}
+                iceServers={iceServers}
+                localMediaStream={localMediaStream}
+                addRemoteStream={this.addRemoteStream}
+                startConnection={connectionStarted}
+                sendMessage={sendMessage}
+                roomInfo={{ socketID, roomKey }}
+              />
+              <RTCVideo id="local" mediaStream={localMediaStream} muted={true} />
+            </>
+            ) : null
+        }
+        {
+          remoteMediaStream ?
+            (<>
+              <RTCVideo id="remote" mediaStream={remoteMediaStream} muted={false} />
+            </>) : null
+        }
       </>
     );
   }

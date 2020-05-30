@@ -1,28 +1,29 @@
-import React, { PureComponent } from 'react';
+import React from 'react'
+import { Paper, makeStyles } from '@material-ui/core'
+import PropTypes from 'prop-types'
+import RTCVideoActions from './RTCVideoActions'
+import RTCVideoPlayer from './RTCVideoPlayer'
 
-class RTCVideo extends PureComponent {
-  addMediaStream = (video) => {
-    const { mediaStream } = this.props;
-    // Prevents throwing error upon a setState change when mediaStream is null
-    // upon initial render
-    if (mediaStream) video.srcObject = mediaStream;
-  }
+const useStyles = makeStyles(() => ({
+  root: {
+    transform: 'translateZ(0px)',
+    flexGrow: 1,
+  },
+}))
 
-  render() {
-    const { mediaStream } = this.props;
-    console.log('mediaStream: ', mediaStream);
+function RTCVideo({ mediaStream, muted }) {
+  const classes = useStyles()
+  return mediaStream ? (
+    <Paper variant="outlined" className={classes.root}>
+      <RTCVideoPlayer mediaStream={mediaStream} muted={muted} />
+      <RTCVideoActions />
+    </Paper>
+  ) : null
+}
 
-    return (
-      <video
-        className="rtc__video"
-        style={{width: '480px', backgroundColor: 'black'}}
-        autoPlay
-        ref={mediaStream ? this.addMediaStream : null}
-      >
-        <track default kind="captions" />
-      </video>
-    );
-  }
-};
+RTCVideo.propTypes = {
+  mediaStream: PropTypes.objectOf(PropTypes.object).isRequired,
+  muted: PropTypes.bool
+}
 
-export default RTCVideo;
+export default RTCVideo

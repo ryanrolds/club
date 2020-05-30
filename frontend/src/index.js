@@ -1,7 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import RTCMesh from './components/RTCMesh.jsx';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import { ThemeProvider } from '@material-ui/core/styles'
+import App from './components/App'
+import theme from './theme'
 
-let isHTTPS = window.location.protocol !== 'https:'
-const wsServer = (isHTTPS ? "ws" : "wss") + "://localhost:3001/room"
-ReactDOM.render(<RTCMesh URL={wsServer} />, document.getElementById('root'));
+ReactDOM.render(
+  <ThemeProvider theme={theme}>
+    {/* CssBaseline kickstarts an elegent baseline to build on */}
+    <CssBaseline />
+    <App />
+  </ThemeProvider>,
+  document.getElementById('root')
+)
