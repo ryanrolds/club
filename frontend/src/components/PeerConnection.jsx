@@ -43,7 +43,6 @@ class PeerConnection extends Component {
 
   componentDidMount() {
     const { rtcPeerConnection } = this.props;
-    rtcPeerConnection.onnegotiationneeded = this.handleOnNegotiationNeeded;
     rtcPeerConnection.onicecandidate = this.handleOnIceEvent;
     rtcPeerConnection.ontrack = this.handleOnTrack;
   }
