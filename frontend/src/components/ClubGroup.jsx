@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import RTCVideo from './RTCVideo.jsx';
+import ClubVideo from './ClubMember.jsx';
 import Websocket from './Websocket.jsx';
 import PeerConnection from './PeerConnection.jsx';
 import { DEFAULT_CONSTRAINTS, DEFAULT_ICE_SERVERS, TYPE_ROOM, TYPE_ANSWER } from './functions/constants';
 import { generateRoomKey, createMessage, createPayload } from './functions/utils';
 
-class RTCGroup extends Component {
+class ClubGroup extends Component {
   constructor(props) {
     super(props);
     const { mediaConstraints, URL } = props;
@@ -25,7 +25,7 @@ class RTCGroup extends Component {
     this.rtcPeerConnection = new RTCPeerConnection({ iceServers: this.state.iceServers });
   }
 
-  useLocalMedia = async (fromHandleOffer) => {
+  handleLocalMedia = async (fromHandleOffer) => {
     const { mediaConstraints, localMediaStream } = this.state;
     try {
       if (!localMediaStream) {
@@ -51,7 +51,7 @@ class RTCGroup extends Component {
 
     await this.rtcPeerConnection.setRemoteDescription(payload.message);
     let mediaStream = localMediaStream
-    if (!mediaStream) mediaStream = await this.useLocalMedia(true);
+    if (!mediaStream) mediaStream = await this.handleLocalMedia(true);
     this.setState({ connectionStarted: true, localMediaStream: mediaStream }, async function () {
       const answer = await this.rtcPeerConnection.createAnswer();
       await this.rtcPeerConnection.setLocalDescription(answer);
@@ -125,7 +125,7 @@ class RTCGroup extends Component {
       iceServers,
       connectionStarted,
     } = this.state;
-    this.useLocalMedia()
+    this.handleLocalMedia()
     console.log('Ready to send video')
     const sendMessage = this.socket.send.bind(this.socket);
     console.log('Socket ReadyState: ', this.socket.readyState)
@@ -144,7 +144,7 @@ class RTCGroup extends Component {
         />
         {/* TODO
         * Send Call Offer to Browser 2 (Peer)
-        * Verify remoteMediaStream exists and is applied to RTCVideo id=remote
+        * Verify remoteMediaStream exists and is applied to ClubVideo id=remote
         *
         *
         *
@@ -162,18 +162,18 @@ class RTCGroup extends Component {
                 sendMessage={sendMessage}
                 roomInfo={{ socketID, roomKey }}
               />
-              <RTCVideo id="local" mediaStream={localMediaStream} muted={true} />
+              <ClubVideo id="local" mediaStream={localMediaStream} muted={true} />
             </>
             ) : null
         }
         {
           remoteMediaStream ?
             (<>
-              <RTCVideo id="remote" mediaStream={remoteMediaStream} muted={false} />
+              <ClubVideo id="remote" mediaStream={remoteMediaStream} muted={false} />
             </>) : null
         }
       </>
     );
   }
 }
-export default RTCGroup;
+export default ClubGroup;

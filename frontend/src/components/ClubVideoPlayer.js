@@ -5,38 +5,33 @@ import PropTypes from 'prop-types'
 const useStyles = makeStyles(() => ({
   video: {
     width: '100%',
-    backgroundColor: 'grey'
-  }
+    backgroundColor: 'grey',
+  },
 }))
 
-function RTCVideoPlayer({mediaStream, muted}) {
+function ClubVideoPlayer({ mediaStream, muted }) {
   const classes = useStyles()
   const videoRef = React.createRef()
 
   const setRef = () => {
-    if(!mediaStream) return
+    if (!mediaStream) return
     videoRef.srcObject = mediaStream
   }
 
   return (
-    <video
-      className={classes.video}
-      autoPlay
-      muted={muted}
-      ref={setRef()}
-    >
+    <video className={classes.video} autoPlay muted={muted} ref={setRef()}>
       <track default />
     </video>
   )
 }
 
-RTCVideoPlayer.defaultProps = {
-  muted: false
+ClubVideoPlayer.defaultProps = {
+  muted: false,
 }
 
-RTCVideoPlayer.propTypes = {
+ClubVideoPlayer.propTypes = {
   mediaStream: PropTypes.objectOf(PropTypes.object).isRequired,
-  muted: PropTypes.bool
+  muted: PropTypes.bool,
 }
 
-export default RTCVideoPlayer
+export default ClubVideoPlayer

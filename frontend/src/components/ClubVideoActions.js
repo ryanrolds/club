@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 
 const actions = [{ icon: <VolumeOffRounded />, name: 'Mute' }]
 
-function RTCVideoActions() {
+function ClubVideoActions() {
   const classes = useStyles()
   const [open, setOpen] = useState(false)
 
@@ -29,7 +29,7 @@ function RTCVideoActions() {
 
   return (
     <SpeedDial
-      ariaLabel="Streamer Options"
+      ariaLabel='Streamer Options'
       className={classes.speedDial}
       icon={<SpeedDialIcon />}
       onClose={handleClose}
@@ -49,4 +49,4 @@ function RTCVideoActions() {
   )
 }
 
-export default RTCVideoActions
+export default ClubVideoActions
