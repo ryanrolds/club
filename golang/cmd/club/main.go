@@ -58,11 +58,14 @@ func main() {
 
 	http.Handle("/room", signaling.NewServer(room))
 
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", NoCache(fs))
+	// In production this service is just a websocket service
+	if config.Environment != EnvironmentProduction {
+		fs := http.FileServer(http.Dir("./static"))
+		http.Handle("/", NoCache(fs))
+	}
 
-	logrus.Info("Listening on :3001...")
-	err = http.ListenAndServe(":3001", nil)
+	logrus.Infof("Listening on :%d...", config.Port)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}

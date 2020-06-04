@@ -4,3 +4,4 @@ groups:
   - id: test
     limit: 6
 reaper_interval: 15s
+port: 3001

@@ -27,6 +27,7 @@ type Config struct {
 	DefaultGroupLimit int              `yaml:"default_group_limit" env:"DEFAULT_GROUP_LIMIT" env-default:"12"`
 	Groups            []GroupConfig    `yaml:"groups"`
 	ReaperInterval    time.Duration    `yaml:"reaper_interval" env:"REAPER_INTERVAL" env-default:"15s"`
+	Port              int              `yaml:"port" env:"PORT" env-default:"3001"`
 }
 
 func GetConfig(filename string) (*Config, error) {
