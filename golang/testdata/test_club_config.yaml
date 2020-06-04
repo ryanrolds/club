@@ -1,0 +1,6 @@
+env: test
+default_group_limit: 42
+groups:
+  - id: test
+    limit: 12
+reaper_interval: 1m

@@ -2,27 +2,28 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"os"
 	"path"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/ryanrolds/club/pkg/signaling"
 
 	"github.com/sirupsen/logrus"
 )
 
-const reaperInterval = time.Second * 15
+const (
+	configFilename = "club.yaml"
+)
 
 func main() {
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "dev"
+	config, err := GetConfig(configFilename)
+	if err != nil {
+		log.Fatal("problem reading club.yaml")
 	}
 
-	if env == "prod" {
+	if config.Environment == EnvironmentProduction {
 		logrus.SetLevel(logrus.InfoLevel)
 	} else {
 		logrus.SetLevel(logrus.DebugLevel)
@@ -41,15 +42,18 @@ func main() {
 	logrus.Infof("Log level: %s", logrus.GetLevel())
 
 	var room = signaling.NewRoom()
-	room.StartReaper(reaperInterval)
-	err := room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, 12))
+	room.StartReaper(config.ReaperInterval)
+
+	err = room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, config.DefaultGroupLimit))
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	err = room.AddGroup(signaling.NewGroup("test", 3))
-	if err != nil {
-		logrus.Fatal(err)
+	for _, groupConfig := range config.Groups {
+		err = room.AddGroup(signaling.NewGroup(groupConfig.ID, groupConfig.Limit))
+		if err != nil {
+			logrus.Fatal(err)
+		}
 	}
 
 	http.Handle("/room", signaling.NewServer(room))
