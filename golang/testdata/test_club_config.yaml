@@ -1,4 +1,4 @@
-env: test
+env: tests
 default_group_limit: 42
 groups:
   - id: test

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
-	"runtime"
-	"strings"
 
 	"github.com/ryanrolds/club/pkg/signaling"
 
@@ -23,23 +20,7 @@ func main() {
 		log.Fatal("problem reading club.yaml")
 	}
 
-	if config.Environment == EnvironmentProduction {
-		logrus.SetLevel(logrus.InfoLevel)
-	} else {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	// Setup logging
-	logrus.SetReportCaller(true)
-	logrus.SetFormatter(&logrus.JSONFormatter{
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			s := strings.Split(f.Function, ".")
-			funcName := s[len(s)-1]
-			return funcName, fmt.Sprintf("%s:%d", path.Base(f.File), f.Line)
-		},
-	})
-
-	logrus.Infof("Log level: %s", logrus.GetLevel())
+	initLogging(config)
 
 	var room = signaling.NewRoom()
 	room.StartReaper(config.ReaperInterval)

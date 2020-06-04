@@ -11,9 +11,7 @@ import (
 type EnvironmentValue string
 
 const (
-	EnvironmentLocal      = EnvironmentValue("local")
-	EnvironmentTest       = EnvironmentValue("test")
-	EnvironmentStaging    = EnvironmentValue("staging")
+	EnvironmentTests      = EnvironmentValue("tests")
 	EnvironmentProduction = EnvironmentValue("production")
 )
 
