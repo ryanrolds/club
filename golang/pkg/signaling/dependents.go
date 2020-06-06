@@ -12,8 +12,7 @@ type ReceiverNode interface {
 	ID() NodeID
 	SetParent(ReceiverNode)
 	GetParent() ReceiverNode
-
-	MessageReceiver
+	Receive(Message)
 }
 
 type Dependents struct {
@@ -50,8 +49,10 @@ func (c *Dependents) GetDependentsCount() int {
 }
 
 func (c *Dependents) AddDependent(dependent ReceiverNode) {
+	logrus.Debugf("adding dependent %s", dependent.ID())
+
 	if c.GetDependent(dependent.ID()) != nil {
-		logrus.Warnf("member %s already present", dependent.ID())
+		logrus.Warnf("dependent %s already present", dependent.ID())
 		return // members already present
 	}
 
@@ -60,16 +61,18 @@ func (c *Dependents) AddDependent(dependent ReceiverNode) {
 
 	c.dependents[dependent.ID()] = dependent
 
-	logrus.Debugf("added member %s", dependent.ID())
+	c.Broadcast(NewJoinMessage(dependent.ID()))
 }
 
 func (c *Dependents) RemoveDependent(dependent ReceiverNode) {
+	logrus.Debugf("removing dependent %s", dependent.ID())
+
 	c.dependentsLock.RLock()
 	defer c.dependentsLock.RUnlock()
 
 	delete(c.dependents, dependent.ID())
 
-	logrus.Debugf("removed members %s", dependent.ID())
+	c.Broadcast(NewLeaveMessage(dependent.ID()))
 }
 
 func (c *Dependents) MessageDependent(message Message) {
@@ -81,7 +84,7 @@ func (c *Dependents) MessageDependent(message Message) {
 
 	dependent.Receive(message)
 
-	logrus.Debugf("sent dependent %s messsage %s", message.DestinationID, message)
+	logrus.Debugf("sent dependent %s messsage %s", dependent.ID(), message)
 }
 
 func (c *Dependents) Broadcast(message Message) {
@@ -90,13 +93,12 @@ func (c *Dependents) Broadcast(message Message) {
 
 	logrus.Debugf("broadcasting message: %s", message)
 
-	for _, dependent := range c.dependents {
+	for id, dependent := range c.dependents {
 		// Don't send messages to source
-		if dependent.ID() == message.SourceID {
+		if id == message.SourceID {
 			continue
 		}
 
 		dependent.Receive(message)
-		logrus.Warnf("problem broadcasting message to members %s", dependent.ID())
 	}
 }

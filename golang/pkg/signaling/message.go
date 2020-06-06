@@ -7,10 +7,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-type MessageReceiver interface {
-	Receive(Message)
-}
-
 type MessageType string
 type MessagePayloadKey string
 type MessagePayload map[MessagePayloadKey]interface{}
@@ -37,6 +33,14 @@ type Message struct {
 	SourceID      NodeID         `json:"peerId" validate:"required"`
 	DestinationID NodeID         `json:"destId"`
 	Payload       MessagePayload `json:"payload" validate:"required"`
+}
+
+func NewJoinMessage(id NodeID) Message {
+	return Message{
+		Type:     MessageTypeJoin,
+		SourceID: id,
+		Payload:  MessagePayload{},
+	}
 }
 
 func NewLeaveMessage(id NodeID) Message {

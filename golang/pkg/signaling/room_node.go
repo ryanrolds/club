@@ -18,7 +18,7 @@ const (
 	RoomDefaultID = NodeID("default")
 )
 
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . NodeGroup
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . ReceiverGroup
 
 type ReceiverGroup interface {
 	ReceiverNode
@@ -32,8 +32,7 @@ type ReceiverGroup interface {
 }
 
 type Room struct {
-	Node
-	Dependents
+	GroupNode
 
 	groups     map[NodeID]ReceiverGroup
 	groupsLock *sync.RWMutex
@@ -41,10 +40,7 @@ type Room struct {
 
 func NewRoom() *Room {
 	return &Room{
-		Node: NewNode("room", nil),
-
-		// We need to hold peers that have joined the room, but not a group
-		Dependents: NewDependents(0),
+		GroupNode: NewGroupNode("room", nil, 0),
 
 		groups: map[NodeID]ReceiverGroup{},
 		// If we avoid creating groups, except for during startup, this mutex won't be needed
@@ -55,9 +51,9 @@ func NewRoom() *Room {
 func (r *Room) Receive(message Message) {
 	logrus.Debugf("Message type: %s", message.Type)
 
-	member := r.GetDependent(message.SourceID)
-	if member == nil {
-		logrus.Warnf("member %s not found in room", member.ID())
+	dependent := r.GetDependent(message.SourceID)
+	if dependent == nil {
+		logrus.Warnf("dependent %s not found in room", dependent.ID())
 		return
 	}
 
@@ -65,11 +61,12 @@ func (r *Room) Receive(message Message) {
 	case MessageTypeJoin:
 		var group ReceiverGroup
 
-		recevier := member.GetParent()
+		// When joining a group, make sure to remove them from their previous group
+		recevier := dependent.GetParent()
 		if group != nil {
 			group = r.GetGroup(recevier.ID())
-			group.RemoveDependent(member)
-			member.SetParent(nil)
+			group.RemoveDependent(dependent)
+			dependent.SetParent(nil)
 		}
 
 		groupID := GetGroupIDFromMessage(message, RoomDefaultID)
@@ -78,27 +75,21 @@ func (r *Room) Receive(message Message) {
 			return
 		}
 
-		member.SetParent(group)
-		group.AddDependent(member)
+		dependent.SetParent(group)
+		group.AddDependent(dependent)
+		r.RemoveDependent(dependent)
 
-		group.Broadcast(message)
+		logrus.Debugf("added dependent %s to group %s", dependent.ID(), group.ID())
 	case MessageTypeLeave:
-		receiver := member.GetParent()
+		receiver := dependent.GetParent()
 		if receiver == nil {
 			return
 		}
 
 		group := r.GetGroup(receiver.ID())
-		group.RemoveDependent(member)
+		group.RemoveDependent(dependent)
 
-		group.Receive(message)
-	case MessageTypeOffer, MessageTypeAnswer, MessageTypeICECandidate:
-		group := member.GetParent()
-		if group == nil {
-			return
-		}
-
-		group.Receive(message)
+		logrus.Debugf("removed dependent %s from group %s", dependent.ID(), group.ID())
 	default:
 		logrus.Warnf(`unknown message type %s`, message.Type)
 		return

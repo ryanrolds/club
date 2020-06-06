@@ -38,7 +38,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	peer := NewWebsocketPeer(conn)
+	peer := NewWebsocketPeer(conn, s.room)
 	s.room.AddDependent(peer)
 
 	go peer.PumpWrite()
@@ -47,4 +47,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("connection established by %s", peer.ID())
 
 	peer.WaitForDisconnect()
+
+	logrus.Infof("peer %s disconnected", peer.ID())
 }

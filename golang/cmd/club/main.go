@@ -43,12 +43,13 @@ func main() {
 	var room = signaling.NewRoom()
 
 	defaultRoom := signaling.NewGroupNode(signaling.RoomDefaultID, room, 12)
-	err := room.AddGroup(defaultRoom)
+	err := room.AddGroup(&defaultRoom)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	err = room.AddGroup(signaling.NewGroupNode("test", room, 3))
+	testRoom := signaling.NewGroupNode("test", room, 3)
+	err = room.AddGroup(&testRoom)
 	if err != nil {
 		logrus.Fatal(err)
 	}

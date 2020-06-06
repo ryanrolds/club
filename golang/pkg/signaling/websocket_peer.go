@@ -24,21 +24,17 @@ type WebsocketPeer struct {
 
 	messages chan Message
 
-	heartbeat     time.Time
-	heartbeatLock sync.Mutex
-
 	conn     *websocket.Conn
 	connLock sync.Mutex
 
 	wait sync.WaitGroup
 }
 
-func NewWebsocketPeer(conn *websocket.Conn) *WebsocketPeer {
+func NewWebsocketPeer(conn *websocket.Conn, parent ReceiverNode) *WebsocketPeer {
 	return &WebsocketPeer{
-		Node: NewNode(NodeID(cuid.New()), nil),
+		Node: NewNode(NodeID(cuid.New()), parent),
 
-		heartbeat:     time.Now(),
-		heartbeatLock: sync.Mutex{},
+		messages: make(chan Message),
 
 		conn:     conn,
 		connLock: sync.Mutex{},
@@ -48,37 +44,52 @@ func NewWebsocketPeer(conn *websocket.Conn) *WebsocketPeer {
 }
 
 func (p *WebsocketPeer) Receive(message Message) {
+	logrus.Debugf("queueing message for %s", p.ID())
+
 	p.messages <- message
+
+	logrus.Debugf("finshed queuing message for %s", p.ID())
 }
 
 func (p *WebsocketPeer) PumpWrite() {
 	ticker := time.NewTicker(pingInterval)
 
+	p.wait.Add(1)
+
 	defer func() {
 		ticker.Stop()
 		p.conn.Close()
+		p.wait.Done()
+		logrus.Debugf("exiting %s write pump", p.ID())
 	}()
+
+	p.conn.SetWriteDeadline(time.Now().Add(timeout))
 
 	for {
 		select {
 		case message, ok := <-p.messages:
 			p.conn.SetWriteDeadline(time.Now().Add(timeout))
 
-			err := p.conn.WriteJSON(message)
-			if err != nil {
-				logrus.Error(err)
-				break
-			}
-
 			if !ok {
-				// The hub closed the channel.
+				logrus.Warn("channel closed")
 				p.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
+			logrus.Debugf("got message: %s", message)
+
+			err := p.conn.WriteJSON(message)
+			if err != nil {
+				logrus.Error(err)
+				return
+			}
 		case <-ticker.C:
+			logrus.Debugf("ping %s", p.ID())
+
 			p.conn.SetWriteDeadline(time.Now().Add(timeout))
+
 			if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				logrus.Debug(err)
 				return
 			}
 		}
@@ -86,18 +97,25 @@ func (p *WebsocketPeer) PumpWrite() {
 }
 
 func (p *WebsocketPeer) PumpRead() {
+	p.wait.Add(1)
+
 	defer func() {
-		p.parent.Receive(NewLeaveMessage(p.ID()))
+		if p.parent != nil {
+			p.parent.Receive(NewLeaveMessage(p.ID()))
+		}
+
 		p.conn.Close()
+		p.wait.Done()
+		logrus.Debugf("exiting %s read pump", p.ID())
 	}()
 
 	p.conn.SetReadDeadline(time.Now().Add(timeout))
+
 	p.conn.SetPongHandler(func(string) error {
-		p.conn.SetReadDeadline(time.Now().Add(pingInterval))
+		logrus.Debugf("pong %s", p.ID())
+		p.conn.SetReadDeadline(time.Now().Add(timeout))
 		return nil
 	})
-
-	p.wait.Add(1)
 
 	for {
 		message, err := p.getNextMessage()
@@ -105,7 +123,7 @@ func (p *WebsocketPeer) PumpRead() {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				logrus.Warn(errors.Wrap(err, "unexpected close"))
 			} else {
-				logrus.Warn(errors.Wrap(err, "problem getting message from client"))
+				logrus.Warn(errors.Wrapf(err, "problem getting message from client %s", p.ID()))
 			}
 
 			break
@@ -113,13 +131,17 @@ func (p *WebsocketPeer) PumpRead() {
 
 		logrus.Debugf("got message %v", message)
 
+		// Do not forward heartbeats to parent
+		if message.Type == MessageTypeHeartbeat {
+			continue
+		}
+
 		p.parent.Receive(message)
 	}
-
-	p.wait.Done()
 }
 
 func (p *WebsocketPeer) Close() {
+	p.conn.WriteMessage(websocket.CloseMessage, []byte{})
 	p.conn.Close()
 }
 
