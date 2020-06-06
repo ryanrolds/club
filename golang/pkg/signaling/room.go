@@ -3,7 +3,6 @@ package signaling
 import (
 	"errors"
 	"sync"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -16,119 +15,99 @@ var ErrInvalidMessageType = errors.New("invalid message type")
 var ErrNonNilGroupRequired = errors.New("non-nil group required")
 
 const (
-	RoomDefaultGroupID = GroupID("default")
+	RoomDefaultID = NodeID("default")
 )
 
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomMember
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . NodeGroup
 
-type RoomMember interface {
-	GetGroup() RoomGroup
-	SetGroup(RoomGroup)
+type ReceiverGroup interface {
+	ReceiverNode
 
-	GroupMember
-}
+	AddDependent(ReceiverNode)
+	GetDependent(NodeID) ReceiverNode
+	RemoveDependent(ReceiverNode)
 
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . RoomGroup
-
-type RoomGroup interface {
-	ID() GroupID
-	PruneStaleMembers()
-	AddMember(member GroupMember)
-	GetMember(peerID PeerID) GroupMember
-	RemoveMember(member GroupMember)
-
-	Broadcast(message Message) error
-	MessageMember(message Message) error
+	Broadcast(Message)
+	MessageDependent(Message)
 }
 
 type Room struct {
-	groups     map[GroupID]RoomGroup
+	Node
+	Dependents
+
+	groups     map[NodeID]ReceiverGroup
 	groupsLock *sync.RWMutex
 }
 
 func NewRoom() *Room {
 	return &Room{
-		groups: map[GroupID]RoomGroup{},
+		Node: NewNode("room", nil),
+
+		// We need to hold peers that have joined the room, but not a group
+		Dependents: NewDependents(0),
+
+		groups: map[NodeID]ReceiverGroup{},
 		// If we avoid creating groups, except for during startup, this mutex won't be needed
 		groupsLock: &sync.RWMutex{},
 	}
 }
 
-// Clients can disconnect without a leave event, iterate groups and tell them to
-// remove stale members
-func (r *Room) StartReaper(interval time.Duration) {
-	go func() {
-		for {
-			logrus.Debugf("running reaper")
-
-			r.groupsLock.RLock()
-
-			for _, group := range r.groups {
-				group.PruneStaleMembers()
-			}
-
-			r.groupsLock.RUnlock()
-
-			time.Sleep(interval)
-		}
-	}()
-}
-
-func (r *Room) Dispatch(member RoomMember, message Message) error {
+func (r *Room) Receive(message Message) {
 	logrus.Debugf("Message type: %s", message.Type)
+
+	member := r.GetDependent(message.SourceID)
+	if member == nil {
+		logrus.Warnf("member %s not found in room", member.ID())
+		return
+	}
 
 	switch message.Type {
 	case MessageTypeJoin:
-		group := member.GetGroup()
+		var group ReceiverGroup
+
+		recevier := member.GetParent()
 		if group != nil {
-			group.RemoveMember(member)
-			member.SetGroup(nil)
+			group = r.GetGroup(recevier.ID())
+			group.RemoveDependent(member)
+			member.SetParent(nil)
 		}
 
-		groupID := GetGroupIDFromMessage(message, RoomDefaultGroupID)
+		groupID := GetGroupIDFromMessage(message, RoomDefaultID)
 		group = r.GetGroup(groupID)
 		if group == nil {
-			return ErrGroupNotFound
+			return
 		}
 
-		member.SetGroup(group)
-		group.AddMember(member)
+		member.SetParent(group)
+		group.AddDependent(member)
 
-		err := group.Broadcast(message)
-		if err != nil {
-			logrus.Error(err)
-		}
+		group.Broadcast(message)
 	case MessageTypeLeave:
-		group := member.GetGroup()
-		if group == nil {
-			return ErrMemberLacksGroup
+		receiver := member.GetParent()
+		if receiver == nil {
+			return
 		}
 
-		group.RemoveMember(member)
+		group := r.GetGroup(receiver.ID())
+		group.RemoveDependent(member)
 
-		err := group.Broadcast(message)
-		if err != nil {
-			logrus.Error(err)
-		}
+		group.Receive(message)
 	case MessageTypeOffer, MessageTypeAnswer, MessageTypeICECandidate:
-		group := member.GetGroup()
+		group := member.GetParent()
 		if group == nil {
-			return ErrMemberLacksGroup
+			return
 		}
 
-		err := group.MessageMember(message)
-		if err != nil {
-			logrus.Error(err)
-		}
+		group.Receive(message)
 	default:
 		logrus.Warnf(`unknown message type %s`, message.Type)
-		return ErrInvalidMessageType
+		return
 	}
 
-	return nil
+	return
 }
 
-func (r *Room) AddGroup(group RoomGroup) error {
+func (r *Room) AddGroup(group ReceiverGroup) error {
 	if group == nil {
 		return ErrNonNilGroupRequired
 	}
@@ -146,11 +125,11 @@ func (r *Room) AddGroup(group RoomGroup) error {
 	return nil
 }
 
-func (r *Room) GetGroup(groupID GroupID) RoomGroup {
+func (r *Room) GetGroup(id NodeID) ReceiverGroup {
 	r.groupsLock.RLock()
 	defer r.groupsLock.RUnlock()
 
-	group, ok := r.groups[groupID]
+	group, ok := r.groups[id]
 	if !ok {
 		return nil
 	}

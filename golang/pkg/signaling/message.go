@@ -7,6 +7,10 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
+type MessageReceiver interface {
+	Receive(Message)
+}
+
 type MessageType string
 type MessagePayloadKey string
 type MessagePayload map[MessagePayloadKey]interface{}
@@ -30,12 +34,20 @@ var validate = validator.New()
 
 type Message struct {
 	Type          MessageType    `json:"type" validate:"required"`
-	SourceID      PeerID         `json:"peerId" validate:"required"`
-	DestinationID PeerID         `json:"destId"`
+	SourceID      NodeID         `json:"peerId" validate:"required"`
+	DestinationID NodeID         `json:"destId"`
 	Payload       MessagePayload `json:"payload" validate:"required"`
 }
 
-func NewMessageFromBytes(sourceID PeerID, data []byte) (Message, error) {
+func NewLeaveMessage(id NodeID) Message {
+	return Message{
+		Type:     MessageTypeLeave,
+		SourceID: id,
+		Payload:  MessagePayload{},
+	}
+}
+
+func NewMessageFromBytes(sourceID NodeID, data []byte) (Message, error) {
 	logrus.Debugf("Parsing message: %s", data)
 
 	var message Message
@@ -66,11 +78,11 @@ func (m *Message) ToJSON() ([]byte, error) {
 	return b, nil
 }
 
-func GetGroupIDFromMessage(message Message, defaultGroup GroupID) GroupID {
+func GetGroupIDFromMessage(message Message, defaultGroup NodeID) NodeID {
 	groupString, ok := message.Payload[MessagePayloadKeyGroup]
 	if !ok {
 		return defaultGroup
 	}
 
-	return GroupID(groupString.(string))
+	return NodeID(groupString.(string))
 }

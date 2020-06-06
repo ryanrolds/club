@@ -41,13 +41,14 @@ func main() {
 	logrus.Infof("Log level: %s", logrus.GetLevel())
 
 	var room = signaling.NewRoom()
-	room.StartReaper(reaperInterval)
-	err := room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, 12))
+
+	defaultRoom := signaling.NewGroupNode(signaling.RoomDefaultID, room, 12)
+	err := room.AddGroup(defaultRoom)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	err = room.AddGroup(signaling.NewGroup("test", 3))
+	err = room.AddGroup(signaling.NewGroupNode("test", room, 3))
 	if err != nil {
 		logrus.Fatal(err)
 	}
