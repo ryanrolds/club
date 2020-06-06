@@ -12,6 +12,7 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app/
 COPY --from=build /club/club .
+COPY --from=build /club/club.yaml .
 COPY --from=build /club/static static
 
 CMD ["./club"]

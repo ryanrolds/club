@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/gorilla/websocket v1.4.2
+	github.com/ilyakaznacheev/cleanenv v1.2.3
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lucsky/cuid v1.0.2
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3 // indirect
