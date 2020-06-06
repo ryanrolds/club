@@ -2,63 +2,51 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"os"
-	"path"
-	"runtime"
-	"strings"
-	"time"
 
 	"github.com/ryanrolds/club/pkg/signaling"
 
 	"github.com/sirupsen/logrus"
 )
 
-const reaperInterval = time.Second * 15
+const (
+	configFilename = "club.yaml"
+)
 
 func main() {
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "dev"
+	config, err := GetConfig(configFilename)
+	if err != nil {
+		log.Fatal("problem reading club.yaml")
 	}
 
-	if env == "prod" {
-		logrus.SetLevel(logrus.InfoLevel)
-	} else {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	// Setup logging
-	logrus.SetReportCaller(true)
-	logrus.SetFormatter(&logrus.JSONFormatter{
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			s := strings.Split(f.Function, ".")
-			funcName := s[len(s)-1]
-			return funcName, fmt.Sprintf("%s:%d", path.Base(f.File), f.Line)
-		},
-	})
-
-	logrus.Infof("Log level: %s", logrus.GetLevel())
+	initLogging(config)
 
 	var room = signaling.NewRoom()
-	room.StartReaper(reaperInterval)
-	err := room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, 12))
+	room.StartReaper(config.ReaperInterval)
+
+	err = room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, config.DefaultGroupLimit))
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	err = room.AddGroup(signaling.NewGroup("test", 3))
-	if err != nil {
-		logrus.Fatal(err)
+	for _, groupConfig := range config.Groups {
+		err = room.AddGroup(signaling.NewGroup(groupConfig.ID, groupConfig.Limit))
+		if err != nil {
+			logrus.Fatal(err)
+		}
 	}
 
 	http.Handle("/room", signaling.NewServer(room))
 
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", NoCache(fs))
+	// In production this service is just a websocket service
+	if config.Environment != EnvironmentProduction {
+		fs := http.FileServer(http.Dir("./static"))
+		http.Handle("/", NoCache(fs))
+	}
 
-	logrus.Info("Listening on :3001...")
-	err = http.ListenAndServe(":3001", nil)
+	logrus.Infof("Listening on :%d...", config.Port)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
