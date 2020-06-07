@@ -26,6 +26,10 @@ var _ = Describe("Dependents", func() {
 		fakeDependent.IDReturns(signaling.NodeID("123"))
 		fakeDependent.GetParentReturns(fakeParent)
 		dependents.AddDependent(fakeDependent)
+
+		anotherDependent = &signalingfakes.FakeReceiverNode{}
+		anotherDependent.IDReturns(signaling.NodeID("456"))
+		anotherDependent.GetParentReturns(fakeParent)
 	})
 
 	Context("NewGroup", func() {
@@ -41,21 +45,14 @@ var _ = Describe("Dependents", func() {
 		})
 
 		It("should get two dependents", func() {
-			anotherDependent = &signalingfakes.FakeReceiverNode{}
-			anotherDependent.IDReturns(signaling.NodeID("124"))
 			dependents.AddDependent(anotherDependent)
 
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 			Expect(dependents.GetDependent(anotherDependent.ID())).To(Equal(anotherDependent))
 		})
 
-		It("should get two dependents with unique IDs", func() {
-			anotherDependent = &signalingfakes.FakeReceiverNode{}
-			anotherDependent.IDReturns(signaling.NodeID("124"))
-			anotherDependent.GetParentReturns(fakeParent)
-			dependents.AddDependent(anotherDependent)
-
-			Expect(fakeDependent.ID()).ToNot(Equal(anotherDependent.ID()))
+		It("should return nil of dependent does not exist", func() {
+			Expect(dependents.GetDependent(signaling.NodeID("doesnotexist"))).To(BeNil())
 		})
 	})
 
@@ -66,8 +63,6 @@ var _ = Describe("Dependents", func() {
 		})
 
 		It("should get depdenent count equal to two", func() {
-			anotherDependent = &signalingfakes.FakeReceiverNode{}
-			anotherDependent.IDReturns(signaling.NodeID("124"))
 			dependents.AddDependent(anotherDependent)
 
 			Expect(dependents.GetDependentsCount()).To(Equal(2))
@@ -92,6 +87,15 @@ var _ = Describe("Dependents", func() {
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 			Expect(dependents.GetDependentsCount()).To(Equal(1))
 		})
+
+		It("should inform other dependents of addition", func() {
+			dependents.AddDependent(anotherDependent)
+
+			Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+			message := fakeDependent.ReceiveArgsForCall(0)
+			Expect(message.Type).To(Equal(signaling.MessageTypeJoin))
+			Expect(message.SourceID).To(Equal(anotherDependent.ID()))
+		})
 	})
 
 	Context("RemoveDependent", func() {
@@ -104,10 +108,6 @@ var _ = Describe("Dependents", func() {
 		})
 
 		It("should remove only one depdenent", func() {
-			anotherDependent = &signalingfakes.FakeReceiverNode{}
-			anotherDependent.IDReturns(signaling.NodeID("124"))
-
-			dependents.AddDependent(fakeDependent)
 			dependents.AddDependent(anotherDependent)
 
 			Expect(dependents.GetDependentsCount()).To(Equal(2))
@@ -137,17 +137,63 @@ var _ = Describe("Dependents", func() {
 			Expect(dependents.GetDependent(anotherDependent.ID())).To(BeNil())
 			Expect(dependents.GetDependent(anotherDependent.ID())).To(BeNil())
 		})
+
+		It("should inform other dependents of removal", func() {
+			dependents.AddDependent(anotherDependent)
+
+			dependents.RemoveDependent(fakeDependent)
+
+			Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
+			message := anotherDependent.ReceiveArgsForCall(0)
+			Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
+			Expect(message.SourceID).To(Equal(fakeDependent.ID()))
+		})
 	})
 
-	Context("MessageDepenednt", func() {
-		It("should message depdenent", func() {
+	Context("MessageDependant", func() {
+		It("should message dependant", func() {
+			Expect(fakeDependent.ReceiveCallCount()).To(Equal(0))
 
+			dependents.AddDependent(anotherDependent)
+
+			dependents.MessageDependent(signaling.Message{
+				Type:          signaling.MessageTypeJoin,
+				SourceID:      signaling.NodeID("123"),
+				DestinationID: signaling.NodeID("456"),
+			})
+
+			// Adding a dependent will call Receive on existing dependents
+			Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+			Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
+		})
+
+		It("should handle trying to message a dependant that does not exist", func() {
+			dependents.AddDependent(anotherDependent)
+
+			dependents.MessageDependent(signaling.Message{
+				Type:          signaling.MessageTypeJoin,
+				SourceID:      signaling.NodeID("123"),
+				DestinationID: signaling.NodeID("doesnotexist"),
+			})
+
+			// Adding a dependent will call Receive on existing dependents
+			Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+			Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
 		})
 	})
 
 	Context("Broadcast", func() {
-		It("should message all mambers except source", func() {
+		It("should message all dependenta except source", func() {
+			dependents.AddDependent(anotherDependent)
 
+			dependents.Broadcast(signaling.Message{
+				Type:     signaling.MessageTypeJoin,
+				SourceID: signaling.NodeID("abc"),
+			})
+
+			// Adding a dependent will call Receive on existing dependents
+			Expect(fakeDependent.ReceiveCallCount()).To(Equal(2))
+			Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
 		})
 	})
 })

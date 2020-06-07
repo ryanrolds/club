@@ -77,6 +77,9 @@ func (c *Dependents) RemoveDependent(dependent ReceiverNode) {
 
 func (c *Dependents) MessageDependent(message Message) {
 	dependent := c.GetDependent(message.DestinationID)
+
+	logrus.Error(message)
+
 	if dependent == nil {
 		logrus.Warnf("cannot find dependent %s", message.DestinationID)
 		return

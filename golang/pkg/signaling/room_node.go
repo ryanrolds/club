@@ -53,7 +53,7 @@ func (r *Room) Receive(message Message) {
 
 	dependent := r.GetDependent(message.SourceID)
 	if dependent == nil {
-		logrus.Warnf("dependent %s not found in room", dependent.ID())
+		logrus.Warnf("dependent %s not found in room", message.SourceID)
 		return
 	}
 
@@ -80,16 +80,6 @@ func (r *Room) Receive(message Message) {
 		r.RemoveDependent(dependent)
 
 		logrus.Debugf("added dependent %s to group %s", dependent.ID(), group.ID())
-	case MessageTypeLeave:
-		receiver := dependent.GetParent()
-		if receiver == nil {
-			return
-		}
-
-		group := r.GetGroup(receiver.ID())
-		group.RemoveDependent(dependent)
-
-		logrus.Debugf("removed dependent %s from group %s", dependent.ID(), group.ID())
 	default:
 		logrus.Warnf(`unknown message type %s`, message.Type)
 		return
