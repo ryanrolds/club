@@ -64,69 +64,41 @@ var _ = Describe("GroupNode", func() {
 		})
 
 		Context("RTC related messages", func() {
+			testRTCMessage := func(messsageType signaling.MessageType) {
+				group.AddDependent(anotherDependent)
+
+				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+				Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
+
+				group.Receive(signaling.Message{
+					Type:          messsageType,
+					SourceID:      fakeDependent.ID(),
+					DestinationID: anotherDependent.ID(),
+				})
+
+				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+				Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
+
+				message := anotherDependent.ReceiveArgsForCall(0)
+				Expect(message.Type).To(Equal(messsageType))
+				Expect(message.SourceID).To(Equal(fakeDependent.ID()))
+			}
+
 			Context("MessageTypeOffer", func() {
 				It("should send message to intended destination", func() {
-					group.AddDependent(anotherDependent)
-
-					Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-					Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
-
-					group.Receive(signaling.Message{
-						Type:          signaling.MessageTypeOffer,
-						SourceID:      fakeDependent.ID(),
-						DestinationID: anotherDependent.ID(),
-					})
-
-					Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-					Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
-
-					message := anotherDependent.ReceiveArgsForCall(0)
-					Expect(message.Type).To(Equal(signaling.MessageTypeOffer))
-					Expect(message.SourceID).To(Equal(fakeDependent.ID()))
+					testRTCMessage(signaling.MessageTypeICECandidate)
 				})
 			})
 
 			Context("MessageTypeAnswer", func() {
 				It("should send message to intended destination", func() {
-					group.AddDependent(anotherDependent)
-
-					Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-					Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
-
-					group.Receive(signaling.Message{
-						Type:          signaling.MessageTypeAnswer,
-						SourceID:      fakeDependent.ID(),
-						DestinationID: anotherDependent.ID(),
-					})
-
-					Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-					Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
-
-					message := anotherDependent.ReceiveArgsForCall(0)
-					Expect(message.Type).To(Equal(signaling.MessageTypeAnswer))
-					Expect(message.SourceID).To(Equal(fakeDependent.ID()))
+					testRTCMessage(signaling.MessageTypeAnswer)
 				})
 			})
 
 			Context("MessageTypeICECandidate", func() {
 				It("should send message to intended destination", func() {
-					group.AddDependent(anotherDependent)
-
-					Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-					Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
-
-					group.Receive(signaling.Message{
-						Type:          signaling.MessageTypeICECandidate,
-						SourceID:      fakeDependent.ID(),
-						DestinationID: anotherDependent.ID(),
-					})
-
-					Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-					Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
-
-					message := anotherDependent.ReceiveArgsForCall(0)
-					Expect(message.Type).To(Equal(signaling.MessageTypeICECandidate))
-					Expect(message.SourceID).To(Equal(fakeDependent.ID()))
+					testRTCMessage(signaling.MessageTypeICECandidate)
 				})
 			})
 		})
