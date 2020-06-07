@@ -8,140 +8,139 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Group", func() {
+var _ = Describe("Dependents", func() {
 	var (
-		group         *signaling.Group
-		fakeMember    *signalingfakes.FakeRoomMember
-		anotherMember *signalingfakes.FakeRoomMember
+		dependents       signaling.Dependents
+		fakeParent       *signalingfakes.FakeReceiverNode
+		fakeDependent    *signalingfakes.FakeReceiverNode
+		anotherDependent *signalingfakes.FakeReceiverNode
 	)
 
 	BeforeEach(func() {
-		group = signaling.NewGroup("foo", 12)
+		dependents = signaling.NewDependents(12)
 
-		fakeMember = &signalingfakes.FakeRoomMember{}
-		fakeMember.IDReturns(signaling.PeerID("123"))
-		fakeMember.GetGroupReturns(group)
-		group.AddMember(fakeMember)
+		fakeParent = &signalingfakes.FakeReceiverNode{}
+		fakeParent.IDReturns(signaling.NodeID("parent"))
+
+		fakeDependent = &signalingfakes.FakeReceiverNode{}
+		fakeDependent.IDReturns(signaling.NodeID("123"))
+		fakeDependent.GetParentReturns(fakeParent)
+		dependents.AddDependent(fakeDependent)
 	})
 
 	Context("NewGroup", func() {
-		It("should create new group", func() {
-			group = signaling.NewGroup("id", 42)
-			Expect(group).ToNot(BeNil())
+		It("should create new set of dependents", func() {
+			dependents = signaling.NewDependents(42)
+			Expect(dependents).ToNot(BeNil())
 		})
 	})
 
-	Context("ID", func() {
-		It("should return ID", func() {
-			Expect(group.ID()).To(Equal(signaling.GroupID("foo")))
+	Context("GetDependent", func() {
+		It("should get one dependent", func() {
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
+		})
+
+		It("should get two dependents", func() {
+			anotherDependent = &signalingfakes.FakeReceiverNode{}
+			anotherDependent.IDReturns(signaling.NodeID("124"))
+			dependents.AddDependent(anotherDependent)
+
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
+			Expect(dependents.GetDependent(anotherDependent.ID())).To(Equal(anotherDependent))
+		})
+
+		It("should get two dependents with unique IDs", func() {
+			anotherDependent = &signalingfakes.FakeReceiverNode{}
+			anotherDependent.IDReturns(signaling.NodeID("124"))
+			anotherDependent.GetParentReturns(fakeParent)
+			dependents.AddDependent(anotherDependent)
+
+			Expect(fakeDependent.ID()).ToNot(Equal(anotherDependent.ID()))
 		})
 	})
 
-	Context("GetMember", func() {
-		It("should get one member", func() {
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+	Context("GetDependentsCount", func() {
+		It("should get depdenent count equal to one", func() {
+			Expect(dependents.GetDependentsCount()).To(Equal(1))
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 		})
 
-		It("should get two members", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-			group.AddMember(anotherMember)
+		It("should get depdenent count equal to two", func() {
+			anotherDependent = &signalingfakes.FakeReceiverNode{}
+			anotherDependent.IDReturns(signaling.NodeID("124"))
+			dependents.AddDependent(anotherDependent)
 
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(group.GetMember(anotherMember.ID())).To(Equal(anotherMember))
+			Expect(dependents.GetDependentsCount()).To(Equal(2))
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 		})
 
-		It("should get two members with unique IDs", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-			group.AddMember(anotherMember)
-
-			Expect(fakeMember.ID()).ToNot(Equal(anotherMember.ID()))
+		It("should get depdenent count equal to zero", func() {
+			dependents.RemoveDependent(fakeDependent)
+			Expect(dependents.GetDependentsCount()).To(Equal(0))
 		})
 	})
 
-	Context("GetMemberCount", func() {
-		It("should get member count equal to one", func() {
-			Expect(group.GetMemberCount()).To(Equal(1))
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+	Context("AddDependent", func() {
+		It("should add depdenent", func() {
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
+			Expect(dependents.GetDependentsCount()).To(Equal(1))
 		})
 
-		It("should get member count equal to two", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-			group.AddMember(anotherMember)
+		It("should not add existing depdenent", func() {
+			dependents.AddDependent(fakeDependent)
 
-			Expect(group.GetMemberCount()).To(Equal(2))
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-		})
-
-		It("should get member count equal to zero", func() {
-			group.RemoveMember(fakeMember)
-			Expect(group.GetMemberCount()).To(Equal(0))
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
+			Expect(dependents.GetDependentsCount()).To(Equal(1))
 		})
 	})
 
-	Context("AddMember", func() {
-		It("should add member", func() {
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(group.GetMemberCount()).To(Equal(1))
+	Context("RemoveDependent", func() {
+		It("should remove depdenent", func() {
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
+
+			dependents.RemoveDependent(fakeDependent)
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(BeNil())
+			Expect(dependents.GetDependentsCount()).To(Equal(0))
 		})
 
-		It("should not add existing member", func() {
-			group.AddMember(fakeMember)
+		It("should remove only one depdenent", func() {
+			anotherDependent = &signalingfakes.FakeReceiverNode{}
+			anotherDependent.IDReturns(signaling.NodeID("124"))
 
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
-			Expect(group.GetMemberCount()).To(Equal(1))
-		})
-	})
+			dependents.AddDependent(fakeDependent)
+			dependents.AddDependent(anotherDependent)
 
-	Context("RemoveMember", func() {
-		It("should remove member", func() {
-			Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+			Expect(dependents.GetDependentsCount()).To(Equal(2))
 
-			group.RemoveMember(fakeMember)
-			Expect(group.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(group.GetMemberCount()).To(Equal(0))
+			dependents.RemoveDependent(fakeDependent)
+			Expect(dependents.GetDependentsCount()).To(Equal(1))
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(BeNil())
+			Expect(dependents.GetDependent(anotherDependent.ID())).ToNot(BeNil())
 		})
 
-		It("should remove only one member", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
+		It("should remove only two dependents", func() {
+			anotherDependent = &signalingfakes.FakeReceiverNode{}
+			anotherDependent.IDReturns(signaling.NodeID("124"))
 
-			group.AddMember(fakeMember)
-			group.AddMember(anotherMember)
+			dependents.AddDependent(anotherDependent)
 
-			Expect(group.GetMemberCount()).To(Equal(2))
+			Expect(dependents.GetDependentsCount()).To(Equal(2))
 
-			group.RemoveMember(fakeMember)
-			Expect(group.GetMemberCount()).To(Equal(1))
-			Expect(group.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(group.GetMember(anotherMember.ID())).ToNot(BeNil())
-		})
+			dependents.RemoveDependent(fakeDependent)
+			Expect(dependents.GetDependentsCount()).To(Equal(1))
+			Expect(dependents.GetDependent(fakeDependent.ID())).To(BeNil())
+			Expect(dependents.GetDependent(anotherDependent.ID())).ToNot(BeNil())
+			Expect(dependents.GetDependent(anotherDependent.ID())).To(Equal(anotherDependent))
 
-		It("should remove only two members", func() {
-			anotherMember = &signalingfakes.FakeRoomMember{}
-			anotherMember.IDReturns(signaling.PeerID("124"))
-
-			group.AddMember(anotherMember)
-
-			Expect(group.GetMemberCount()).To(Equal(2))
-
-			group.RemoveMember(fakeMember)
-			Expect(group.GetMemberCount()).To(Equal(1))
-			Expect(group.GetMember(fakeMember.ID())).To(BeNil())
-			Expect(group.GetMember(anotherMember.ID())).ToNot(BeNil())
-			Expect(group.GetMember(anotherMember.ID())).To(Equal(anotherMember))
-
-			group.RemoveMember(anotherMember)
-			Expect(group.GetMemberCount()).To(Equal(0))
-			Expect(group.GetMember(anotherMember.ID())).To(BeNil())
-			Expect(group.GetMember(anotherMember.ID())).To(BeNil())
+			dependents.RemoveDependent(anotherDependent)
+			Expect(dependents.GetDependentsCount()).To(Equal(0))
+			Expect(dependents.GetDependent(anotherDependent.ID())).To(BeNil())
+			Expect(dependents.GetDependent(anotherDependent.ID())).To(BeNil())
 		})
 	})
 
-	Context("MessageMember", func() {
-		It("should message member", func() {
+	Context("MessageDepenednt", func() {
+		It("should message depdenent", func() {
 
 		})
 	})

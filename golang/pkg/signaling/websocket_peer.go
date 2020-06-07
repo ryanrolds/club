@@ -10,7 +10,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . websocket.Conn
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . WebsocketConn
+
+type WebsocketConn interface {
+	SetWriteDeadline(t time.Time) error
+	SetReadDeadline(t time.Time) error
+	SetPongHandler(h func(appData string) error)
+	ReadMessage() (int, []byte, error)
+	WriteMessage(messageType int, data []byte) error
+	WriteJSON(interface{}) error
+	Close() error
+}
 
 type PeerID string
 
@@ -21,33 +31,23 @@ const (
 
 type WebsocketPeer struct {
 	Node
-
 	messages chan Message
-
-	conn     *websocket.Conn
-	connLock sync.Mutex
-
-	wait sync.WaitGroup
+	conn     WebsocketConn
+	wait     sync.WaitGroup
 }
 
-func NewWebsocketPeer(conn *websocket.Conn, parent ReceiverNode) *WebsocketPeer {
+func NewWebsocketPeer(conn WebsocketConn, parent ReceiverNode) *WebsocketPeer {
 	return &WebsocketPeer{
-		Node: NewNode(NodeID(cuid.New()), parent),
-
+		Node:     NewNode(NodeID(cuid.New()), parent),
 		messages: make(chan Message),
-
 		conn:     conn,
-		connLock: sync.Mutex{},
-
-		wait: sync.WaitGroup{},
+		wait:     sync.WaitGroup{},
 	}
 }
 
 func (p *WebsocketPeer) Receive(message Message) {
 	logrus.Debugf("queueing message for %s", p.ID())
-
 	p.messages <- message
-
 	logrus.Debugf("finshed queuing message for %s", p.ID())
 }
 
@@ -63,22 +63,33 @@ func (p *WebsocketPeer) PumpWrite() {
 		logrus.Debugf("exiting %s write pump", p.ID())
 	}()
 
-	p.conn.SetWriteDeadline(time.Now().Add(timeout))
+	err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
+	if err != nil {
+		return
+	}
 
 	for {
 		select {
 		case message, ok := <-p.messages:
-			p.conn.SetWriteDeadline(time.Now().Add(timeout))
+			err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
+			if err != nil {
+				logrus.Error(err)
+				return
+			}
 
 			if !ok {
 				logrus.Warn("channel closed")
-				p.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				err = p.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					logrus.Warn(err)
+				}
+
 				return
 			}
 
 			logrus.Debugf("got message: %s", message)
 
-			err := p.conn.WriteJSON(message)
+			err = p.conn.WriteJSON(message)
 			if err != nil {
 				logrus.Error(err)
 				return
@@ -86,7 +97,10 @@ func (p *WebsocketPeer) PumpWrite() {
 		case <-ticker.C:
 			logrus.Debugf("ping %s", p.ID())
 
-			p.conn.SetWriteDeadline(time.Now().Add(timeout))
+			err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
+			if err != nil {
+				return
+			}
 
 			if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				logrus.Debug(err)
@@ -109,11 +123,18 @@ func (p *WebsocketPeer) PumpRead() {
 		logrus.Debugf("exiting %s read pump", p.ID())
 	}()
 
-	p.conn.SetReadDeadline(time.Now().Add(timeout))
+	err := p.conn.SetReadDeadline(time.Now().Add(timeout))
+	if err != nil {
+		return
+	}
 
 	p.conn.SetPongHandler(func(string) error {
 		logrus.Debugf("pong %s", p.ID())
-		p.conn.SetReadDeadline(time.Now().Add(timeout))
+		err := p.conn.SetReadDeadline(time.Now().Add(timeout))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -141,7 +162,11 @@ func (p *WebsocketPeer) PumpRead() {
 }
 
 func (p *WebsocketPeer) Close() {
-	p.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	err := p.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	p.conn.Close()
 }
 

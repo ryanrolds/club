@@ -15,7 +15,7 @@ var ErrInvalidMessageType = errors.New("invalid message type")
 var ErrNonNilGroupRequired = errors.New("non-nil group required")
 
 const (
-	RoomDefaultID = NodeID("default")
+	DefaultGroupID = NodeID("default")
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . ReceiverGroup
@@ -69,7 +69,7 @@ func (r *Room) Receive(message Message) {
 			dependent.SetParent(nil)
 		}
 
-		groupID := GetGroupIDFromMessage(message, RoomDefaultID)
+		groupID := GetGroupIDFromMessage(message, DefaultGroupID)
 		group = r.GetGroup(groupID)
 		if group == nil {
 			return
@@ -94,8 +94,6 @@ func (r *Room) Receive(message Message) {
 		logrus.Warnf(`unknown message type %s`, message.Type)
 		return
 	}
-
-	return
 }
 
 func (r *Room) AddGroup(group ReceiverGroup) error {

@@ -24,7 +24,7 @@ func main() {
 
 	var room = signaling.NewRoom()
 
-	defaultRoom := signaling.NewGroupNode(signaling.RoomDefaultID, room, config.DefaultGroupLimit)
+	defaultRoom := signaling.NewGroupNode(signaling.DefaultGroupID, room, config.DefaultGroupLimit)
 	err = room.AddGroup(&defaultRoom)
 	if err != nil {
 		logrus.Fatal(err)
