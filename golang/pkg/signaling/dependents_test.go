@@ -183,7 +183,7 @@ var _ = Describe("Dependents", func() {
 	})
 
 	Context("Broadcast", func() {
-		It("should message all dependenta except source", func() {
+		It("should message all dependents except source", func() {
 			dependents.AddDependent(anotherDependent)
 
 			dependents.Broadcast(signaling.Message{
