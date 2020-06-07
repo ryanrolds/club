@@ -56,122 +56,127 @@ func (p *WebsocketPeer) PumpWrite() {
 
 	p.wait.Add(1)
 
-	defer func() {
-		ticker.Stop()
-		p.conn.Close()
-		p.wait.Done()
-		logrus.Debugf("exiting %s write pump", p.ID())
-	}()
+	go func() {
+		defer func() {
+			ticker.Stop()
+			p.closeConnection()
+			p.wait.Done()
+			logrus.Debugf("exiting %s write pump", p.ID())
+		}()
 
-	err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
-	if err != nil {
-		return
-	}
+		err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
+		if err != nil {
+			return
+		}
 
-	for {
-		select {
-		case message, ok := <-p.messages:
-			err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
-			if err != nil {
-				logrus.Error(err)
-				return
-			}
-
-			if !ok {
-				logrus.Warn("channel closed")
-				err = p.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				if err != nil {
-					logrus.Warn(err)
+		for {
+			select {
+			case message, ok := <-p.messages:
+				if !ok {
+					logrus.Warn("channel closed")
+					return
 				}
 
-				return
-			}
+				logrus.Debugf("got message: %s", message)
 
-			logrus.Debugf("got message: %s", message)
+				err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
+				if err != nil {
+					logrus.Error(err)
+					return
+				}
 
-			err = p.conn.WriteJSON(message)
-			if err != nil {
-				logrus.Error(err)
-				return
-			}
-		case <-ticker.C:
-			logrus.Debugf("ping %s", p.ID())
+				if message.Type == MessageTypeKick || message.Type == MessageTypeShutdown {
+					close(p.messages)
+				}
 
-			err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
-			if err != nil {
-				return
-			}
+				err = p.conn.WriteJSON(message)
+				if err != nil {
+					logrus.Error(err)
+					return
+				}
+			case <-ticker.C:
+				logrus.Debugf("ping %s", p.ID())
 
-			if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				logrus.Debug(err)
-				return
+				err := p.conn.SetWriteDeadline(time.Now().Add(timeout))
+				if err != nil {
+					return
+				}
+
+				if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					logrus.Debug(err)
+					return
+				}
 			}
 		}
-	}
+	}()
 }
 
 func (p *WebsocketPeer) PumpRead() {
 	p.wait.Add(1)
 
-	defer func() {
-		if p.parent != nil {
-			p.parent.Receive(NewLeaveMessage(p.ID()))
-		}
+	go func() {
+		defer func() {
+			p.closeConnection()
+			p.wait.Done()
+			logrus.Debugf("exiting %s read pump", p.ID())
+		}()
 
-		p.conn.Close()
-		p.wait.Done()
-		logrus.Debugf("exiting %s read pump", p.ID())
-	}()
-
-	err := p.conn.SetReadDeadline(time.Now().Add(timeout))
-	if err != nil {
-		return
-	}
-
-	p.conn.SetPongHandler(func(string) error {
-		logrus.Debugf("pong %s", p.ID())
 		err := p.conn.SetReadDeadline(time.Now().Add(timeout))
 		if err != nil {
-			return err
+			return
 		}
 
-		return nil
-	})
-
-	for {
-		message, err := p.getNextMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				logrus.Warn(errors.Wrap(err, "unexpected close"))
-			} else {
-				logrus.Warn(errors.Wrapf(err, "problem getting message from client %s", p.ID()))
+		p.conn.SetPongHandler(func(string) error {
+			logrus.Debugf("pong %s", p.ID())
+			err := p.conn.SetReadDeadline(time.Now().Add(timeout))
+			if err != nil {
+				return err
 			}
 
-			break
+			return nil
+		})
+
+		for {
+			message, err := p.getNextMessage()
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
+					logrus.Warn(errors.Wrap(err, "unexpected close"))
+				} else {
+					logrus.Warn(errors.Wrapf(err, "problem getting message from client %s", p.ID()))
+				}
+
+				break
+			}
+
+			logrus.Debugf("got message %v", message)
+
+			// Do not forward heartbeats to parent
+			if message.Type == MessageTypeHeartbeat {
+				continue
+			}
+
+			if p.parent != nil {
+				p.parent.Receive(message)
+			}
 		}
-
-		logrus.Debugf("got message %v", message)
-
-		// Do not forward heartbeats to parent
-		if message.Type == MessageTypeHeartbeat {
-			continue
-		}
-
-		p.parent.Receive(message)
-	}
+	}()
 }
 
-func (p *WebsocketPeer) Close() {
+func (p *WebsocketPeer) WaitForDisconnect() {
+	p.wait.Wait()
+}
+
+func (p *WebsocketPeer) closeConnection() {
+	if p.parent != nil {
+		p.parent.Receive(NewLeaveMessage(p.ID()))
+	}
+
 	err := p.conn.WriteMessage(websocket.CloseMessage, []byte{})
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	p.conn.Close()
-}
-
-func (p *WebsocketPeer) WaitForDisconnect() {
-	p.wait.Wait()
 }
 
 func (p *WebsocketPeer) getNextMessage() (Message, error) {

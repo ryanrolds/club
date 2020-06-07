@@ -41,8 +41,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	peer := NewWebsocketPeer(conn, s.room)
 	s.room.AddDependent(peer)
 
-	go peer.PumpWrite()
-	go peer.PumpRead()
+	peer.PumpWrite()
+	peer.PumpRead()
 
 	logrus.Debugf("connection established by %s", peer.ID())
 

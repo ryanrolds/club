@@ -19,6 +19,8 @@ const (
 	MessageTypeAnswer       = MessageType("answer")
 	MessageTypeICECandidate = MessageType("icecandidate")
 	MessageTypeError        = MessageType("error")
+	MessageTypeKick         = MessageType("kick")
+	MessageTypeShutdown     = MessageType("shutdown")
 
 	MessagePayloadKeyGroup   = MessagePayloadKey("group")
 	MessagePayloadKeyReason  = MessagePayloadKey("reason")
