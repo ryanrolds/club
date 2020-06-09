@@ -32,6 +32,7 @@ module.exports = {
     'object-shorthand': 'off',
     'class-methods-use-this': 'off',
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "react/prop-types": [2, { ignore: ['children'] }]
   },
 }

@@ -7,11 +7,10 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import { ThemeProvider } from '@material-ui/core/styles'
 
 import store from './store'
-import WebSocketProvider from './websocket';
+import WebSocketProvider from './websocket'
 
 import App from './views/app'
 import theme from './theme'
-
 
 ReactDOM.render(
   <Provider store={store}>
