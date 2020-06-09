@@ -1,5 +1,5 @@
 import websocketReducer from './websocket'
-import { socketConnected, socketDisonnected } from '../actions/websocket'
+import { socketConnected, socketDisconnected } from '../actions/websocket'
 
 it('should return true when connected', () => {
   let state = websocketReducer({}, socketConnected())
@@ -7,6 +7,6 @@ it('should return true when connected', () => {
 })
 
 it('should return false when disconnected', () => {
-  let state = websocketReducer({}, socketDisonnected())
+  let state = websocketReducer({}, socketDisconnected())
   expect(state).toEqual(false)
 })
