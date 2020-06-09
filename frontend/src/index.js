@@ -13,11 +13,13 @@ import theme from './theme'
 
 ReactDOM.render(
   <Provider store={store}>
-    <ThemeProvider theme={theme}>
-      {/* CssBaseline kickstarts an elegent baseline to build on */}
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <WebsocketProvider>
+      <ThemeProvider theme={theme}>
+        {/* CssBaseline kickstarts an elegent baseline to build on */}
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </WebsocketProvider>
   </Provider>,
   document.getElementById('root')
 )
