@@ -56,6 +56,13 @@ var _ = Describe("Dependents", func() {
 		})
 	})
 
+	Context("GetLimit", func() {
+		It("should return the limit of the set", func() {
+			dependents = signaling.NewDependents(42)
+			Expect(dependents.GetLimit()).To(Equal(42))
+		})
+	})
+
 	Context("GetDependentsCount", func() {
 		It("should get dependent count equal to one", func() {
 			Expect(dependents.GetDependentsCount()).To(Equal(1))
