@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -14,7 +12,6 @@ var _ = Describe("Config", func() {
 		Expect(config).ToNot(BeNil())
 		Expect(config.Environment).To(Equal(EnvironmentTests))
 		Expect(config.DefaultGroupLimit).To(Equal(42))
-		Expect(config.ReaperInterval).To(Equal(time.Second * 60))
 		Expect(config.Port).To(Equal(3002))
 	})
 })
