@@ -14,7 +14,7 @@ var _ = Describe("Message", func() {
 
 	var room = signaling.NewRoom()
 	var group = signaling.NewGroupNode("foo", room, 12)
-	room.AddGroup(&group)
+	_ = room.AddGroup(&group)
 
 	var fakeDependent = &signalingfakes.FakeReceiverNode{}
 	fakeDependent.IDReturns(nodeID)
