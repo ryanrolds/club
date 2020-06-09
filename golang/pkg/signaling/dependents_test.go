@@ -57,31 +57,31 @@ var _ = Describe("Dependents", func() {
 	})
 
 	Context("GetDependentsCount", func() {
-		It("should get depdenent count equal to one", func() {
+		It("should get dependent count equal to one", func() {
 			Expect(dependents.GetDependentsCount()).To(Equal(1))
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 		})
 
-		It("should get depdenent count equal to two", func() {
+		It("should get dependent count equal to two", func() {
 			dependents.AddDependent(anotherDependent)
 
 			Expect(dependents.GetDependentsCount()).To(Equal(2))
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 		})
 
-		It("should get depdenent count equal to zero", func() {
+		It("should get dependent count equal to zero", func() {
 			dependents.RemoveDependent(fakeDependent)
 			Expect(dependents.GetDependentsCount()).To(Equal(0))
 		})
 	})
 
 	Context("AddDependent", func() {
-		It("should add depdenent", func() {
+		It("should add dependent", func() {
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 			Expect(dependents.GetDependentsCount()).To(Equal(1))
 		})
 
-		It("should not add existing depdenent", func() {
+		It("should not add existing dependent", func() {
 			dependents.AddDependent(fakeDependent)
 
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
@@ -99,7 +99,7 @@ var _ = Describe("Dependents", func() {
 	})
 
 	Context("RemoveDependent", func() {
-		It("should remove depdenent", func() {
+		It("should remove dependent", func() {
 			Expect(dependents.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
 
 			dependents.RemoveDependent(fakeDependent)
@@ -107,7 +107,7 @@ var _ = Describe("Dependents", func() {
 			Expect(dependents.GetDependentsCount()).To(Equal(0))
 		})
 
-		It("should remove only one depdenent", func() {
+		It("should remove only one dependent", func() {
 			dependents.AddDependent(anotherDependent)
 
 			Expect(dependents.GetDependentsCount()).To(Equal(2))

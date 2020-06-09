@@ -13,6 +13,8 @@ type MessagePayload map[MessagePayloadKey]interface{}
 
 const (
 	MessageTypeHeartbeat    = MessageType("heartbeat")
+	MessageTypeJoinedRoom   = MessageType("room_joined")
+	MessageTypeLeftRoom     = MessageType("room_left")
 	MessageTypeJoin         = MessageType("join")
 	MessageTypeLeave        = MessageType("leave")
 	MessageTypeOffer        = MessageType("offer")
@@ -22,10 +24,12 @@ const (
 	MessageTypeKick         = MessageType("kick")
 	MessageTypeShutdown     = MessageType("shutdown")
 
-	MessagePayloadKeyGroup   = MessagePayloadKey("group")
-	MessagePayloadKeyReason  = MessagePayloadKey("reason")
-	MessagePayloadKeyError   = MessagePayloadKey("error")
-	MessagePayloadKeyMessage = MessagePayloadKey("message")
+	MessagePayloadKeyGroup        = MessagePayloadKey("group")
+	MessagePayloadKeyReason       = MessagePayloadKey("reason")
+	MessagePayloadKeyError        = MessagePayloadKey("error")
+	MessagePayloadKeyMessage      = MessagePayloadKey("message")
+	MessagePayloadKeyGroupDetails = MessagePayloadKey("group_details")
+	MessagePayloadKeyNodeID       = MessagePayloadKey("id")
 )
 
 var validate = validator.New()
@@ -35,6 +39,27 @@ type Message struct {
 	SourceID      NodeID         `json:"peerId" validate:"required"`
 	DestinationID NodeID         `json:"destId"`
 	Payload       MessagePayload `json:"payload" validate:"required"`
+}
+
+func NewJoinedRoomMessage(id NodeID, room *Room) Message {
+	return Message{
+		Type:          MessageTypeJoinedRoom,
+		SourceID:      room.ID(),
+		DestinationID: id,
+		Payload: MessagePayload{
+			MessagePayloadKeyNodeID:       room.ID(),
+			MessagePayloadKeyGroupDetails: room.GetDetailsForGroups(),
+		},
+	}
+}
+
+func NewLeftRoomMessage(id NodeID, room *Room) Message {
+	return Message{
+		Type:          MessageTypeLeftRoom,
+		SourceID:      room.ID(),
+		DestinationID: id,
+		Payload:       MessagePayload{},
+	}
 }
 
 func NewJoinMessage(id NodeID) Message {

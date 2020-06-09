@@ -22,6 +22,7 @@ const (
 
 type ReceiverGroup interface {
 	ReceiverNode
+	GetDetails() GroupDetails
 
 	AddDependent(ReceiverNode)
 	GetDependent(NodeID) ReceiverNode
@@ -114,4 +115,26 @@ func (r *Room) GetGroup(id NodeID) ReceiverGroup {
 	}
 
 	return group
+}
+
+func (r *Room) GetDetailsForGroups() []GroupDetails {
+	r.groupsLock.RLock()
+	defer r.groupsLock.RUnlock()
+
+	var groups = make([]GroupDetails, 0)
+	for _, group := range r.groups {
+		groups = append(groups, group.GetDetails())
+	}
+
+	return groups
+}
+
+func (r *Room) AddDependent(dependent ReceiverNode) {
+	r.GroupNode.Dependents.AddDependent(dependent)
+	r.MessageDependent(NewJoinedRoomMessage(dependent.ID(), r))
+}
+
+func (r *Room) RemoveDependent(dependent ReceiverNode) {
+	r.GroupNode.Dependents.RemoveDependent(dependent)
+	r.MessageDependent(NewLeftRoomMessage(dependent.ID(), r))
 }

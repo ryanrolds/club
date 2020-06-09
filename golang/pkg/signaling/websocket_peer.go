@@ -39,7 +39,7 @@ type WebsocketPeer struct {
 func NewWebsocketPeer(conn WebsocketConn, parent ReceiverNode) *WebsocketPeer {
 	return &WebsocketPeer{
 		Node:     NewNode(NodeID(cuid.New()), parent),
-		messages: make(chan Message),
+		messages: make(chan Message, 10),
 		conn:     conn,
 		wait:     sync.WaitGroup{},
 	}

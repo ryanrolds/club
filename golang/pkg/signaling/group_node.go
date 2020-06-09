@@ -2,6 +2,13 @@ package signaling
 
 import "github.com/sirupsen/logrus"
 
+type GroupDetails struct {
+	ID             NodeID `json:"id"`
+	Name           string `json:"name"`
+	Limit          int    `json:"limit"`
+	DependentCount int    `json:"num_members"`
+}
+
 type GroupNode struct {
 	Node
 	Dependents
@@ -32,5 +39,14 @@ func (g *GroupNode) Receive(message Message) {
 	default:
 		logrus.Warnf(`unknown message type %s`, message.Type)
 		return
+	}
+}
+
+func (g *GroupNode) GetDetails() GroupDetails {
+	return GroupDetails{
+		ID:             g.ID(),
+		Name:           string(g.ID()),
+		Limit:          g.Dependents.GetLimit(),
+		DependentCount: g.Dependents.GetDependentsCount(),
 	}
 }
