@@ -10,13 +10,13 @@ class SignalingServer extends EventTarget {
     this.websocket = websocket
 
     websocket.addEventListener("open", (event) => {
-      console.log(`connected: ${event}`)
+      console.log(`connected:`, event)
       this.dispatchEvent(new Event("connected"))
     })
 
     websocket.addEventListener("close", (event) => {
       clearInterval(ping)
-      console.log(`closed: ${event}`)
+      console.log(`closed:`, event)
       this.dispatchEvent(new Event("disconnected"))
     })
 
@@ -51,11 +51,11 @@ class SignalingServer extends EventTarget {
           this.dispatchEvent(new CustomEvent("icecandidate", { detail: { peerId: parsed.peerId, candidate: parsed.payload } }))
           break
         case "error":
-          console.log("Error processing message:", parsed.payload.error)
+          console.log("error processing message:", parsed.payload.error)
           console.log(parsed)
           break
         default:
-          console.log("unknown message type", parsed)
+          console.log("unknown message type:", parsed)
       }
     })
 

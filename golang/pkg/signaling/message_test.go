@@ -8,29 +8,45 @@ import (
 )
 
 var _ = Describe("Message", func() {
-	var peerID = signaling.PeerID("peerID")
+	var nodeID = signaling.NodeID("nodeID")
 	var validMessage = []byte(`{"type":"type","destId":"destID","payload":{}}`)
+
+	Context("NewJoinMessage", func() {
+		It("should return join message", func() {
+			message := signaling.NewJoinMessage(signaling.NodeID("123"))
+			Expect(message.Type).To(Equal(signaling.MessageTypeJoin))
+			Expect(message.SourceID).To(Equal(signaling.NodeID("123")))
+		})
+	})
+
+	Context("NewJoinMessage", func() {
+		It("should return leave message", func() {
+			message := signaling.NewLeaveMessage(signaling.NodeID("123"))
+			Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
+			Expect(message.SourceID).To(Equal(signaling.NodeID("123")))
+		})
+	})
 
 	Context("NewMessageFromBytes", func() {
 		It("should create message from bytes", func() {
-			message, err := signaling.NewMessageFromBytes(peerID, validMessage)
+			message, err := signaling.NewMessageFromBytes(nodeID, validMessage)
 			Expect(err).To(BeNil())
 			Expect(message.Type).To(Equal(signaling.MessageType("type")))
-			Expect(message.DestinationID).To(Equal(signaling.PeerID("destID")))
-			Expect(message.SourceID).To(Equal(peerID))
+			Expect(message.DestinationID).To(Equal(signaling.NodeID("destID")))
+			Expect(message.SourceID).To(Equal(nodeID))
 			Expect(message.Payload).To(Equal(signaling.MessagePayload{}))
 		})
 
 		It("should error if invalid JSON", func() {
 			invalidMessage := []byte(`{`)
-			_, err := signaling.NewMessageFromBytes(peerID, invalidMessage)
+			_, err := signaling.NewMessageFromBytes(nodeID, invalidMessage)
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal("unexpected end of JSON input"))
 		})
 
 		It("should error if message is missing type", func() {
 			incompleteMessage := []byte(`{"destId":"destID","payload":{}}`)
-			_, err := signaling.NewMessageFromBytes(peerID, incompleteMessage)
+			_, err := signaling.NewMessageFromBytes(nodeID, incompleteMessage)
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(`Key: 'Message.Type' Error:Field validation for 'Type' ` +
 				`failed on the 'required' tag`))
@@ -38,7 +54,7 @@ var _ = Describe("Message", func() {
 
 		It("should error if message is missing source id", func() {
 			incompleteMessage := []byte(`{"type":"type","payload":{}}`)
-			_, err := signaling.NewMessageFromBytes(signaling.PeerID(""),
+			_, err := signaling.NewMessageFromBytes(signaling.NodeID(""),
 				incompleteMessage)
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(`Key: 'Message.SourceID' Error:Field validation for 'SourceID' ` +
@@ -47,7 +63,7 @@ var _ = Describe("Message", func() {
 
 		It("should error if message is missing payload", func() {
 			incompleteMessage := []byte(`{"type":"type","destId":"destID"}`)
-			_, err := signaling.NewMessageFromBytes(peerID, incompleteMessage)
+			_, err := signaling.NewMessageFromBytes(nodeID, incompleteMessage)
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(`Key: 'Message.Payload' Error:Field validation for 'Payload' ` +
 				`failed on the 'required' tag`))
@@ -56,12 +72,12 @@ var _ = Describe("Message", func() {
 
 	Context("ToJSON", func() {
 		It("should return JSON for the message", func() {
-			message, err := signaling.NewMessageFromBytes(peerID, validMessage)
+			message, err := signaling.NewMessageFromBytes(nodeID, validMessage)
 			Expect(err).To(BeNil())
 
 			data, err := message.ToJSON()
 			Expect(err).To(BeNil())
-			Expect(data).To(Equal([]byte(`{"type":"type","peerId":"peerID","destId":"destID","payload":{}}`)))
+			Expect(data).To(Equal([]byte(`{"type":"type","peerId":"nodeID","destId":"destID","payload":{}}`)))
 		})
 	})
 
@@ -73,8 +89,8 @@ var _ = Describe("Message", func() {
 				},
 			}
 
-			groupID := signaling.GetGroupIDFromMessage(message, signaling.GroupID("default"))
-			Expect(groupID).To(Equal(signaling.GroupID("test")))
+			groupID := signaling.GetGroupIDFromMessage(message, signaling.NodeID("default"))
+			Expect(groupID).To(Equal(signaling.NodeID("test")))
 		})
 
 		It("should return the group ID if group key present", func() {
@@ -82,8 +98,8 @@ var _ = Describe("Message", func() {
 				Payload: signaling.MessagePayload{},
 			}
 
-			groupID := signaling.GetGroupIDFromMessage(message, signaling.GroupID("default"))
-			Expect(groupID).To(Equal(signaling.GroupID("default")))
+			groupID := signaling.GetGroupIDFromMessage(message, signaling.NodeID("default"))
+			Expect(groupID).To(Equal(signaling.NodeID("default")))
 		})
 	})
 })

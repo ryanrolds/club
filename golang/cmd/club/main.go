@@ -23,15 +23,16 @@ func main() {
 	initLogging(config)
 
 	var room = signaling.NewRoom()
-	room.StartReaper(config.ReaperInterval)
 
-	err = room.AddGroup(signaling.NewGroup(signaling.RoomDefaultGroupID, config.DefaultGroupLimit))
+	defaultRoom := signaling.NewGroupNode(signaling.DefaultGroupID, room, config.DefaultGroupLimit)
+	err = room.AddGroup(&defaultRoom)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
 	for _, groupConfig := range config.Groups {
-		err = room.AddGroup(signaling.NewGroup(groupConfig.ID, groupConfig.Limit))
+		group := signaling.NewGroupNode(groupConfig.ID, room, groupConfig.Limit)
+		err = room.AddGroup(&group)
 		if err != nil {
 			logrus.Fatal(err)
 		}
