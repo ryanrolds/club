@@ -7,7 +7,7 @@ export const socketConnected = () => {
   }
 }
 
-export const socketDisonnected = () => {
+export const socketDisconnected = () => {
   return {
     type: SOCKET_DISCONNECTED,
   }
