@@ -24,12 +24,12 @@ const (
 	MessageTypeKick         = MessageType("kick")
 	MessageTypeShutdown     = MessageType("shutdown")
 
-	MessagePayloadKeyGroup        = MessagePayloadKey("group")
-	MessagePayloadKeyReason       = MessagePayloadKey("reason")
-	MessagePayloadKeyError        = MessagePayloadKey("error")
-	MessagePayloadKeyMessage      = MessagePayloadKey("message")
-	MessagePayloadKeyGroupDetails = MessagePayloadKey("group_details")
-	MessagePayloadKeyNodeID       = MessagePayloadKey("id")
+	MessagePayloadKeyGroup   = MessagePayloadKey("group")
+	MessagePayloadKeyReason  = MessagePayloadKey("reason")
+	MessagePayloadKeyError   = MessagePayloadKey("error")
+	MessagePayloadKeyMessage = MessagePayloadKey("message")
+	MessagePayloadKeyGroups  = MessagePayloadKey("groups")
+	MessagePayloadKeyNodeID  = MessagePayloadKey("id")
 )
 
 var validate = validator.New()
@@ -47,8 +47,8 @@ func NewJoinedRoomMessage(id NodeID, room *Room) Message {
 		SourceID:      room.ID(),
 		DestinationID: id,
 		Payload: MessagePayload{
-			MessagePayloadKeyNodeID:       room.ID(),
-			MessagePayloadKeyGroupDetails: room.GetDetailsForGroups(),
+			MessagePayloadKeyNodeID: room.ID(),
+			MessagePayloadKeyGroups: room.GetDetailsForGroups(),
 		},
 	}
 }

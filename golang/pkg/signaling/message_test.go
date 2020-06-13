@@ -27,7 +27,7 @@ var _ = Describe("Message", func() {
 			Expect(message.SourceID).To(Equal(signaling.NodeID("room")))
 			Expect(message.DestinationID).To(Equal(nodeID))
 
-			groupsRaw, ok := message.Payload[signaling.MessagePayloadKeyGroupDetails]
+			groupsRaw, ok := message.Payload[signaling.MessagePayloadKeyGroups]
 			Expect(ok).To(Equal(true))
 
 			groups := groupsRaw.([]signaling.GroupDetails)
