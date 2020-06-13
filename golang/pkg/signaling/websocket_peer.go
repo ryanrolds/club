@@ -25,8 +25,9 @@ type WebsocketConn interface {
 type PeerID string
 
 const (
-	timeout      = time.Second * 30
-	pingInterval = time.Second * 20
+	timeout       = time.Second * 30
+	pingInterval  = time.Second * 20
+	channelBuffer = 10
 )
 
 type WebsocketPeer struct {
@@ -39,7 +40,7 @@ type WebsocketPeer struct {
 func NewWebsocketPeer(conn WebsocketConn, parent ReceiverNode) *WebsocketPeer {
 	return &WebsocketPeer{
 		Node:     NewNode(NodeID(cuid.New()), parent),
-		messages: make(chan Message),
+		messages: make(chan Message, channelBuffer),
 		conn:     conn,
 		wait:     sync.WaitGroup{},
 	}

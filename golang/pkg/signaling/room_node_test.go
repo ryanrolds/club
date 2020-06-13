@@ -21,8 +21,21 @@ var _ = Describe("Room", func() {
 
 		defaultGroup = &signalingfakes.FakeReceiverGroup{}
 		defaultGroup.IDReturns(signaling.DefaultGroupID)
+		defaultGroup.GetDetailsReturns(signaling.GroupDetails{
+			ID:             signaling.DefaultGroupID,
+			Name:           "foo",
+			Limit:          42,
+			DependentCount: 2,
+		})
+
 		testGroup = &signalingfakes.FakeReceiverGroup{}
 		testGroup.IDReturns("test")
+		testGroup.GetDetailsReturns(signaling.GroupDetails{
+			ID:             signaling.DefaultGroupID,
+			Name:           "foo",
+			Limit:          42,
+			DependentCount: 2,
+		})
 
 		err := room.AddGroup(defaultGroup)
 		Expect(err).To(BeNil())
@@ -114,6 +127,15 @@ var _ = Describe("Room", func() {
 
 		It("should return nil if group does not exist", func() {
 			Expect(room.GetGroup(signaling.NodeID("doesnotexist"))).To(BeNil())
+		})
+	})
+
+	Context("GetDetailsForGroups", func() {
+		It("should return array of group details", func() {
+			details := room.GetDetailsForGroups()
+			Expect(len(details)).To(Equal(2))
+			Expect(details[0]).To(Equal(defaultGroup.GetDetails()))
+			Expect(details[1]).To(Equal(testGroup.GetDetails()))
 		})
 	})
 })

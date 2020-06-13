@@ -103,4 +103,14 @@ var _ = Describe("GroupNode", func() {
 			})
 		})
 	})
+
+	Context("GetDetails", func() {
+		It("should return the group details", func() {
+			details := group.GetDetails()
+			Expect(details.ID).To(Equal(signaling.NodeID("foo")))
+			Expect(details.Name).To(Equal("foo"))
+			Expect(details.Limit).To(Equal(12))
+			Expect(details.DependentCount).To(Equal(2))
+		})
+	})
 })

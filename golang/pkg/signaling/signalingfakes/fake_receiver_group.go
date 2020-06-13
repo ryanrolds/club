@@ -29,6 +29,16 @@ type FakeReceiverGroup struct {
 	getDependentReturnsOnCall map[int]struct {
 		result1 signaling.ReceiverNode
 	}
+	GetDetailsStub        func() signaling.GroupDetails
+	getDetailsMutex       sync.RWMutex
+	getDetailsArgsForCall []struct {
+	}
+	getDetailsReturns struct {
+		result1 signaling.GroupDetails
+	}
+	getDetailsReturnsOnCall map[int]struct {
+		result1 signaling.GroupDetails
+	}
 	GetParentStub        func() signaling.ReceiverNode
 	getParentMutex       sync.RWMutex
 	getParentArgsForCall []struct {
@@ -192,6 +202,58 @@ func (fake *FakeReceiverGroup) GetDependentReturnsOnCall(i int, result1 signalin
 	}
 	fake.getDependentReturnsOnCall[i] = struct {
 		result1 signaling.ReceiverNode
+	}{result1}
+}
+
+func (fake *FakeReceiverGroup) GetDetails() signaling.GroupDetails {
+	fake.getDetailsMutex.Lock()
+	ret, specificReturn := fake.getDetailsReturnsOnCall[len(fake.getDetailsArgsForCall)]
+	fake.getDetailsArgsForCall = append(fake.getDetailsArgsForCall, struct {
+	}{})
+	fake.recordInvocation("GetDetails", []interface{}{})
+	fake.getDetailsMutex.Unlock()
+	if fake.GetDetailsStub != nil {
+		return fake.GetDetailsStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.getDetailsReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeReceiverGroup) GetDetailsCallCount() int {
+	fake.getDetailsMutex.RLock()
+	defer fake.getDetailsMutex.RUnlock()
+	return len(fake.getDetailsArgsForCall)
+}
+
+func (fake *FakeReceiverGroup) GetDetailsCalls(stub func() signaling.GroupDetails) {
+	fake.getDetailsMutex.Lock()
+	defer fake.getDetailsMutex.Unlock()
+	fake.GetDetailsStub = stub
+}
+
+func (fake *FakeReceiverGroup) GetDetailsReturns(result1 signaling.GroupDetails) {
+	fake.getDetailsMutex.Lock()
+	defer fake.getDetailsMutex.Unlock()
+	fake.GetDetailsStub = nil
+	fake.getDetailsReturns = struct {
+		result1 signaling.GroupDetails
+	}{result1}
+}
+
+func (fake *FakeReceiverGroup) GetDetailsReturnsOnCall(i int, result1 signaling.GroupDetails) {
+	fake.getDetailsMutex.Lock()
+	defer fake.getDetailsMutex.Unlock()
+	fake.GetDetailsStub = nil
+	if fake.getDetailsReturnsOnCall == nil {
+		fake.getDetailsReturnsOnCall = make(map[int]struct {
+			result1 signaling.GroupDetails
+		})
+	}
+	fake.getDetailsReturnsOnCall[i] = struct {
+		result1 signaling.GroupDetails
 	}{result1}
 }
 
@@ -432,6 +494,8 @@ func (fake *FakeReceiverGroup) Invocations() map[string][][]interface{} {
 	defer fake.broadcastMutex.RUnlock()
 	fake.getDependentMutex.RLock()
 	defer fake.getDependentMutex.RUnlock()
+	fake.getDetailsMutex.RLock()
+	defer fake.getDetailsMutex.RUnlock()
 	fake.getParentMutex.RLock()
 	defer fake.getParentMutex.RUnlock()
 	fake.iDMutex.RLock()

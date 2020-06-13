@@ -2,6 +2,7 @@ package signaling_test
 
 import (
 	"github.com/ryanrolds/club/pkg/signaling"
+	"github.com/ryanrolds/club/pkg/signaling/signalingfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,19 +12,51 @@ var _ = Describe("Message", func() {
 	var nodeID = signaling.NodeID("nodeID")
 	var validMessage = []byte(`{"type":"type","destId":"destID","payload":{}}`)
 
+	var room = signaling.NewRoom()
+	var group = signaling.NewGroupNode("foo", room, 12)
+	_ = room.AddGroup(&group)
+
+	var fakeDependent = &signalingfakes.FakeReceiverNode{}
+	fakeDependent.IDReturns(nodeID)
+	group.AddDependent(fakeDependent)
+
+	Context("NewJoinedRoomMessage", func() {
+		It("should return joined room message", func() {
+			message := signaling.NewJoinedRoomMessage(nodeID, room)
+			Expect(message.Type).To(Equal(signaling.MessageTypeJoinedRoom))
+			Expect(message.SourceID).To(Equal(signaling.NodeID("room")))
+			Expect(message.DestinationID).To(Equal(nodeID))
+
+			groupsRaw, ok := message.Payload[signaling.MessagePayloadKeyGroupDetails]
+			Expect(ok).To(Equal(true))
+
+			groups := groupsRaw.([]signaling.GroupDetails)
+			Expect(groups).To(Equal(room.GetDetailsForGroups()))
+		})
+	})
+
+	Context("NewLeftRoomMessage", func() {
+		It("should return left room message", func() {
+			message := signaling.NewLeftRoomMessage(nodeID, room)
+			Expect(message.Type).To(Equal(signaling.MessageTypeLeftRoom))
+			Expect(message.SourceID).To(Equal(signaling.NodeID("room")))
+			Expect(message.DestinationID).To(Equal(nodeID))
+		})
+	})
+
 	Context("NewJoinMessage", func() {
 		It("should return join message", func() {
-			message := signaling.NewJoinMessage(signaling.NodeID("123"))
+			message := signaling.NewJoinMessage(nodeID)
 			Expect(message.Type).To(Equal(signaling.MessageTypeJoin))
-			Expect(message.SourceID).To(Equal(signaling.NodeID("123")))
+			Expect(message.SourceID).To(Equal(nodeID))
 		})
 	})
 
 	Context("NewJoinMessage", func() {
 		It("should return leave message", func() {
-			message := signaling.NewLeaveMessage(signaling.NodeID("123"))
+			message := signaling.NewLeaveMessage(nodeID)
 			Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
-			Expect(message.SourceID).To(Equal(signaling.NodeID("123")))
+			Expect(message.SourceID).To(Equal(nodeID))
 		})
 	})
 

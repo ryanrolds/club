@@ -41,6 +41,10 @@ func (c *Dependents) GetDependent(id NodeID) ReceiverNode {
 	return dependent
 }
 
+func (c *Dependents) GetLimit() int {
+	return c.limit
+}
+
 func (c *Dependents) GetDependentsCount() int {
 	c.dependentsLock.RLock()
 	defer c.dependentsLock.RUnlock()
@@ -60,7 +64,6 @@ func (c *Dependents) AddDependent(dependent ReceiverNode) {
 	defer c.dependentsLock.RUnlock()
 
 	c.dependents[dependent.ID()] = dependent
-
 	c.Broadcast(NewJoinMessage(dependent.ID()))
 }
 
@@ -77,8 +80,6 @@ func (c *Dependents) RemoveDependent(dependent ReceiverNode) {
 
 func (c *Dependents) MessageDependent(message Message) {
 	dependent := c.GetDependent(message.DestinationID)
-
-	logrus.Error(message)
 
 	if dependent == nil {
 		logrus.Warnf("cannot find dependent %s", message.DestinationID)
