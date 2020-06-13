@@ -20,32 +20,32 @@ export default ({ children }) => {
   if (!websocket) {
     websocket = new WebSocket(url)
 
-    websocket.addEventListener('open', (event) => {
+    websocket.addEventListener('open', () => {
       dispatch(socketConnected())
     })
 
-    websocket.addEventListener('close', (event) => {
+    websocket.addEventListener('close', () => {
       dispatch(socketDisconnected())
     })
 
     websocket.addEventListener('message', (message) => {
       let data = null
       try {
-        data = JSON.parse(message.data);
+        data = JSON.parse(message.data)
       } catch (e) {
-        console.error("problem parsing data", e, message.data)
+        console.error('problem parsing data', e, message.data)
         return
       }
 
-      switch(data.type) {
+      switch (data.type) {
         case ROOM_JOINED:
           dispatch(roomJoined(data.payload.id, data.payload.groups))
-          break;
+          break
         case ROOM_LEFT:
           dispatch(roomLeft())
-          break;
+          break
         default:
-          console.error("invalid message type", data.type)
+          console.error('invalid message type', data.type)
       }
     })
 

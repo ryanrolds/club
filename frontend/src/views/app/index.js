@@ -8,13 +8,15 @@ import { WebSocketContext } from '../../websocket'
 
 import store from '../../store'
 
+let currentState = store.getState()
+
 export default function App() {
   const ws = useContext(WebSocketContext)
 
   store.subscribe(() => {
-    let state = store.getState()
+    currentState = store.getState()
     // TODO do something with state change
-    console.log(state)
+    console.log(currentState)
   })
 
   return (

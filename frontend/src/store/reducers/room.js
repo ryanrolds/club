@@ -5,7 +5,7 @@ export default (state = {}, action) => {
     case ROOM_JOINED:
       return {
         id: action.id,
-        groups: action.groups
+        groups: action.groups,
       }
     case ROOM_LEFT:
       return {}

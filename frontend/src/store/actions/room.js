@@ -5,7 +5,7 @@ export const roomJoined = (id, groups) => {
   return {
     type: ROOM_JOINED,
     id,
-    groups
+    groups,
   }
 }
 
