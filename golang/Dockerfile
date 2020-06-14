@@ -10,7 +10,7 @@ RUN make build
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
-WORKDIR /app/
+WORKDIR /club/
 COPY --from=build /club/backend .
 COPY --from=build /club/backend.yaml .
 COPY --from=build /club/static static
