@@ -10,23 +10,23 @@ import (
 
 var _ = Describe("GroupNode", func() {
 	var (
-		group            signaling.GroupNode
-		room             *signaling.Room
-		fakeDependent    *signalingfakes.FakeReceiverNode
-		anotherDependent *signalingfakes.FakeReceiverNode
+		group         signaling.GroupNode
+		room          *signaling.Room
+		fakeMember    *signalingfakes.FakeReceiverNode
+		anotherMember *signalingfakes.FakeReceiverNode
 	)
 
 	BeforeEach(func() {
 		room = &signaling.Room{}
 		group = signaling.NewGroupNode("foo", room, 12)
 
-		fakeDependent = &signalingfakes.FakeReceiverNode{}
-		fakeDependent.IDReturns(signaling.NodeID("123"))
-		group.AddDependent(fakeDependent)
+		fakeMember = &signalingfakes.FakeReceiverNode{}
+		fakeMember.IDReturns(signaling.NodeID("123"))
+		group.AddMember(fakeMember)
 
-		anotherDependent = &signalingfakes.FakeReceiverNode{}
-		anotherDependent.IDReturns(signaling.NodeID("456"))
-		group.AddDependent(anotherDependent)
+		anotherMember = &signalingfakes.FakeReceiverNode{}
+		anotherMember.IDReturns(signaling.NodeID("456"))
+		group.AddMember(anotherMember)
 	})
 
 	Context("NewGroupNode", func() {
@@ -38,50 +38,50 @@ var _ = Describe("GroupNode", func() {
 
 	Context("Receive", func() {
 		Context("Leave message", func() {
-			It("should remove dependent", func() {
-				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+			It("should remove member", func() {
+				Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
 
-				Expect(group.GetDependent(anotherDependent.ID())).To(Equal(anotherDependent))
-				group.Receive(signaling.NewLeaveMessage(anotherDependent.ID()))
-				Expect(group.GetDependent(anotherDependent.ID())).To(BeNil())
+				Expect(group.GetMember(anotherMember.ID())).To(Equal(anotherMember))
+				group.Receive(signaling.NewLeaveMessage(anotherMember.ID()))
+				Expect(group.GetMember(anotherMember.ID())).To(BeNil())
 
-				Expect(fakeDependent.ReceiveCallCount()).To(Equal(2))
-				message := fakeDependent.ReceiveArgsForCall(1)
+				Expect(fakeMember.ReceiveCallCount()).To(Equal(2))
+				message := fakeMember.ReceiveArgsForCall(1)
 				Expect(message.Type).To(Equal(signaling.MessageTypeLeave))
-				Expect(message.SourceID).To(Equal(anotherDependent.ID()))
+				Expect(message.SourceID).To(Equal(anotherMember.ID()))
 			})
 
-			It("should do nothing if dependent does not exist", func() {
-				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
+			It("should do nothing if member does not exist", func() {
+				Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
 
 				group.Receive(signaling.NewLeaveMessage(signaling.NodeID("doesnotexist")))
 
-				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-				Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
-				Expect(group.GetDependent(fakeDependent.ID())).To(Equal(fakeDependent))
-				Expect(group.GetDependent(anotherDependent.ID())).To(Equal(anotherDependent))
+				Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
+				Expect(anotherMember.ReceiveCallCount()).To(Equal(0))
+				Expect(group.GetMember(fakeMember.ID())).To(Equal(fakeMember))
+				Expect(group.GetMember(anotherMember.ID())).To(Equal(anotherMember))
 			})
 		})
 
 		Context("RTC related messages", func() {
 			testRTCMessage := func(messsageType signaling.MessageType) {
-				group.AddDependent(anotherDependent)
+				group.AddMember(anotherMember)
 
-				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-				Expect(anotherDependent.ReceiveCallCount()).To(Equal(0))
+				Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
+				Expect(anotherMember.ReceiveCallCount()).To(Equal(0))
 
 				group.Receive(signaling.Message{
 					Type:          messsageType,
-					SourceID:      fakeDependent.ID(),
-					DestinationID: anotherDependent.ID(),
+					SourceID:      fakeMember.ID(),
+					DestinationID: anotherMember.ID(),
 				})
 
-				Expect(fakeDependent.ReceiveCallCount()).To(Equal(1))
-				Expect(anotherDependent.ReceiveCallCount()).To(Equal(1))
+				Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
+				Expect(anotherMember.ReceiveCallCount()).To(Equal(1))
 
-				message := anotherDependent.ReceiveArgsForCall(0)
+				message := anotherMember.ReceiveArgsForCall(0)
 				Expect(message.Type).To(Equal(messsageType))
-				Expect(message.SourceID).To(Equal(fakeDependent.ID()))
+				Expect(message.SourceID).To(Equal(fakeMember.ID()))
 			}
 
 			Context("MessageTypeOffer", func() {
@@ -110,7 +110,7 @@ var _ = Describe("GroupNode", func() {
 			Expect(details.ID).To(Equal(signaling.NodeID("foo")))
 			Expect(details.Name).To(Equal("foo"))
 			Expect(details.Limit).To(Equal(12))
-			Expect(details.DependentCount).To(Equal(2))
+			Expect(details.MemberCount).To(Equal(2))
 		})
 	})
 })

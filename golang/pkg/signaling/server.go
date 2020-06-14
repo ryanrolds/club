@@ -39,7 +39,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	peer := NewWebsocketPeer(conn, s.room)
-	s.room.AddDependent(peer)
+	s.room.AddMember(peer)
 
 	peer.PumpWrite()
 	peer.PumpRead()
