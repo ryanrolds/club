@@ -7,7 +7,7 @@ install:
 	cd static/ && yarn install
 
 build:
-	go build ./cmd/club
+	go build ./cmd/backend
 
 fakes:
 	go generate ./...
@@ -31,7 +31,7 @@ lint:
 ci: install lint build test coverage-ci
 
 run: build
-	ENV=prod ./club
+	ENV=prod ./backend
 
 run-debug: build
-	ENV=dev ./club
+	ENV=local ./backend

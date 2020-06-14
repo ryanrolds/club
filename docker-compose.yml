@@ -4,8 +4,9 @@ services:
     build: frontend/.
     ports:
       - "3000:80"
-  club:
+  backend:
     build: golang/.
     ports:
       - "3001:3001"
+    command: "./backend"
 
