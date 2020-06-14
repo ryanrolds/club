@@ -10,10 +10,10 @@ import (
 
 var _ = Describe("Room", func() {
 	var (
-		room          *signaling.Room
-		defaultGroup  *signalingfakes.FakeReceiverGroup
-		testGroup     *signalingfakes.FakeReceiverGroup
-		fakeDependent *signalingfakes.FakeReceiverNode
+		room         *signaling.Room
+		defaultGroup *signalingfakes.FakeReceiverGroup
+		testGroup    *signalingfakes.FakeReceiverGroup
+		fakeMember   *signalingfakes.FakeReceiverNode
 	)
 
 	BeforeEach(func() {
@@ -22,19 +22,19 @@ var _ = Describe("Room", func() {
 		defaultGroup = &signalingfakes.FakeReceiverGroup{}
 		defaultGroup.IDReturns(signaling.DefaultGroupID)
 		defaultGroup.GetDetailsReturns(signaling.GroupDetails{
-			ID:             signaling.DefaultGroupID,
-			Name:           "foo",
-			Limit:          42,
-			DependentCount: 2,
+			ID:          signaling.DefaultGroupID,
+			Name:        "foo",
+			Limit:       42,
+			MemberCount: 2,
 		})
 
 		testGroup = &signalingfakes.FakeReceiverGroup{}
 		testGroup.IDReturns("test")
 		testGroup.GetDetailsReturns(signaling.GroupDetails{
-			ID:             signaling.DefaultGroupID,
-			Name:           "foo",
-			Limit:          42,
-			DependentCount: 2,
+			ID:          signaling.DefaultGroupID,
+			Name:        "foo",
+			Limit:       42,
+			MemberCount: 2,
 		})
 
 		err := room.AddGroup(defaultGroup)
@@ -42,10 +42,10 @@ var _ = Describe("Room", func() {
 		err = room.AddGroup(testGroup)
 		Expect(err).To(BeNil())
 
-		fakeDependent = &signalingfakes.FakeReceiverNode{}
-		fakeDependent.IDReturns(signaling.NodeID("123"))
+		fakeMember = &signalingfakes.FakeReceiverNode{}
+		fakeMember.IDReturns(signaling.NodeID("123"))
 
-		room.AddDependent(fakeDependent)
+		room.AddMember(fakeMember)
 	})
 
 	Context("NewRoom", func() {
@@ -58,42 +58,42 @@ var _ = Describe("Room", func() {
 	Context("Receive", func() {
 		Context("MessageTypeJoin", func() {
 			It("should add the depenent to the group", func() {
-				Expect(defaultGroup.AddDependentCallCount()).To(Equal(0))
-				Expect(fakeDependent.SetParentCallCount()).To(Equal(0))
+				Expect(defaultGroup.AddMemberCallCount()).To(Equal(0))
+				Expect(fakeMember.SetParentCallCount()).To(Equal(0))
 
-				room.Receive(signaling.NewJoinMessage(fakeDependent.ID()))
+				room.Receive(signaling.NewJoinMessage(fakeMember.ID()))
 
-				Expect(defaultGroup.AddDependentCallCount()).To(Equal(1))
-				newDependent := defaultGroup.AddDependentArgsForCall(0)
-				Expect(newDependent).To(Equal(fakeDependent))
+				Expect(defaultGroup.AddMemberCallCount()).To(Equal(1))
+				newMember := defaultGroup.AddMemberArgsForCall(0)
+				Expect(newMember).To(Equal(fakeMember))
 
-				Expect(fakeDependent.SetParentCallCount()).To(Equal(1))
-				newParent := fakeDependent.SetParentArgsForCall(0)
+				Expect(fakeMember.SetParentCallCount()).To(Equal(1))
+				newParent := fakeMember.SetParentArgsForCall(0)
 				Expect(newParent).To(Equal(defaultGroup))
 
-				Expect(testGroup.AddDependentCallCount()).To(Equal(0))
+				Expect(testGroup.AddMemberCallCount()).To(Equal(0))
 			})
 
 			It("should allow adding to non-default group", func() {
-				Expect(testGroup.AddDependentCallCount()).To(Equal(0))
-				Expect(fakeDependent.SetParentCallCount()).To(Equal(0))
+				Expect(testGroup.AddMemberCallCount()).To(Equal(0))
+				Expect(fakeMember.SetParentCallCount()).To(Equal(0))
 
-				message := signaling.NewJoinMessage(fakeDependent.ID())
+				message := signaling.NewJoinMessage(fakeMember.ID())
 				message.Payload = signaling.MessagePayload{
 					signaling.MessagePayloadKeyGroup: "test",
 				}
 
 				room.Receive(message)
 
-				Expect(testGroup.AddDependentCallCount()).To(Equal(1))
-				newDependent := testGroup.AddDependentArgsForCall(0)
-				Expect(newDependent).To(Equal(fakeDependent))
+				Expect(testGroup.AddMemberCallCount()).To(Equal(1))
+				newMember := testGroup.AddMemberArgsForCall(0)
+				Expect(newMember).To(Equal(fakeMember))
 
-				Expect(fakeDependent.SetParentCallCount()).To(Equal(1))
-				newParent := fakeDependent.SetParentArgsForCall(0)
+				Expect(fakeMember.SetParentCallCount()).To(Equal(1))
+				newParent := fakeMember.SetParentArgsForCall(0)
 				Expect(newParent).To(Equal(testGroup))
 
-				Expect(defaultGroup.AddDependentCallCount()).To(Equal(0))
+				Expect(defaultGroup.AddMemberCallCount()).To(Equal(0))
 			})
 		})
 	})
