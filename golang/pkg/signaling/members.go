@@ -47,6 +47,9 @@ func (m *Members) GetMember(id NodeID) ReceiverNode {
 }
 
 func (m *Members) GetMembersDetails() []MemberDetails {
+	m.membersLock.RLock()
+	defer m.membersLock.RUnlock()
+
 	var details []MemberDetails
 
 	for _, member := range m.members {
