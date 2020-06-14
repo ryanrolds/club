@@ -34,11 +34,11 @@ func NewMembers(limit int) Members {
 	}
 }
 
-func (c *Members) GetMember(id NodeID) ReceiverNode {
-	c.membersLock.RLock()
-	defer c.membersLock.RUnlock()
+func (m *Members) GetMember(id NodeID) ReceiverNode {
+	m.membersLock.RLock()
+	defer m.membersLock.RUnlock()
 
-	member, ok := c.members[id]
+	member, ok := m.members[id]
 	if !ok {
 		return nil
 	}
@@ -46,51 +46,58 @@ func (c *Members) GetMember(id NodeID) ReceiverNode {
 	return member
 }
 
-func (c *Members) GetMembersDetails() []MemberDetails {
+func (m *Members) GetMembersDetails() []MemberDetails {
 	var details []MemberDetails
+
+	for _, member := range m.members {
+		details = append(details, MemberDetails{
+			ID:   member.ID(),
+			Name: string(member.ID()),
+		})
+	}
 
 	return details
 }
 
-func (c *Members) GetLimit() int {
-	return c.limit
+func (m *Members) GetLimit() int {
+	return m.limit
 }
 
-func (c *Members) GetMembersCount() int {
-	c.membersLock.RLock()
-	defer c.membersLock.RUnlock()
+func (m *Members) GetMembersCount() int {
+	m.membersLock.RLock()
+	defer m.membersLock.RUnlock()
 
-	return len(c.members)
+	return len(m.members)
 }
 
-func (c *Members) AddMember(member ReceiverNode) {
+func (m *Members) AddMember(member ReceiverNode) {
 	logrus.Debugf("adding member %s", member.ID())
 
-	if c.GetMember(member.ID()) != nil {
+	if m.GetMember(member.ID()) != nil {
 		logrus.Warnf("member %s already present", member.ID())
 		return // members already present
 	}
 
-	c.membersLock.RLock()
-	defer c.membersLock.RUnlock()
+	m.membersLock.RLock()
+	defer m.membersLock.RUnlock()
 
-	c.members[member.ID()] = member
-	c.Broadcast(NewJoinMessage(member.ID()))
+	m.members[member.ID()] = member
+	m.Broadcast(NewJoinMessage(member.ID()))
 }
 
-func (c *Members) RemoveMember(member ReceiverNode) {
+func (m *Members) RemoveMember(member ReceiverNode) {
 	logrus.Debugf("removing member %s", member.ID())
 
-	c.membersLock.RLock()
-	defer c.membersLock.RUnlock()
+	m.membersLock.RLock()
+	defer m.membersLock.RUnlock()
 
-	delete(c.members, member.ID())
+	delete(m.members, member.ID())
 
-	c.Broadcast(NewLeaveMessage(member.ID()))
+	m.Broadcast(NewLeaveMessage(member.ID()))
 }
 
-func (c *Members) MessageMember(message Message) {
-	member := c.GetMember(message.DestinationID)
+func (m *Members) MessageMember(message Message) {
+	member := m.GetMember(message.DestinationID)
 
 	if member == nil {
 		logrus.Warnf("cannot find member %s", message.DestinationID)
@@ -102,13 +109,13 @@ func (c *Members) MessageMember(message Message) {
 	logrus.Debugf("sent member %s messsage %s", member.ID(), message)
 }
 
-func (c *Members) Broadcast(message Message) {
-	c.membersLock.RLock()
-	defer c.membersLock.RUnlock()
+func (m *Members) Broadcast(message Message) {
+	m.membersLock.RLock()
+	defer m.membersLock.RUnlock()
 
 	logrus.Debugf("broadcasting message: %s", message)
 
-	for id, member := range c.members {
+	for id, member := range m.members {
 		// Don't send messages to source
 		if id == message.SourceID {
 			continue

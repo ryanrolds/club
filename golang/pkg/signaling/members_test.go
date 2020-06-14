@@ -56,6 +56,16 @@ var _ = Describe("Members", func() {
 		})
 	})
 
+	Context("GetMembersDetails", func() {
+		It("should return details of members", func() {
+
+		})
+
+		It("should return empty slice if no members", func() {
+
+		})
+	})
+
 	Context("GetLimit", func() {
 		It("should return the limit of the set", func() {
 			members = signaling.NewMembers(42)

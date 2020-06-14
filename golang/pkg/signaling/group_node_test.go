@@ -109,6 +109,7 @@ var _ = Describe("GroupNode", func() {
 			Expect(details.Name).To(Equal("foo"))
 			Expect(details.Limit).To(Equal(12))
 			Expect(details.MemberCount).To(Equal(2))
+			Expect(len(details.Members)).To(Equal(details.MemberCount))
 		})
 	})
 })
