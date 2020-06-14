@@ -48,7 +48,7 @@ func (g *GroupNode) GetDetails() GroupDetails {
 		ID:          g.ID(),
 		Name:        string(g.ID()),
 		Limit:       g.Members.GetLimit(),
-		MemberCount: g.Members.GetMemberCount(),
+		MemberCount: g.Members.GetMembersCount(),
 		Members:     g.Members.GetMembersDetails(),
 	}
 }

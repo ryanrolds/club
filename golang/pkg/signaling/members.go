@@ -56,7 +56,7 @@ func (c *Members) GetLimit() int {
 	return c.limit
 }
 
-func (c *Members) GetMemberCount() int {
+func (c *Members) GetMembersCount() int {
 	c.membersLock.RLock()
 	defer c.membersLock.RUnlock()
 
