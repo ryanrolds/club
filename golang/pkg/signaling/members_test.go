@@ -58,11 +58,22 @@ var _ = Describe("Members", func() {
 
 	Context("GetMembersDetails", func() {
 		It("should return details of members", func() {
+			members.AddMember(anotherMember)
 
+			details := members.GetMembersDetails()
+			Expect(len(details)).To(Equal(2))
+			Expect(details[0].ID).To(Equal(signaling.NodeID("123")))
+			Expect(details[0].Name).To(Equal("123"))
+			Expect(details[1].ID).To(Equal(signaling.NodeID("456")))
+			Expect(details[1].Name).To(Equal("456"))
 		})
 
 		It("should return empty slice if no members", func() {
+			members = signaling.NewMembers(42)
+			Expect(members).ToNot(BeNil())
 
+			details := members.GetMembersDetails()
+			Expect(len(details)).To(Equal(0))
 		})
 	})
 
