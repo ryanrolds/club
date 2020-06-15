@@ -131,10 +131,10 @@ func (r *Room) GetDetailsForGroups() []GroupDetails {
 
 func (r *Room) AddMember(member ReceiverNode) {
 	r.GroupNode.Members.AddMember(member)
-	r.MessageMember(NewJoinedRoomMessage(member.ID(), r))
+	member.Receive(NewJoinedRoomMessage(member.ID(), r))
 }
 
 func (r *Room) RemoveMember(member ReceiverNode) {
 	r.GroupNode.Members.RemoveMember(member)
-	r.MessageMember(NewLeftRoomMessage(member.ID(), r))
+	member.Receive(NewLeftRoomMessage(member.ID(), r))
 }

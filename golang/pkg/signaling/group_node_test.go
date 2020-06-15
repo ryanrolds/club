@@ -112,4 +112,32 @@ var _ = Describe("GroupNode", func() {
 			Expect(len(details.Members)).To(Equal(details.MemberCount))
 		})
 	})
+
+	Context("AddMember", func() {
+		It("should add member and send joined message", func() {
+			group = signaling.NewGroupNode("foo", room, 12)
+
+			fakeMember = &signalingfakes.FakeReceiverNode{}
+			fakeMember.IDReturns(signaling.NodeID("123"))
+			group.AddMember(fakeMember)
+
+			Expect(group.GetMember("123")).To(Equal(fakeMember))
+
+			Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
+			message := fakeMember.ReceiveArgsForCall(0)
+			Expect(message.Type).To(Equal(signaling.MessageTypeJoinedGroup))
+		})
+	})
+
+	Context("RemoveMember", func() {
+		It("should remove member and send left message", func() {
+			group.RemoveMember(fakeMember)
+
+			Expect(group.GetMember("123")).To(BeNil())
+
+			Expect(fakeMember.ReceiveCallCount()).To(Equal(fakeMemberReceiveCount + 1))
+			message := fakeMember.ReceiveArgsForCall(fakeMemberReceiveCount)
+			Expect(message.Type).To(Equal(signaling.MessageTypeLeftGroup))
+		})
+	})
 })

@@ -138,4 +138,34 @@ var _ = Describe("Room", func() {
 			Expect(details[1]).To(Equal(testGroup.GetDetails()))
 		})
 	})
+
+	Context("AddMember", func() {
+		It("should add member and send joined message", func() {
+			room = signaling.NewRoom()
+
+			fakeMember = &signalingfakes.FakeReceiverNode{}
+			fakeMember.IDReturns(signaling.NodeID("123"))
+			room.AddMember(fakeMember)
+
+			Expect(room.GetMember("123")).To(Equal(fakeMember))
+
+			Expect(fakeMember.ReceiveCallCount()).To(Equal(1))
+			message := fakeMember.ReceiveArgsForCall(0)
+			Expect(message.Type).To(Equal(signaling.MessageTypeJoinedRoom))
+		})
+	})
+
+	Context("RemoveMember", func() {
+		It("should remove member and send left message", func() {
+			fakeMemberReceiveCount := fakeMember.ReceiveCallCount()
+
+			room.RemoveMember(fakeMember)
+
+			Expect(room.GetMember("123")).To(BeNil())
+
+			Expect(fakeMember.ReceiveCallCount()).To(Equal(fakeMemberReceiveCount + 1))
+			message := fakeMember.ReceiveArgsForCall(fakeMemberReceiveCount)
+			Expect(message.Type).To(Equal(signaling.MessageTypeLeftRoom))
+		})
+	})
 })

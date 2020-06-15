@@ -55,10 +55,10 @@ func (g *GroupNode) GetDetails() GroupDetails {
 
 func (g *GroupNode) AddMember(member ReceiverNode) {
 	g.Members.AddMember(member)
-	g.MessageMember(NewJoinedGroupMessage(member.ID(), g))
+	member.Receive(NewJoinedGroupMessage(member.ID(), g))
 }
 
 func (g *GroupNode) RemoveMember(member ReceiverNode) {
 	g.Members.RemoveMember(member)
-	g.MessageMember(NewLeftGroupMessage(member.ID(), g))
+	member.Receive(NewLeftGroupMessage(member.ID(), g))
 }
