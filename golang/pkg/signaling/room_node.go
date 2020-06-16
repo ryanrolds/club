@@ -24,12 +24,12 @@ type ReceiverGroup interface {
 	ReceiverNode
 	GetDetails() GroupDetails
 
-	AddDependent(ReceiverNode)
-	GetDependent(NodeID) ReceiverNode
-	RemoveDependent(ReceiverNode)
+	AddMember(ReceiverNode)
+	GetMember(NodeID) ReceiverNode
+	RemoveMember(ReceiverNode)
 
 	Broadcast(Message)
-	MessageDependent(Message)
+	MessageMember(Message)
 }
 
 type Room struct {
@@ -52,9 +52,9 @@ func NewRoom() *Room {
 func (r *Room) Receive(message Message) {
 	logrus.Debugf("Message type: %s", message.Type)
 
-	dependent := r.GetDependent(message.SourceID)
-	if dependent == nil {
-		logrus.Warnf("dependent %s not found in room", message.SourceID)
+	member := r.GetMember(message.SourceID)
+	if member == nil {
+		logrus.Warnf("member %s not found in room", message.SourceID)
 		return
 	}
 
@@ -63,11 +63,11 @@ func (r *Room) Receive(message Message) {
 		var group ReceiverGroup
 
 		// When joining a group, make sure to remove them from their previous group
-		recevier := dependent.GetParent()
+		recevier := member.GetParent()
 		if group != nil {
 			group = r.GetGroup(recevier.ID())
-			group.RemoveDependent(dependent)
-			dependent.SetParent(nil)
+			group.RemoveMember(member)
+			member.SetParent(nil)
 		}
 
 		groupID := GetGroupIDFromMessage(message, DefaultGroupID)
@@ -76,11 +76,11 @@ func (r *Room) Receive(message Message) {
 			return
 		}
 
-		dependent.SetParent(group)
-		group.AddDependent(dependent)
-		r.RemoveDependent(dependent)
+		member.SetParent(group)
+		group.AddMember(member)
+		r.RemoveMember(member)
 
-		logrus.Debugf("added dependent %s to group %s", dependent.ID(), group.ID())
+		logrus.Debugf("added member %s to group %s", member.ID(), group.ID())
 	default:
 		logrus.Warnf(`unknown message type %s`, message.Type)
 		return
@@ -129,12 +129,12 @@ func (r *Room) GetDetailsForGroups() []GroupDetails {
 	return groups
 }
 
-func (r *Room) AddDependent(dependent ReceiverNode) {
-	r.GroupNode.Dependents.AddDependent(dependent)
-	r.MessageDependent(NewJoinedRoomMessage(dependent.ID(), r))
+func (r *Room) AddMember(member ReceiverNode) {
+	r.GroupNode.Members.AddMember(member)
+	member.Receive(NewJoinedRoomMessage(member.ID(), r))
 }
 
-func (r *Room) RemoveDependent(dependent ReceiverNode) {
-	r.GroupNode.Dependents.RemoveDependent(dependent)
-	r.MessageDependent(NewLeftRoomMessage(dependent.ID(), r))
+func (r *Room) RemoveMember(member ReceiverNode) {
+	r.GroupNode.Members.RemoveMember(member)
+	member.Receive(NewLeftRoomMessage(member.ID(), r))
 }
