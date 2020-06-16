@@ -2,6 +2,7 @@ import React, { createContext } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { socketConnected, socketDisconnected } from './store/actions/websocket'
+import { ROOM_JOINED, ROOM_LEFT, roomJoined, roomLeft } from './store/actions/room'
 
 const WebSocketContext = createContext(null)
 export { WebSocketContext }
@@ -19,18 +20,33 @@ export default ({ children }) => {
   if (!websocket) {
     websocket = new WebSocket(url)
 
-    websocket.addEventListener('open', (event) => {
-      console.log(`connected:`, event)
+    websocket.addEventListener('open', () => {
       dispatch(socketConnected())
     })
 
-    websocket.addEventListener('close', (event) => {
-      console.log(`closed:`, event)
+    websocket.addEventListener('close', () => {
       dispatch(socketDisconnected())
     })
 
     websocket.addEventListener('message', (message) => {
-      console.log(message)
+      let data = null
+      try {
+        data = JSON.parse(message.data)
+      } catch (e) {
+        console.error('problem parsing data', e, message.data)
+        return
+      }
+
+      switch (data.type) {
+        case ROOM_JOINED:
+          dispatch(roomJoined(data.payload.id, data.payload.groups))
+          break
+        case ROOM_LEFT:
+          dispatch(roomLeft())
+          break
+        default:
+          console.error('invalid message type', data.type)
+      }
     })
 
     const sendJoin = (group) => {
