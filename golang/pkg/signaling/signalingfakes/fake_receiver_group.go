@@ -8,26 +8,15 @@ import (
 )
 
 type FakeReceiverGroup struct {
-	AddDependentStub        func(signaling.ReceiverNode)
-	addDependentMutex       sync.RWMutex
-	addDependentArgsForCall []struct {
+	AddMemberStub        func(signaling.ReceiverNode)
+	addMemberMutex       sync.RWMutex
+	addMemberArgsForCall []struct {
 		arg1 signaling.ReceiverNode
 	}
 	BroadcastStub        func(signaling.Message)
 	broadcastMutex       sync.RWMutex
 	broadcastArgsForCall []struct {
 		arg1 signaling.Message
-	}
-	GetDependentStub        func(signaling.NodeID) signaling.ReceiverNode
-	getDependentMutex       sync.RWMutex
-	getDependentArgsForCall []struct {
-		arg1 signaling.NodeID
-	}
-	getDependentReturns struct {
-		result1 signaling.ReceiverNode
-	}
-	getDependentReturnsOnCall map[int]struct {
-		result1 signaling.ReceiverNode
 	}
 	GetDetailsStub        func() signaling.GroupDetails
 	getDetailsMutex       sync.RWMutex
@@ -38,6 +27,17 @@ type FakeReceiverGroup struct {
 	}
 	getDetailsReturnsOnCall map[int]struct {
 		result1 signaling.GroupDetails
+	}
+	GetMemberStub        func(signaling.NodeID) signaling.ReceiverNode
+	getMemberMutex       sync.RWMutex
+	getMemberArgsForCall []struct {
+		arg1 signaling.NodeID
+	}
+	getMemberReturns struct {
+		result1 signaling.ReceiverNode
+	}
+	getMemberReturnsOnCall map[int]struct {
+		result1 signaling.ReceiverNode
 	}
 	GetParentStub        func() signaling.ReceiverNode
 	getParentMutex       sync.RWMutex
@@ -59,9 +59,9 @@ type FakeReceiverGroup struct {
 	iDReturnsOnCall map[int]struct {
 		result1 signaling.NodeID
 	}
-	MessageDependentStub        func(signaling.Message)
-	messageDependentMutex       sync.RWMutex
-	messageDependentArgsForCall []struct {
+	MessageMemberStub        func(signaling.Message)
+	messageMemberMutex       sync.RWMutex
+	messageMemberArgsForCall []struct {
 		arg1 signaling.Message
 	}
 	ReceiveStub        func(signaling.Message)
@@ -69,9 +69,9 @@ type FakeReceiverGroup struct {
 	receiveArgsForCall []struct {
 		arg1 signaling.Message
 	}
-	RemoveDependentStub        func(signaling.ReceiverNode)
-	removeDependentMutex       sync.RWMutex
-	removeDependentArgsForCall []struct {
+	RemoveMemberStub        func(signaling.ReceiverNode)
+	removeMemberMutex       sync.RWMutex
+	removeMemberArgsForCall []struct {
 		arg1 signaling.ReceiverNode
 	}
 	SetParentStub        func(signaling.ReceiverNode)
@@ -83,34 +83,34 @@ type FakeReceiverGroup struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeReceiverGroup) AddDependent(arg1 signaling.ReceiverNode) {
-	fake.addDependentMutex.Lock()
-	fake.addDependentArgsForCall = append(fake.addDependentArgsForCall, struct {
+func (fake *FakeReceiverGroup) AddMember(arg1 signaling.ReceiverNode) {
+	fake.addMemberMutex.Lock()
+	fake.addMemberArgsForCall = append(fake.addMemberArgsForCall, struct {
 		arg1 signaling.ReceiverNode
 	}{arg1})
-	fake.recordInvocation("AddDependent", []interface{}{arg1})
-	fake.addDependentMutex.Unlock()
-	if fake.AddDependentStub != nil {
-		fake.AddDependentStub(arg1)
+	fake.recordInvocation("AddMember", []interface{}{arg1})
+	fake.addMemberMutex.Unlock()
+	if fake.AddMemberStub != nil {
+		fake.AddMemberStub(arg1)
 	}
 }
 
-func (fake *FakeReceiverGroup) AddDependentCallCount() int {
-	fake.addDependentMutex.RLock()
-	defer fake.addDependentMutex.RUnlock()
-	return len(fake.addDependentArgsForCall)
+func (fake *FakeReceiverGroup) AddMemberCallCount() int {
+	fake.addMemberMutex.RLock()
+	defer fake.addMemberMutex.RUnlock()
+	return len(fake.addMemberArgsForCall)
 }
 
-func (fake *FakeReceiverGroup) AddDependentCalls(stub func(signaling.ReceiverNode)) {
-	fake.addDependentMutex.Lock()
-	defer fake.addDependentMutex.Unlock()
-	fake.AddDependentStub = stub
+func (fake *FakeReceiverGroup) AddMemberCalls(stub func(signaling.ReceiverNode)) {
+	fake.addMemberMutex.Lock()
+	defer fake.addMemberMutex.Unlock()
+	fake.AddMemberStub = stub
 }
 
-func (fake *FakeReceiverGroup) AddDependentArgsForCall(i int) signaling.ReceiverNode {
-	fake.addDependentMutex.RLock()
-	defer fake.addDependentMutex.RUnlock()
-	argsForCall := fake.addDependentArgsForCall[i]
+func (fake *FakeReceiverGroup) AddMemberArgsForCall(i int) signaling.ReceiverNode {
+	fake.addMemberMutex.RLock()
+	defer fake.addMemberMutex.RUnlock()
+	argsForCall := fake.addMemberArgsForCall[i]
 	return argsForCall.arg1
 }
 
@@ -143,66 +143,6 @@ func (fake *FakeReceiverGroup) BroadcastArgsForCall(i int) signaling.Message {
 	defer fake.broadcastMutex.RUnlock()
 	argsForCall := fake.broadcastArgsForCall[i]
 	return argsForCall.arg1
-}
-
-func (fake *FakeReceiverGroup) GetDependent(arg1 signaling.NodeID) signaling.ReceiverNode {
-	fake.getDependentMutex.Lock()
-	ret, specificReturn := fake.getDependentReturnsOnCall[len(fake.getDependentArgsForCall)]
-	fake.getDependentArgsForCall = append(fake.getDependentArgsForCall, struct {
-		arg1 signaling.NodeID
-	}{arg1})
-	fake.recordInvocation("GetDependent", []interface{}{arg1})
-	fake.getDependentMutex.Unlock()
-	if fake.GetDependentStub != nil {
-		return fake.GetDependentStub(arg1)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	fakeReturns := fake.getDependentReturns
-	return fakeReturns.result1
-}
-
-func (fake *FakeReceiverGroup) GetDependentCallCount() int {
-	fake.getDependentMutex.RLock()
-	defer fake.getDependentMutex.RUnlock()
-	return len(fake.getDependentArgsForCall)
-}
-
-func (fake *FakeReceiverGroup) GetDependentCalls(stub func(signaling.NodeID) signaling.ReceiverNode) {
-	fake.getDependentMutex.Lock()
-	defer fake.getDependentMutex.Unlock()
-	fake.GetDependentStub = stub
-}
-
-func (fake *FakeReceiverGroup) GetDependentArgsForCall(i int) signaling.NodeID {
-	fake.getDependentMutex.RLock()
-	defer fake.getDependentMutex.RUnlock()
-	argsForCall := fake.getDependentArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeReceiverGroup) GetDependentReturns(result1 signaling.ReceiverNode) {
-	fake.getDependentMutex.Lock()
-	defer fake.getDependentMutex.Unlock()
-	fake.GetDependentStub = nil
-	fake.getDependentReturns = struct {
-		result1 signaling.ReceiverNode
-	}{result1}
-}
-
-func (fake *FakeReceiverGroup) GetDependentReturnsOnCall(i int, result1 signaling.ReceiverNode) {
-	fake.getDependentMutex.Lock()
-	defer fake.getDependentMutex.Unlock()
-	fake.GetDependentStub = nil
-	if fake.getDependentReturnsOnCall == nil {
-		fake.getDependentReturnsOnCall = make(map[int]struct {
-			result1 signaling.ReceiverNode
-		})
-	}
-	fake.getDependentReturnsOnCall[i] = struct {
-		result1 signaling.ReceiverNode
-	}{result1}
 }
 
 func (fake *FakeReceiverGroup) GetDetails() signaling.GroupDetails {
@@ -254,6 +194,66 @@ func (fake *FakeReceiverGroup) GetDetailsReturnsOnCall(i int, result1 signaling.
 	}
 	fake.getDetailsReturnsOnCall[i] = struct {
 		result1 signaling.GroupDetails
+	}{result1}
+}
+
+func (fake *FakeReceiverGroup) GetMember(arg1 signaling.NodeID) signaling.ReceiverNode {
+	fake.getMemberMutex.Lock()
+	ret, specificReturn := fake.getMemberReturnsOnCall[len(fake.getMemberArgsForCall)]
+	fake.getMemberArgsForCall = append(fake.getMemberArgsForCall, struct {
+		arg1 signaling.NodeID
+	}{arg1})
+	fake.recordInvocation("GetMember", []interface{}{arg1})
+	fake.getMemberMutex.Unlock()
+	if fake.GetMemberStub != nil {
+		return fake.GetMemberStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.getMemberReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeReceiverGroup) GetMemberCallCount() int {
+	fake.getMemberMutex.RLock()
+	defer fake.getMemberMutex.RUnlock()
+	return len(fake.getMemberArgsForCall)
+}
+
+func (fake *FakeReceiverGroup) GetMemberCalls(stub func(signaling.NodeID) signaling.ReceiverNode) {
+	fake.getMemberMutex.Lock()
+	defer fake.getMemberMutex.Unlock()
+	fake.GetMemberStub = stub
+}
+
+func (fake *FakeReceiverGroup) GetMemberArgsForCall(i int) signaling.NodeID {
+	fake.getMemberMutex.RLock()
+	defer fake.getMemberMutex.RUnlock()
+	argsForCall := fake.getMemberArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeReceiverGroup) GetMemberReturns(result1 signaling.ReceiverNode) {
+	fake.getMemberMutex.Lock()
+	defer fake.getMemberMutex.Unlock()
+	fake.GetMemberStub = nil
+	fake.getMemberReturns = struct {
+		result1 signaling.ReceiverNode
+	}{result1}
+}
+
+func (fake *FakeReceiverGroup) GetMemberReturnsOnCall(i int, result1 signaling.ReceiverNode) {
+	fake.getMemberMutex.Lock()
+	defer fake.getMemberMutex.Unlock()
+	fake.GetMemberStub = nil
+	if fake.getMemberReturnsOnCall == nil {
+		fake.getMemberReturnsOnCall = make(map[int]struct {
+			result1 signaling.ReceiverNode
+		})
+	}
+	fake.getMemberReturnsOnCall[i] = struct {
+		result1 signaling.ReceiverNode
 	}{result1}
 }
 
@@ -361,34 +361,34 @@ func (fake *FakeReceiverGroup) IDReturnsOnCall(i int, result1 signaling.NodeID) 
 	}{result1}
 }
 
-func (fake *FakeReceiverGroup) MessageDependent(arg1 signaling.Message) {
-	fake.messageDependentMutex.Lock()
-	fake.messageDependentArgsForCall = append(fake.messageDependentArgsForCall, struct {
+func (fake *FakeReceiverGroup) MessageMember(arg1 signaling.Message) {
+	fake.messageMemberMutex.Lock()
+	fake.messageMemberArgsForCall = append(fake.messageMemberArgsForCall, struct {
 		arg1 signaling.Message
 	}{arg1})
-	fake.recordInvocation("MessageDependent", []interface{}{arg1})
-	fake.messageDependentMutex.Unlock()
-	if fake.MessageDependentStub != nil {
-		fake.MessageDependentStub(arg1)
+	fake.recordInvocation("MessageMember", []interface{}{arg1})
+	fake.messageMemberMutex.Unlock()
+	if fake.MessageMemberStub != nil {
+		fake.MessageMemberStub(arg1)
 	}
 }
 
-func (fake *FakeReceiverGroup) MessageDependentCallCount() int {
-	fake.messageDependentMutex.RLock()
-	defer fake.messageDependentMutex.RUnlock()
-	return len(fake.messageDependentArgsForCall)
+func (fake *FakeReceiverGroup) MessageMemberCallCount() int {
+	fake.messageMemberMutex.RLock()
+	defer fake.messageMemberMutex.RUnlock()
+	return len(fake.messageMemberArgsForCall)
 }
 
-func (fake *FakeReceiverGroup) MessageDependentCalls(stub func(signaling.Message)) {
-	fake.messageDependentMutex.Lock()
-	defer fake.messageDependentMutex.Unlock()
-	fake.MessageDependentStub = stub
+func (fake *FakeReceiverGroup) MessageMemberCalls(stub func(signaling.Message)) {
+	fake.messageMemberMutex.Lock()
+	defer fake.messageMemberMutex.Unlock()
+	fake.MessageMemberStub = stub
 }
 
-func (fake *FakeReceiverGroup) MessageDependentArgsForCall(i int) signaling.Message {
-	fake.messageDependentMutex.RLock()
-	defer fake.messageDependentMutex.RUnlock()
-	argsForCall := fake.messageDependentArgsForCall[i]
+func (fake *FakeReceiverGroup) MessageMemberArgsForCall(i int) signaling.Message {
+	fake.messageMemberMutex.RLock()
+	defer fake.messageMemberMutex.RUnlock()
+	argsForCall := fake.messageMemberArgsForCall[i]
 	return argsForCall.arg1
 }
 
@@ -423,34 +423,34 @@ func (fake *FakeReceiverGroup) ReceiveArgsForCall(i int) signaling.Message {
 	return argsForCall.arg1
 }
 
-func (fake *FakeReceiverGroup) RemoveDependent(arg1 signaling.ReceiverNode) {
-	fake.removeDependentMutex.Lock()
-	fake.removeDependentArgsForCall = append(fake.removeDependentArgsForCall, struct {
+func (fake *FakeReceiverGroup) RemoveMember(arg1 signaling.ReceiverNode) {
+	fake.removeMemberMutex.Lock()
+	fake.removeMemberArgsForCall = append(fake.removeMemberArgsForCall, struct {
 		arg1 signaling.ReceiverNode
 	}{arg1})
-	fake.recordInvocation("RemoveDependent", []interface{}{arg1})
-	fake.removeDependentMutex.Unlock()
-	if fake.RemoveDependentStub != nil {
-		fake.RemoveDependentStub(arg1)
+	fake.recordInvocation("RemoveMember", []interface{}{arg1})
+	fake.removeMemberMutex.Unlock()
+	if fake.RemoveMemberStub != nil {
+		fake.RemoveMemberStub(arg1)
 	}
 }
 
-func (fake *FakeReceiverGroup) RemoveDependentCallCount() int {
-	fake.removeDependentMutex.RLock()
-	defer fake.removeDependentMutex.RUnlock()
-	return len(fake.removeDependentArgsForCall)
+func (fake *FakeReceiverGroup) RemoveMemberCallCount() int {
+	fake.removeMemberMutex.RLock()
+	defer fake.removeMemberMutex.RUnlock()
+	return len(fake.removeMemberArgsForCall)
 }
 
-func (fake *FakeReceiverGroup) RemoveDependentCalls(stub func(signaling.ReceiverNode)) {
-	fake.removeDependentMutex.Lock()
-	defer fake.removeDependentMutex.Unlock()
-	fake.RemoveDependentStub = stub
+func (fake *FakeReceiverGroup) RemoveMemberCalls(stub func(signaling.ReceiverNode)) {
+	fake.removeMemberMutex.Lock()
+	defer fake.removeMemberMutex.Unlock()
+	fake.RemoveMemberStub = stub
 }
 
-func (fake *FakeReceiverGroup) RemoveDependentArgsForCall(i int) signaling.ReceiverNode {
-	fake.removeDependentMutex.RLock()
-	defer fake.removeDependentMutex.RUnlock()
-	argsForCall := fake.removeDependentArgsForCall[i]
+func (fake *FakeReceiverGroup) RemoveMemberArgsForCall(i int) signaling.ReceiverNode {
+	fake.removeMemberMutex.RLock()
+	defer fake.removeMemberMutex.RUnlock()
+	argsForCall := fake.removeMemberArgsForCall[i]
 	return argsForCall.arg1
 }
 
@@ -488,24 +488,24 @@ func (fake *FakeReceiverGroup) SetParentArgsForCall(i int) signaling.ReceiverNod
 func (fake *FakeReceiverGroup) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.addDependentMutex.RLock()
-	defer fake.addDependentMutex.RUnlock()
+	fake.addMemberMutex.RLock()
+	defer fake.addMemberMutex.RUnlock()
 	fake.broadcastMutex.RLock()
 	defer fake.broadcastMutex.RUnlock()
-	fake.getDependentMutex.RLock()
-	defer fake.getDependentMutex.RUnlock()
 	fake.getDetailsMutex.RLock()
 	defer fake.getDetailsMutex.RUnlock()
+	fake.getMemberMutex.RLock()
+	defer fake.getMemberMutex.RUnlock()
 	fake.getParentMutex.RLock()
 	defer fake.getParentMutex.RUnlock()
 	fake.iDMutex.RLock()
 	defer fake.iDMutex.RUnlock()
-	fake.messageDependentMutex.RLock()
-	defer fake.messageDependentMutex.RUnlock()
+	fake.messageMemberMutex.RLock()
+	defer fake.messageMemberMutex.RUnlock()
 	fake.receiveMutex.RLock()
 	defer fake.receiveMutex.RUnlock()
-	fake.removeDependentMutex.RLock()
-	defer fake.removeDependentMutex.RUnlock()
+	fake.removeMemberMutex.RLock()
+	defer fake.removeMemberMutex.RUnlock()
 	fake.setParentMutex.RLock()
 	defer fake.setParentMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

@@ -16,9 +16,9 @@ var _ = Describe("Message", func() {
 	var group = signaling.NewGroupNode("foo", room, 12)
 	_ = room.AddGroup(&group)
 
-	var fakeDependent = &signalingfakes.FakeReceiverNode{}
-	fakeDependent.IDReturns(nodeID)
-	group.AddDependent(fakeDependent)
+	var fakeMember = &signalingfakes.FakeReceiverNode{}
+	fakeMember.IDReturns(nodeID)
+	group.AddMember(fakeMember)
 
 	Context("NewJoinedRoomMessage", func() {
 		It("should return joined room message", func() {

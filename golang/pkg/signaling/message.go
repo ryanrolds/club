@@ -15,6 +15,8 @@ const (
 	MessageTypeHeartbeat    = MessageType("heartbeat")
 	MessageTypeJoinedRoom   = MessageType("room_joined")
 	MessageTypeLeftRoom     = MessageType("room_left")
+	MessageTypeJoinedGroup  = MessageType("group_joined")
+	MessageTypeLeftGroup    = MessageType("group_left")
 	MessageTypeJoin         = MessageType("join")
 	MessageTypeLeave        = MessageType("leave")
 	MessageTypeOffer        = MessageType("offer")
@@ -24,12 +26,13 @@ const (
 	MessageTypeKick         = MessageType("kick")
 	MessageTypeShutdown     = MessageType("shutdown")
 
-	MessagePayloadKeyGroup   = MessagePayloadKey("group")
-	MessagePayloadKeyReason  = MessagePayloadKey("reason")
-	MessagePayloadKeyError   = MessagePayloadKey("error")
-	MessagePayloadKeyMessage = MessagePayloadKey("message")
-	MessagePayloadKeyGroups  = MessagePayloadKey("groups")
-	MessagePayloadKeyNodeID  = MessagePayloadKey("id")
+	MessagePayloadKeyGroup        = MessagePayloadKey("group")
+	MessagePayloadKeyReason       = MessagePayloadKey("reason")
+	MessagePayloadKeyError        = MessagePayloadKey("error")
+	MessagePayloadKeyMessage      = MessagePayloadKey("message")
+	MessagePayloadKeyGroupDetails = MessagePayloadKey("group_details")
+	MessagePayloadKeyMembers      = MessagePayloadKey("members")
+	MessagePayloadKeyNodeID       = MessagePayloadKey("id")
 )
 
 var validate = validator.New()
@@ -57,6 +60,27 @@ func NewLeftRoomMessage(id NodeID, room *Room) Message {
 	return Message{
 		Type:          MessageTypeLeftRoom,
 		SourceID:      room.ID(),
+		DestinationID: id,
+		Payload:       MessagePayload{},
+	}
+}
+
+func NewJoinedGroupMessage(id NodeID, group *GroupNode) Message {
+	return Message{
+		Type:          MessageTypeJoinedGroup,
+		SourceID:      group.ID(),
+		DestinationID: id,
+		Payload: MessagePayload{
+			MessagePayloadKeyNodeID:  group.ID(),
+			MessagePayloadKeyMembers: group.GetMembersDetails(),
+		},
+	}
+}
+
+func NewLeftGroupMessage(id NodeID, group *GroupNode) Message {
+	return Message{
+		Type:          MessageTypeLeftGroup,
+		SourceID:      group.ID(),
 		DestinationID: id,
 		Payload:       MessagePayload{},
 	}
