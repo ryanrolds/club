@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	configFilename = "club.yaml"
+	configFilename = "backend.yaml"
 )
 
 func main() {
 	config, err := GetConfig(configFilename)
 	if err != nil {
-		log.Fatal("problem reading club.yaml")
+		log.Fatal("problem reading backend.yaml")
 	}
 
 	initLogging(config)

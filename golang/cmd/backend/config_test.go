@@ -7,7 +7,7 @@ import (
 
 var _ = Describe("Config", func() {
 	It("should return config", func() {
-		config, err := GetConfig("../../testdata/test_club_config.yaml")
+		config, err := GetConfig("../../testdata/test_backend_config.yaml")
 		Expect(err).To(BeNil())
 		Expect(config).ToNot(BeNil())
 		Expect(config.Environment).To(Equal(EnvironmentTests))

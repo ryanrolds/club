@@ -5,8 +5,8 @@ Docker Build
 ```
 docker build .
 <get final tag (4ea6105f31a3) from output >
-docker tag 4ea6105f31a3 docker.pedanticorderliness.com/club:4ea6105f31a3
-docker push docker.pedanticorderliness.com/club:4ea6105f31a3
+docker tag 4ea6105f31a3 docker.pedanticorderliness.com/club-backend:4ea6105f31a3
+docker push docker.pedanticorderliness.com/club-backend:4ea6105f31a3
 ```
 
 K8s
