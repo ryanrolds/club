@@ -31,8 +31,8 @@ func (g *GroupNode) Receive(message Message) {
 			return
 		}
 
-		member.SetParent(nil)
 		g.RemoveMember(member)
+		member.SetParent(nil)
 
 		logrus.Debugf("removed member %s from group %s", member.ID(), g.ID())
 	case MessageTypeOffer, MessageTypeAnswer, MessageTypeICECandidate:

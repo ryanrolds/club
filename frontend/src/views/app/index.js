@@ -1,39 +1,33 @@
-import React, { useContext } from 'react'
-
+import React from 'react'
+import { connect } from 'react-redux'
+import PropTypes from 'prop-types'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import Button from '@material-ui/core/Button'
-
 import TopBar from '../../components/appBar/topBar'
-import { WebSocketContext } from '../../websocket'
+import Room from '../room'
 
-import store from '../../store'
-
-let currentState = store.getState()
-
-export default function App() {
-  const ws = useContext(WebSocketContext)
-
-  store.subscribe(() => {
-    currentState = store.getState()
-    // TODO do something with state change
-    console.log(currentState)
-  })
-
+const App = ({ connected, group }) => {
   return (
-    <>
+    <div>
       <CssBaseline />
-      <main>
-        <TopBar />
-        {/* Paper or Main Page Component Here */}
-        <Button
-          variant='contained'
-          onClick={() => {
-            ws.sendJoin()
-          }}
-        >
-          Join Default Group
-        </Button>
-      </main>
-    </>
+      <TopBar />
+      {connected !== 'connected' && <span>Connecting...</span>}
+      {connected === 'connected' && group.id === undefined && <Room />}
+    </div>
   )
 }
+
+const mapStateToProps = (state) => {
+  return {
+    connected: state.connected,
+    group: state.group,
+  }
+}
+
+App.propTypes = {
+  connected: PropTypes.string.isRequired,
+  group: PropTypes.shape({
+    id: PropTypes.string,
+  }).isRequired,
+}
+
+export default connect(mapStateToProps)(App)

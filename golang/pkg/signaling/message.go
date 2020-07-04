@@ -30,7 +30,7 @@ const (
 	MessagePayloadKeyReason  = MessagePayloadKey("reason")
 	MessagePayloadKeyError   = MessagePayloadKey("error")
 	MessagePayloadKeyMessage = MessagePayloadKey("message")
-	MessagePayloadKeyGroups  = MessagePayloadKey("group_details")
+	MessagePayloadKeyGroups  = MessagePayloadKey("groups")
 	MessagePayloadKeyMembers = MessagePayloadKey("members")
 	MessagePayloadKeyNodeID  = MessagePayloadKey("id")
 )

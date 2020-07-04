@@ -18,7 +18,7 @@ matrix:
       before_install:
         - cd frontend/
       script:
-        - npm run ci
+        - make ci
 
 notifications:
   email: false

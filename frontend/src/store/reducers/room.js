@@ -1,6 +1,11 @@
 import { ROOM_JOINED, ROOM_LEFT } from '../actions/room'
 
-export default (state = {}, action) => {
+const defaultState = {
+  id: null,
+  groups: [],
+}
+
+export default (state = defaultState, action) => {
   switch (action.type) {
     case ROOM_JOINED:
       return {

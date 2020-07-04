@@ -16,8 +16,8 @@ format:
 test:
 	npm run test
 
-ci:
-	npm run ci
+ci: install lint build
+	
 
 run:
 	npm run start
