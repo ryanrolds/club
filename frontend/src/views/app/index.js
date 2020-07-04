@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import TopBar from '../../components/appBar/topBar'
+import TopBar from '../../components/app_bar/top_bar'
 import Room from '../room'
 import Group from '../group'
 
