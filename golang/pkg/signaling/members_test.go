@@ -62,10 +62,6 @@ var _ = Describe("Members", func() {
 
 			details := members.GetMembersDetails()
 			Expect(len(details)).To(Equal(2))
-			Expect(details[0].ID).To(Equal(signaling.NodeID("123")))
-			Expect(details[0].Name).To(Equal("123"))
-			Expect(details[1].ID).To(Equal(signaling.NodeID("456")))
-			Expect(details[1].Name).To(Equal("456"))
 		})
 
 		It("should return empty slice if no members", func() {
