@@ -1,11 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Group from '../group'
+import  GroupItem from '../group_item'
 
 const GroupList = ({ groups }) => (
   <ul>
     {groups.map((group) => (
-      <Group key={group.id} name={group.name} />
+      <GroupItem key={group.id} name={group.name} />
     ))}
   </ul>
 )
