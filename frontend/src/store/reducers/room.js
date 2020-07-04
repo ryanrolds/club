@@ -2,7 +2,7 @@ import { ROOM_JOINED, ROOM_LEFT } from '../actions/room'
 
 const defaultState = {
   id: null,
-  groups: []
+  groups: [],
 }
 
 export default (state = defaultState, action) => {
