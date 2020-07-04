@@ -22,8 +22,7 @@
     "test": "react-scripts test",
     "lint": "./node_modules/eslint/bin/eslint.js .",
     "format": "prettier --write \"**/*.+(js|jsx|json|yml|yaml|css|md|vue)\"",
-    "eject": "react-scripts eject",
-    "ci": "yarn install && npm run lint && npm run build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"

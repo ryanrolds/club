@@ -81,6 +81,11 @@ func (r *Room) Receive(message Message) {
 		r.RemoveMember(member)
 
 		logrus.Debugf("added member %s to group %s", member.ID(), group.ID())
+	case MessageTypeLeave:
+		r.RemoveMember(member)
+		member.SetParent(nil)
+
+		logrus.Debugf("removed member %s from room", member.ID())
 	default:
 		logrus.Warnf(`unknown message type %s`, message.Type)
 		return

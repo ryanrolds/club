@@ -8,10 +8,11 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.2.3
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lucsky/cuid v1.0.2
-	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3 // indirect
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
