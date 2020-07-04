@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import GroupList from '../group_list'
+import GroupList from '../../components/group_list'
 import { WebSocketContext } from '../../websocket'
 
 const Room = ({ groups }) => {

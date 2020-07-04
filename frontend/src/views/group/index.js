@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import MemberList from '../member_list'
+import MemberList from '../../components/member_list'
 
 const Group = ({ id, members }) => {
   return (
