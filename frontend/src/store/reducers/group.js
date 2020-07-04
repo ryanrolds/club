@@ -4,7 +4,7 @@ import { PEER_JOIN, PEER_LEAVE } from '../actions/peer'
 const intialState = {}
 
 export default (state = intialState, action) => {
-  let newState = {...state}
+  const newState = { ...state }
 
   switch (action.type) {
     case GROUP_JOINED:
@@ -18,7 +18,7 @@ export default (state = intialState, action) => {
       if (state.id) {
         newState.members = [
           ...state.members.slice(0),
-          {id: action.id, name: action.id}
+          { id: action.id, name: action.id },
         ]
       }
 
