@@ -1,18 +1,19 @@
-export const JOIN_GROUP = 'join_group'
-export const LEAVE_GROUP = 'leave_group'
-export const GROUP_MEMBER_JOIN = 'socket_connected'
-export const GROUP_MEMBER_LEFT = 'socket_disconnected'
+export const GROUP_JOINED = 'group_joined'
+export const GROUP_LEFT = 'group_left'
+export const GROUP_MEMBER_JOIN = 'peer_joined'
+export const GROUP_MEMBER_LEFT = 'peed_left'
 
-export const joinGroup = (id) => {
+export const groupJoined = (id, members) => {
   return {
-    type: JOIN_GROUP,
+    type: GROUP_JOINED,
     id: id,
+    members: members,
   }
 }
 
-export const leaveGroup = (id) => {
+export const groupLeft = (id) => {
   return {
-    type: LEAVE_GROUP,
+    type: GROUP_LEFT,
     id: id,
   }
 }

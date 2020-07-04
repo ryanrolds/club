@@ -1,11 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import GroupItem from '../group_item'
+import GroupListItem from '../group_list_item'
 
-const GroupList = ({ groups }) => (
+const GroupList = ({ groups, onGroupClick }) => (
   <ul>
     {groups.map((group) => (
-      <GroupItem key={group.id} name={group.name} />
+      <GroupListItem key={group.id} name={group.name} onClick={() => onGroupClick(group.id)} />
     ))}
   </ul>
 )
@@ -17,8 +17,9 @@ GroupList.propTypes = {
       name: PropTypes.string.isRequire,
       // members: PropTypes.arrayOf(PropTypes.shape({}).isRequired),
       num_members: PropTypes.number.isRequired,
-    }).isRequired
+    }).isRequired,
   ).isRequired,
+  onGroupClick: PropTypes.func.isRequired,
 }
 
 export default GroupList

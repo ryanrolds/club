@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 
 import { socketConnected, socketDisconnected } from './store/actions/websocket'
 import { ROOM_JOINED, ROOM_LEFT, roomJoined, roomLeft } from './store/actions/room'
+import { GROUP_JOINED, groupJoined } from './store/actions/group'
 
 const WebSocketContext = createContext(null)
 export { WebSocketContext }
@@ -43,6 +44,9 @@ export default ({ children }) => {
           break
         case ROOM_LEFT:
           dispatch(roomLeft())
+          break
+        case GROUP_JOINED:
+          dispatch(groupJoined(data.payload.id, data.payload.members))
           break
         default:
           console.error('invalid message type', data.type)
