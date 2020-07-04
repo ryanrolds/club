@@ -5,12 +5,13 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import TopBar from '../../components/appBar/topBar'
 import Room from '../room'
 
-const App = ({ props }) => {
+const App = ({ connected, group }) => {
   return (
     <div>
       <CssBaseline />
       <TopBar />
-      <Room />
+      {connected !== 'connected' && <span>Connecting...</span>}
+      {connected === 'connected' && group.id === undefined && <Room />}
     </div>
   )
 }
@@ -18,14 +19,15 @@ const App = ({ props }) => {
 const mapStateToProps = (state) => {
   return {
     connected: state.connected,
-    group: state.group
+    group: state.group,
   }
 }
 
-
 App.propTypes = {
-  connected :PropTypes.string.isRequired,
-  group: PropTypes.shape({}).isRequired,
+  connected: PropTypes.string.isRequired,
+  group: PropTypes.shape({
+    id: PropTypes.string,
+  }).isRequired,
 }
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps)(App)

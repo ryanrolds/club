@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import  GroupItem from '../group_item'
+import GroupItem from '../group_item'
 
 const GroupList = ({ groups }) => (
   <ul>
