@@ -7,9 +7,7 @@ import { WebSocketContext } from '../../websocket'
 const Room = ({ groups }) => {
   const ws = useContext(WebSocketContext)
 
-  return (
-    <GroupList groups={groups} onGroupClick={(id) => ws.sendJoin(id)} />
-  )
+  return <GroupList groups={groups} onGroupClick={(id) => ws.sendJoin(id)} />
 }
 
 Room.propTypes = {
@@ -19,7 +17,7 @@ Room.propTypes = {
       name: PropTypes.string.isRequire,
       // members: PropTypes.arrayOf(PropTypes.shape({}).isRequired),
       num_members: PropTypes.number.isRequired,
-    }).isRequired,
+    }).isRequired
   ).isRequired,
 }
 

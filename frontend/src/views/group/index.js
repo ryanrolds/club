@@ -16,7 +16,7 @@ Group.propTypes = {
   id: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired
+      id: PropTypes.string.isRequired,
     })
   ).isRequired,
 }

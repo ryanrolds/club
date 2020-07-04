@@ -5,7 +5,7 @@ import MemberListItem from '../member_list_item'
 const MemberList = ({ members }) => (
   <ul>
     {members.map((member) => (
-      <MemberListItem key={member.id} id={member.id} name={member.name}/>
+      <MemberListItem key={member.id} id={member.id} name={member.name} />
     ))}
   </ul>
 )
