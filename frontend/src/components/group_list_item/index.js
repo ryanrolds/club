@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button'
 
 const Group = ({ name, onClick }) => (
   <Button onClick={onClick}>
-    Join
+    Join&nbsp;
     {name}
   </Button>
 )
