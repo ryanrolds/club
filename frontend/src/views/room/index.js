@@ -2,8 +2,6 @@ import { connect } from 'react-redux'
 import GroupList from '../group_list'
 
 const mapStateToProps = state => {
-    console.log(state)
-
     return {
         groups: state.room.groups
     }
