@@ -41,7 +41,9 @@ export default ({ children }) => {
 
       switch (data.type) {
         case ROOM_JOINED:
-          dispatch(roomJoined(data.payload.id, data.payload.groups))
+          dispatch(
+            roomJoined(data.payload.id, data.payload.local_id, data.payload.groups)
+          )
           break
         case ROOM_LEFT:
           dispatch(roomLeft())
