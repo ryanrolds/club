@@ -32,8 +32,8 @@ const (
 	MessagePayloadKeyMessage = MessagePayloadKey("message")
 	MessagePayloadKeyGroups  = MessagePayloadKey("groups")
 	MessagePayloadKeyMembers = MessagePayloadKey("members")
-  MessagePayloadKeyNodeID  = MessagePayloadKey("id")
-  MessagePayloadKeyLocalID = MessagePayloadKey("local_id")
+	MessagePayloadKeyNodeID  = MessagePayloadKey("id")
+	MessagePayloadKeyLocalID = MessagePayloadKey("local_id")
 )
 
 var validate = validator.New()
@@ -51,7 +51,7 @@ func NewJoinedRoomMessage(id NodeID, room *Room) Message {
 		SourceID:      room.ID(),
 		DestinationID: id,
 		Payload: MessagePayload{
-      MessagePayloadKeyLocalID: id,
+			MessagePayloadKeyLocalID: id,
 			MessagePayloadKeyNodeID:  room.ID(),
 			MessagePayloadKeyGroups:  room.GetDetailsForGroups(),
 		},
