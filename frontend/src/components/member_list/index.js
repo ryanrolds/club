@@ -6,7 +6,7 @@ import LocalPeer from '../peer_local'
 const MemberList = ({ localID, members }) => (
   <ul>
     <li>
-      <LocalPeer />
+      <LocalPeer id={localID} />
     </li>
     {members.map(
       (member) =>
