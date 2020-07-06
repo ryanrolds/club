@@ -19,21 +19,39 @@ const url = `${isHTTPS ? 'wss' : 'ws'}://${hostUrl.hostname}:3001/room`
 export default ({ children }) => {
   let websocket
   let ws
-
   const peerEventListeners = {}
-  const notifyPeerEventListeners = (peerID, event) => {
-    if (!lodash.has(peerEventListeners, peerID)) {
-      throw new Error('unknown peerID')
-    }
-
-    peerEventListeners[peerID].forEach((listener) => {
-      listener(event)
-    })
-  }
-
   const dispatch = useDispatch()
 
   if (!websocket) {
+    const addPeerEventListener = (peerID, listener) => {
+      if (!lodash.has(peerEventListeners, peerID)) {
+        peerEventListeners[peerID] = []
+      }
+
+      peerEventListeners[peerID].push(listener)
+    }
+
+    const removePeerEventListener = (peerID, listener) => {
+      if (!lodash.has(peerEventListeners, peerID)) {
+        throw new Error('unknown peerID')
+      }
+
+      peerEventListeners[peerID] = lodash.remove(
+        peerEventListeners[peerID],
+        listener
+      )
+    }
+
+    const notifyPeerEventListeners = (peerID, type, event) => {
+      if (!lodash.has(peerEventListeners, peerID)) {
+        throw new Error('unknown peerID')
+      }
+
+      peerEventListeners[peerID].forEach((listener) => {
+        listener(type, event)
+      })
+    }
+
     websocket = new WebSocket(url)
 
     websocket.addEventListener('open', () => {
@@ -74,8 +92,7 @@ export default ({ children }) => {
         case RTC_OFFER:
         case RTC_ANSWER:
         case RTC_ICECANDIDATE:
-          console.log(data.type, data)
-          notifyPeerEventListeners(data.payload)
+          notifyPeerEventListeners(data.peerId, data.type, data.payload)
           break
         default:
           console.error('invalid message type', data.type)
@@ -109,25 +126,6 @@ export default ({ children }) => {
     const sendICECandidate = (peerId, candidate) => {
       websocket.send(
         JSON.stringify({ type: 'icecandidate', destId: peerId, payload: candidate })
-      )
-    }
-
-    const addPeerEventListener = (peerID, listener) => {
-      if (!lodash.has(peerEventListeners, peerID)) {
-        peerEventListeners[peerID] = []
-      }
-
-      peerEventListeners[peerID] = peerEventListeners[peerID].push(listener)
-    }
-
-    const removePeerEventListener = (peerID, listener) => {
-      if (!lodash.has(peerEventListeners, peerID)) {
-        throw new Error('unknown peerID')
-      }
-
-      peerEventListeners[peerID] = lodash.remove(
-        peerEventListeners[peerID],
-        listener
       )
     }
 

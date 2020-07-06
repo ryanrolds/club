@@ -18,7 +18,7 @@ export default (state = intialState, action) => {
       if (state.id) {
         newState.members = [
           ...state.members.slice(0),
-          { id: action.id, name: action.id },
+          { id: action.id, name: action.id, sendOffer: true },
         ]
       }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import Button from '@material-ui/core/Button'
 import { makeStyles } from '@material-ui/core/styles'
@@ -11,9 +11,8 @@ const useStyles = makeStyles({
   button: {},
 })
 
-const PeerLocal = ({ id }) => {
+const PeerLocal = ({ id, stream, setStream }) => {
   const classes = useStyles()
-  const [stream, setStream] = useState(null)
 
   const enableVideo = () => {
     const opts = { audio: true, video: true }
@@ -41,6 +40,8 @@ const PeerLocal = ({ id }) => {
 
 PeerLocal.propTypes = {
   id: PropTypes.string.isRequired,
+  stream: PropTypes.instanceOf(MediaStream),
+  setStream: PropTypes.func.isRequired,
 }
 
 export default PeerLocal
