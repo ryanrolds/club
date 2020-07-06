@@ -112,7 +112,7 @@ const PeerRemote = ({ id, localStream }) => {
 
   return (
     <div className={classes.root}>
-      <Media id={id} srcObject={stream} autoPlay muted className={classes.media} />
+      <Media id={id} srcObject={stream} autoPlay className={classes.media} />
     </div>
   )
 }
