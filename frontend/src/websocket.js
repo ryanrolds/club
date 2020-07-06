@@ -1,10 +1,13 @@
 import React, { createContext } from 'react'
 import { useDispatch } from 'react-redux'
 
+import lodash from 'lodash'
+
 import { socketConnected, socketDisconnected } from './store/actions/websocket'
 import { ROOM_JOINED, ROOM_LEFT, roomJoined, roomLeft } from './store/actions/room'
 import { GROUP_JOINED, groupJoined } from './store/actions/group'
 import { PEER_JOIN, PEER_LEAVE, peerJoin, peerLeave } from './store/actions/peer'
+import { RTC_OFFER, RTC_ANSWER, RTC_ICECANDIDATE } from './store/actions/rtc'
 
 const WebSocketContext = createContext(null)
 export { WebSocketContext }
@@ -16,6 +19,17 @@ const url = `${isHTTPS ? 'wss' : 'ws'}://${hostUrl.hostname}:3001/room`
 export default ({ children }) => {
   let websocket
   let ws
+
+  const peerEventListeners = {}
+  const notifyPeerEventListeners = (peerID, event) => {
+    if (!lodash.has(peerEventListeners, peerID)) {
+      throw new Error('unknown peerID')
+    }
+
+    peerEventListeners[peerID].forEach((listener) => {
+      listener(event)
+    })
+  }
 
   const dispatch = useDispatch()
 
@@ -57,6 +71,12 @@ export default ({ children }) => {
         case PEER_LEAVE:
           dispatch(peerLeave(data.peerId))
           break
+        case RTC_OFFER:
+        case RTC_ANSWER:
+        case RTC_ICECANDIDATE:
+          console.log(data.type, data)
+          notifyPeerEventListeners(data.payload)
+          break
         default:
           console.error('invalid message type', data.type)
       }
@@ -92,6 +112,25 @@ export default ({ children }) => {
       )
     }
 
+    const addPeerEventListener = (peerID, listener) => {
+      if (!lodash.has(peerEventListeners, peerID)) {
+        peerEventListeners[peerID] = []
+      }
+
+      peerEventListeners[peerID] = peerEventListeners[peerID].push(listener)
+    }
+
+    const removePeerEventListener = (peerID, listener) => {
+      if (!lodash.has(peerEventListeners, peerID)) {
+        throw new Error('unknown peerID')
+      }
+
+      peerEventListeners[peerID] = lodash.remove(
+        peerEventListeners[peerID],
+        listener
+      )
+    }
+
     ws = {
       websocket: websocket,
       sendJoin,
@@ -99,6 +138,8 @@ export default ({ children }) => {
       sendOffer,
       sendAnswer,
       sendICECandidate,
+      addPeerEventListener,
+      removePeerEventListener,
     }
   }
 
