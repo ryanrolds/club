@@ -19,7 +19,6 @@ const MemberList = ({ localID, members }) => {
               id={member.id}
               name={member.name}
               localStream={localStream}
-              sendOffer={member.sendOffer}
             />
           )
       )}
@@ -33,7 +32,6 @@ MemberList.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
-      sendOffer: PropTypes.bool,
     }).isRequired
   ).isRequired,
 }

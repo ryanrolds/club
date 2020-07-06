@@ -1,5 +1,4 @@
 import React, { useState, useContext, useEffect } from 'react'
-import lodash from 'lodash'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -20,7 +19,7 @@ const config = {
   ],
 }
 
-const PeerRemote = ({ id, localStream, sendOffer }) => {
+const PeerRemote = ({ id, localStream }) => {
   const ws = useContext(WebSocketContext)
   const classes = useStyles()
   const [stream, setStream] = useState(null)
@@ -28,25 +27,24 @@ const PeerRemote = ({ id, localStream, sendOffer }) => {
   const tracks = []
 
   const getOffer = () => {
-    return peer.createOffer({
-      offerToReceiveVideo: 1,
-      offerToReceiveAudio: 1,
-    }).then((offer) => {
-      return peer.setLocalDescription(offer)
-        .then(() => {
+    return peer
+      .createOffer({
+        offerToReceiveVideo: 1,
+        offerToReceiveAudio: 1,
+      })
+      .then((offer) => {
+        return peer.setLocalDescription(offer).then(() => {
           return offer
         })
-    })
+      })
   }
 
   const getAnswer = () => {
-    return peer.createAnswer()
-      .then((answer) => {
-        return peer.setLocalDescription(answer)
-          .then(() => {
-            return answer
-          })
+    return peer.createAnswer().then((answer) => {
+      return peer.setLocalDescription(answer).then(() => {
+        return answer
       })
+    })
   }
 
   const addTracks = () => {
@@ -65,28 +63,32 @@ const PeerRemote = ({ id, localStream, sendOffer }) => {
       }
     })
 
-    peer.addEventListener("track", (track) => {
+    peer.addEventListener('track', (track) => {
       setStream(track.streams[0])
     })
 
-    peer.addEventListener("negotiationneeded", (event) => {
-      getOffer().then((offer) => {
-        ws.sendOffer(id, offer)
-      }).catch((err) => {
-        console.log(err)
-      })
+    peer.addEventListener('negotiationneeded', () => {
+      getOffer()
+        .then((offer) => {
+          ws.sendOffer(id, offer)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
     })
 
     ws.addPeerEventListener(id, (type, event) => {
-      switch(type) {
+      switch (type) {
         case 'offer':
           peer.setRemoteDescription(event)
 
-          getAnswer().then((offer) => {
-            ws.sendAnswer(id, offer)
-          }).catch((err) => {
-            console.log(err)
-          })
+          getAnswer()
+            .then((offer) => {
+              ws.sendAnswer(id, offer)
+            })
+            .catch((err) => {
+              console.log(err)
+            })
           break
         case 'answer':
           peer.setRemoteDescription(event)
@@ -95,10 +97,10 @@ const PeerRemote = ({ id, localStream, sendOffer }) => {
           peer.addIceCandidate(event)
           break
         default:
-          console.log("unknown event", event)
+          console.log('unknown event', event)
       }
     })
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!localStream) {
@@ -106,7 +108,7 @@ const PeerRemote = ({ id, localStream, sendOffer }) => {
     }
 
     addTracks()
-  }, [localStream])
+  }, [localStream]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={classes.root}>
@@ -116,13 +118,12 @@ const PeerRemote = ({ id, localStream, sendOffer }) => {
 }
 
 PeerRemote.defaultProps = {
-  sendOffer: false,
+  localStream: null,
 }
 
 PeerRemote.propTypes = {
   id: PropTypes.string.isRequired,
   localStream: PropTypes.instanceOf(MediaStream),
-  sendOffer: PropTypes.bool,
 }
 
 export default PeerRemote

@@ -38,6 +38,10 @@ const PeerLocal = ({ id, stream, setStream }) => {
   )
 }
 
+PeerLocal.defaultProps = {
+  stream: null,
+}
+
 PeerLocal.propTypes = {
   id: PropTypes.string.isRequired,
   stream: PropTypes.instanceOf(MediaStream),
