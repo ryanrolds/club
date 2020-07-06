@@ -49,7 +49,7 @@ func NewWebsocketPeer(conn WebsocketConn, parent ReceiverNode) *WebsocketPeer {
 func (p *WebsocketPeer) Receive(message Message) {
 	logrus.Debugf("queueing message for %s", p.ID())
 	p.messages <- message
-	logrus.Debugf("finshed queuing message for %s", p.ID())
+	logrus.Debugf("finished queuing message for %s", p.ID())
 }
 
 func (p *WebsocketPeer) PumpWrite() {

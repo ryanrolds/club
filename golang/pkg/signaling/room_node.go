@@ -63,9 +63,9 @@ func (r *Room) Receive(message Message) {
 		var group ReceiverGroup
 
 		// When joining a group, make sure to remove them from their previous group
-		recevier := member.GetParent()
+		receiver := member.GetParent()
 		if group != nil {
-			group = r.GetGroup(recevier.ID())
+			group = r.GetGroup(receiver.ID())
 			group.RemoveMember(member)
 			member.SetParent(nil)
 		}

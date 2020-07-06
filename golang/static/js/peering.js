@@ -73,8 +73,15 @@ class Peering {
     let video = document.createElement("video")
     video.id = peerId
     video.autoplay = true
+    video.controls = true
+    video.muted = true
+    video.poster = 'https://upload.wikimedia.org/wikipedia/commons/d/d3/WUERFEL5_0-_bis_5-dimensionale_Wuerfelanaloge.png'
 
     this.videosElm.appendChild(video)
+
+    setTimeout(() => {
+      video.play()
+    }, 1000)
 
     peer.addEventListener('icecandidate', ({ candidate }) => {
       if (candidate) {
