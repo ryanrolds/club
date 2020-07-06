@@ -3,17 +3,18 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import MemberList from '../../components/member_list'
 
-const Group = ({ id, members }) => {
+const Group = ({ id, localID, members }) => {
   return (
     <>
       <div>{id}</div>
-      <MemberList members={members} />
+      <MemberList localID={localID} members={members} />
     </>
   )
 }
 
 Group.propTypes = {
   id: PropTypes.string.isRequired,
+  localID: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -25,6 +26,7 @@ const mapStateToProps = (state) => {
   return {
     id: state.group.id,
     members: state.group.members,
+    localID: state.local.id,
   }
 }
 
