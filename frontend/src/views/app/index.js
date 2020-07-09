@@ -1,15 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import TopBar from '../../components/app_bar/top_bar'
+// import TopBar from '../../components/app_bar/top_bar'
 import Room from '../room'
 import Group from '../group'
 
 const App = ({ connected, group }) => {
   return (
-    <div>
+    <div height='100%'>
       {connected !== 'connected' && <span>Connecting...</span>}
-      {connected === 'connected' && <TopBar />}
+      {/* connected === 'connected' && <TopBar /> */}
       {connected === 'connected' && group.id === undefined && <Room />}
       {connected === 'connected' && group.id !== undefined && <Group />}
     </div>

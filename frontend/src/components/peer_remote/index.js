@@ -7,7 +7,11 @@ import Media from '../media'
 
 const useStyles = makeStyles({
   root: {},
-  media: {},
+  media: {
+    'text-align': 'center',
+    height: '100%',
+    width: '100%',
+  },
   button: {},
 })
 

@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import GroupList from '../../components/group_list'
+import GroupGrid from '../../components/group_grid'
 import { WebSocketContext } from '../../websocket'
 
 const Room = ({ groups }) => {
   const ws = useContext(WebSocketContext)
 
-  return <GroupList groups={groups} onGroupClick={(id) => ws.sendJoin(id)} />
+  return <GroupGrid groups={groups} onGroupClick={(id) => ws.sendJoin(id)} />
 }
 
 Room.propTypes = {
