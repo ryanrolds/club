@@ -1,19 +1,18 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import MemberList from '../../components/member_list'
+import MemberGrid from '../../components/member_grid'
 
-const Group = ({ id, localID, members }) => {
+const Group = ({ localID, members }) => {
   return (
     <>
-      <div>{id}</div>
-      <MemberList localID={localID} members={members} />
+      {/* <div>{id}</div> */}
+      <MemberGrid localID={localID} members={members} />
     </>
   )
 }
 
 Group.propTypes = {
-  id: PropTypes.string.isRequired,
   localID: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(
     PropTypes.shape({
