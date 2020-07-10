@@ -77,7 +77,7 @@ const PeerRemote = ({ id, localStream }) => {
       ws.sendOffer(id, offer)
     })
 
-    ws.addPeerEventListener(id, async (type, event) => {
+    const wsEventListener = async (type, event) => {
       let answer = null
 
       switch (type) {
@@ -96,7 +96,13 @@ const PeerRemote = ({ id, localStream }) => {
         default:
           console.log('unknown event', event)
       }
-    })
+    }
+
+    ws.addPeerEventListener(id, wsEventListener)
+
+    return () => {
+      ws.removePeerEventListener(id, wsEventListener)
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
