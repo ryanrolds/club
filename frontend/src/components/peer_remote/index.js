@@ -6,11 +6,18 @@ import { WebSocketContext } from '../../websocket'
 import Media from '../media'
 
 const useStyles = makeStyles({
-  root: {},
+  root: {
+    position: 'relative',
+  },
   media: {
     'text-align': 'center',
     height: '100%',
     width: '100%',
+  },
+  label: {
+    position: 'absolute',
+    top: '0.5em',
+    left: '0.5em',
   },
   button: {},
 })
@@ -30,25 +37,19 @@ const PeerRemote = ({ id, localStream }) => {
   const [peer] = useState(new RTCPeerConnection(config))
   const tracks = []
 
-  const getOffer = () => {
-    return peer
-      .createOffer({
-        offerToReceiveVideo: 1,
-        offerToReceiveAudio: 1,
-      })
-      .then((offer) => {
-        return peer.setLocalDescription(offer).then(() => {
-          return offer
-        })
-      })
+  const getOffer = async () => {
+    const offer = await peer.createOffer({
+      offerToReceiveVideo: 1,
+      offerToReceiveAudio: 1,
+    })
+    await peer.setLocalDescription(offer)
+    return offer
   }
 
-  const getAnswer = () => {
-    return peer.createAnswer().then((answer) => {
-      return peer.setLocalDescription(answer).then(() => {
-        return answer
-      })
-    })
+  const getAnswer = async () => {
+    const answer = await peer.createAnswer()
+    await peer.setLocalDescription(answer)
+    return answer
   }
 
   const addTracks = () => {
@@ -71,34 +72,26 @@ const PeerRemote = ({ id, localStream }) => {
       setStream(track.streams[0])
     })
 
-    peer.addEventListener('negotiationneeded', () => {
-      getOffer()
-        .then((offer) => {
-          ws.sendOffer(id, offer)
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+    peer.addEventListener('negotiationneeded', async () => {
+      const offer = await getOffer()
+      ws.sendOffer(id, offer)
     })
 
-    ws.addPeerEventListener(id, (type, event) => {
+    ws.addPeerEventListener(id, async (type, event) => {
+      let answer = null
+
       switch (type) {
         case 'offer':
-          peer.setRemoteDescription(event)
+          await peer.setRemoteDescription(event)
 
-          getAnswer()
-            .then((offer) => {
-              ws.sendAnswer(id, offer)
-            })
-            .catch((err) => {
-              console.log(err)
-            })
+          answer = await getAnswer()
+          ws.sendAnswer(id, answer)
           break
         case 'answer':
-          peer.setRemoteDescription(event)
+          await peer.setRemoteDescription(event)
           break
         case 'icecandidate':
-          peer.addIceCandidate(event)
+          await peer.addIceCandidate(event)
           break
         default:
           console.log('unknown event', event)
@@ -117,6 +110,10 @@ const PeerRemote = ({ id, localStream }) => {
   return (
     <div className={classes.root}>
       <Media id={id} srcObject={stream} autoPlay className={classes.media} />
+      <span className={classes.label}>
+        Peer&nbsp;-&nbps;
+        {id}
+      </span>
     </div>
   )
 }

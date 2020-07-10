@@ -1,21 +1,20 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import Lodash from 'lodash'
 import { makeStyles } from '@material-ui/core/styles'
-import MemberGridRow from '../member_grid_row'
+import MemberGridItem from '../member_grid_item'
 
 const useStyles = makeStyles({
   grid: {
     display: 'grid',
     width: '100vw',
     height: '100vh',
+    padding: '1rem',
     'grid-gap': '1rem',
     'justify-content': 'center',
     'align-content': 'center',
   },
   gridColumns: (props) => ({
-    'grid-template-columns': `repeat(${props.cols}, ${120 / props.cols}vmin)`,
-    'grid-template-rows': `repeat(${props.rowss}, ${120 / props.rows}vmin)`,
+    'grid-template-columns': `repeat(auto-fit, ${120 / props.cols}vmin)`,
   }),
 })
 
@@ -24,16 +23,17 @@ const MemberGrid = ({ localID, members }) => {
   const numMembers = members.length
   const sqrtMembers = Math.sqrt(numMembers)
   const numColumns = Math.ceil(sqrtMembers)
-  const rows = Lodash.chunk(members, numColumns)
-  const classes = useStyles({ cols: numColumns, rows: rows.length })
+  const classes = useStyles({ cols: numColumns })
+  const colSize = numColumns * (numColumns / members.length)
 
   return (
     <div className={`${classes.grid} ${classes.gridColumns}`}>
-      {rows.map((row, index) => (
-        <MemberGridRow
-          key={`member_row_${index}`} // eslint-disable-line react/no-array-index-key
-          cols={numColumns}
-          members={row}
+      {members.map((member) => (
+        <MemberGridItem
+          key={member.id}
+          colSize={colSize}
+          id={member.id}
+          name={member.name}
           localID={localID}
           localStream={localStream}
           setLocalStream={setLocalStream}
