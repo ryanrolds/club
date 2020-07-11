@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import {ButtonGroup, Button} from '@material-ui/core'
+import { ButtonGroup, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 
 import Media from '../media'
@@ -39,9 +39,10 @@ const PeerLocal = ({ id, stream, setStream }) => {
   const [video, setVideo] = useState(false)
   const [audio, setAudio] = useState(false)
 
-  const toggleTracks = (tracks, enabled) => {
+  const toggleTracks = (tracks, status) => {
     tracks.forEach((track) => {
-      track.enabled = enabled;
+      const t = track
+      t.enabled = status
     })
   }
 
@@ -87,11 +88,16 @@ const PeerLocal = ({ id, stream, setStream }) => {
   return (
     <div className={classes.root}>
       <Media id={id} srcObject={stream} autoPlay muted className={classes.media} />
-      <span className={classes.label} color={"primary"}>
+      <span className={classes.label} color='primary'>
         Local&nbsp;-&nbsp;
         {id}
       </span>
-      <ButtonGroup size="small" aria-label="small outlined button group" color={"primary"} className={classes.controls}>
+      <ButtonGroup
+        size='small'
+        aria-label='small outlined button group'
+        color='primary'
+        className={classes.controls}
+      >
         {!video && (
           <Button onClick={enableVideo} className={classes.videoButton}>
             Enable video
