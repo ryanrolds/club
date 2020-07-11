@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import Button from '@material-ui/core/Button'
+import {ButtonGroup, Button} from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 
 import Media from '../media'
@@ -12,15 +12,22 @@ const useStyles = makeStyles({
   root: {
     position: 'relative',
     overflow: 'hidden',
+    'background-color': '#000000',
+    height: '100%',
+  },
+  label: {
+    position: 'absolute',
+    top: '0.5em',
+    left: '0.5em',
   },
   media: {
     'text-align': 'center',
     height: '100%',
     width: '100%',
   },
-  label: {
+  controls: {
     position: 'absolute',
-    top: '0.5em',
+    bottom: '0.5em',
     left: '0.5em',
   },
   videoButton: {},
@@ -80,30 +87,32 @@ const PeerLocal = ({ id, stream, setStream }) => {
   return (
     <div className={classes.root}>
       <Media id={id} srcObject={stream} autoPlay muted className={classes.media} />
-      <span className={classes.label}>
+      <span className={classes.label} color={"primary"}>
         Local&nbsp;-&nbsp;
         {id}
       </span>
-      {!video && (
-        <Button onClick={enableVideo} className={classes.videoButton}>
-          Enable video
-        </Button>
-      )}
-      {video && (
-        <Button onClick={disableVideo} className={classes.videoButton}>
-          Disable video
-        </Button>
-      )}
-      {!audio && (
-        <Button onClick={enableAudio} className={classes.audioButton}>
-          Enable Audio
-        </Button>
-      )}
-      {audio && (
-        <Button onClick={disableAudio} className={classes.audioButton}>
-          Disable Audio
-        </Button>
-      )}
+      <ButtonGroup size="small" aria-label="small outlined button group" color={"primary"} className={classes.controls}>
+        {!video && (
+          <Button onClick={enableVideo} className={classes.videoButton}>
+            Enable video
+          </Button>
+        )}
+        {video && (
+          <Button onClick={disableVideo} className={classes.videoButton}>
+            Disable video
+          </Button>
+        )}
+        {!audio && (
+          <Button onClick={enableAudio} className={classes.audioButton}>
+            Enable Audio
+          </Button>
+        )}
+        {audio && (
+          <Button onClick={disableAudio} className={classes.audioButton}>
+            Disable Audio
+          </Button>
+        )}
+      </ButtonGroup>
     </div>
   )
 }
