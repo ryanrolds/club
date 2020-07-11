@@ -8,6 +8,9 @@ import Media from '../media'
 const useStyles = makeStyles({
   root: {
     position: 'relative',
+    overflow: 'hidden',
+    'background-color': '#000000',
+    height: '100%',
   },
   media: {
     'text-align': 'center',
@@ -19,7 +22,6 @@ const useStyles = makeStyles({
     top: '0.5em',
     left: '0.5em',
   },
-  button: {},
 })
 
 const config = {
@@ -117,7 +119,7 @@ const PeerRemote = ({ id, localStream }) => {
     <div className={classes.root}>
       <Media id={id} srcObject={stream} autoPlay className={classes.media} />
       <span className={classes.label}>
-        Peer&nbsp;-&nbps;
+        Peer&nbsp;-&nbsp;
         {id}
       </span>
     </div>

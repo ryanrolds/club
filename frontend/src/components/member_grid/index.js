@@ -28,17 +28,29 @@ const MemberGrid = ({ localID, members }) => {
 
   return (
     <div className={`${classes.grid} ${classes.gridColumns}`}>
-      {members.map((member) => (
-        <MemberGridItem
-          key={member.id}
-          colSize={colSize}
-          id={member.id}
-          name={member.name}
-          localID={localID}
-          localStream={localStream}
-          setLocalStream={setLocalStream}
-        />
-      ))}
+      <MemberGridItem
+        key={localID}
+        colSize={colSize}
+        id={localID}
+        name={localID}
+        localID={localID}
+        localStream={localStream}
+        setLocalStream={setLocalStream}
+      />
+      {members.map(
+        (member) =>
+          member.id !== localID && (
+            <MemberGridItem
+              key={member.id}
+              colSize={colSize}
+              id={member.id}
+              name={member.name}
+              localID={localID}
+              localStream={localStream}
+              setLocalStream={setLocalStream}
+            />
+          )
+      )}
     </div>
   )
 }
