@@ -36,10 +36,9 @@ export default ({ children }) => {
         throw new Error('unknown peerID')
       }
 
-      peerEventListeners[peerID] = lodash.remove(
-        peerEventListeners[peerID],
-        listener
-      )
+      lodash.remove(peerEventListeners[peerID], (item) => {
+        return item === listener
+      })
     }
 
     const notifyPeerEventListeners = (peerID, type, event) => {

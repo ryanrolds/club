@@ -65,7 +65,9 @@ const PeerRemote = ({ id, localStream }) => {
 
   useEffect(() => {
     peer.addEventListener('icecandidate', ({ candidate }) => {
-      if (candidate) {
+      // Some browsers (non-FF) do not support end-of-candidate message
+      // don't relay those message to peers
+      if (candidate && candidate.candidate !== "") {
         ws.sendICECandidate(id, candidate)
       }
     })
@@ -93,7 +95,11 @@ const PeerRemote = ({ id, localStream }) => {
           await peer.setRemoteDescription(event)
           break
         case 'icecandidate':
-          await peer.addIceCandidate(event)
+          if (event.candidate === "") {
+            await peer.addIceCandidate(null)
+          } else {
+            await peer.addIceCandidate(event)
+          }
           break
         default:
           console.log('unknown event', event)
