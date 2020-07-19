@@ -2,6 +2,7 @@ package signaling
 
 import (
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -130,6 +131,10 @@ func (r *Room) GetDetailsForGroups() []GroupDetails {
 	for _, group := range r.groups {
 		groups = append(groups, group.GetDetails())
 	}
+
+	sort.Slice(groups, func(i, j int) bool {
+		return groups[i].Name < groups[j].Name
+	})
 
 	return groups
 }
