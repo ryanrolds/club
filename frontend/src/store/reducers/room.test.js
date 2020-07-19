@@ -9,7 +9,7 @@ const groupFoo = {
 }
 
 it('should return room joined state', () => {
-  const state = roomReducer({}, roomJoined('id', [groupFoo]))
+  const state = roomReducer({}, roomJoined('id', 'localID', [groupFoo]))
   expect(state).toEqual({
     id: 'id',
     groups: [groupFoo],

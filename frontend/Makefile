@@ -1,4 +1,4 @@
-.PHONY: install build lint lint-fix format test ci run run-debug all
+.PHONY: install build lint lint-fix format test test-ci ci run run-debug all
 
 install:
 	yarn install
@@ -19,7 +19,10 @@ format:
 test:
 	npm run test
 
-ci: install lint build
+test-ci:
+	CI=test npm run test
+
+ci: install lint test-ci build
 
 run:
 	npm run start
