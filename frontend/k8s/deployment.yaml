@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: club-backend-${ENV}
+  name: club-frontend-${ENV}
   labels:
-    app: club-backend
+    app: club-frontend
     env: ${ENV}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: club-backend
+      app: club-frontend
       env: ${ENV}
   template:
     metadata:
       labels:
-        app: club-backend
+        app: club-frontend
         env: ${ENV}
     spec:
       containers:
-      - name: club
-        image: docker.pedanticorderliness.com/club-backend:${TAG_NAME}
+      - name: frontend
+        image: docker.pedanticorderliness.com/club-frontend:${TAG_NAME}
         ports:
-        - containerPort: 3000
+        - containerPort: 80
         env:
         - name: ENV
           value: ${ENV}
