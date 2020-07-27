@@ -12,7 +12,7 @@ jobs:
       with:
         go-version: ^1.14
       id: go
-    - name: Check out code into the Go module directory
+    - name: Check out code
       uses: actions/checkout@v2
     - name: Get deps
       run: make install
@@ -34,7 +34,7 @@ jobs:
         password: ${{ secrets.DOCKER_REG_PASS }}
         repository: club-backend
         tags: ${{ github.sha }},latest
-        dockerfile: golang/Dockerfile
+        path: golang
     - name: Deploy
       run: |
         curl --fail -X PUT -H "X-Access-Token: ${{ secrets.ACTIONS_ACCESS_TOKEN }}" "https://actions.pedanticorderliness.com/deploy?repo=$GITHUB_REPOSITORY/backend&tag=$GITHUB_SHA"
