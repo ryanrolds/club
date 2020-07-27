@@ -1,0 +1,41 @@
+name: backend
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.14
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Get deps
+      run: make install
+      working-directory: golang
+    - name: Lint
+      run: make lint
+      working-directory: golang
+    - name: Build
+      run: make build
+      working-directory: golang
+    - name: Test
+      run: make test
+      working-directory: golang
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v1.1.0
+      with:
+        registry: docker.pedanticorderliness.com
+        username: ${{ secrets.DOCKER_REG_USER }}
+        password: ${{ secrets.DOCKER_REG_PASS }}
+        repository: club-backend
+        tags: ${{ github.sha }},latest
+      working-directory: golang
+    - name: Deploy
+      run: |
+        curl --fail -X PUT -H "X-Access-Token: ${{ secrets.ACTIONS_ACCESS_TOKEN }}" "https://actions.pedanticorderliness.com/deploy?repo=$GITHUB_REPOSITORY/backend&tag=$GITHUB_SHA"
+
