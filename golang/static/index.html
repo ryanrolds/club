@@ -62,9 +62,17 @@
       signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
       window.addEventListener("unload", function () {
         signals.sendLeave()
-      });
+      })
     })
   </script>
+
+  <hr>
+  <a href="/examples/audio.html">audio.html</a>
+  <a href="/examples/groups.html">groups.html</a>
+  <a href="/examples/local.html">local.html</a>
+  <a href="/examples/peer.html">peer.html</a>
+  <a href="/examples/peer.html">stun.html</a>
+  <a href="/examples/mirror.html">mirror.html</a>
 </body>
 
 </html>

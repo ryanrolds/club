@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style type="text/css">
+    div#videos>video {
+      display: inline-block;
+      width: 33%;
+    }
+
+    #background {
+      border: 5px solid red;
+      display: none;
+    }
+    canvas {
+      background-color: #ccc;
+      width: 33%;
+      display: none;
+    }
+
+  </style>
+  <script src="/js/event-target.js"></script>
+  <script src="/js/mirrormedia.js"></script>
+  <script src="/js/peering.js"></script>
+  <script src="/js/signaling.js"></script>
+</head>
+
+<body>
+  <!-- https://png-pixel.com -->
+  <img
+    id="background"
+    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==">
+
+  <canvas id="canvas" style="border:1px solid #d3d3d3;">
+  Your browser does not support the HTML5 canvas tag.
+  </canvas>
+
+  <div id="videos">
+    <video
+      controls=1 id="local" autoplay muted></video>
+  </div>
+
+  <script type="text/javascript">
+    var mirrorBackground = document.getElementById('background')
+    var mirrorVideo = document.getElementById('local')
+    var mirrorCanvas = document.getElementById('canvas')
+    let mirror = new MirrorMedia(mirrorVideo, mirrorCanvas)
+    let text = 'Mirror, Mirror, on the Wall... '
+    let remotePeerId = null
+
+    mirror.setupMedia().then(() => {
+      const framesPerTextScroll = 10
+      let framesUntilTextScroll = framesPerTextScroll
+      const ctx = mirrorCanvas.getContext('2d')
+
+      setInterval(() => {
+        let image = mirrorBackground
+
+        if (remotePeerId) {
+          const remoteVideo = document.getElementById(remotePeerId)
+          if (remoteVideo) {
+            mirrorCanvas.width = remoteVideo.videoWidth
+            mirrorCanvas.height = remoteVideo.videoHeight
+            image = remoteVideo
+          }
+        }
+        ctx.fillStyle = 'darkslateblue'
+        ctx.fillRect(0, 0, mirrorCanvas.width, mirrorCanvas.height)
+        ctx.drawImage(image, 0, 0, mirrorCanvas.width, mirrorCanvas.height)
+        ctx.font = 'italic 40pt Calibri'
+        ctx.fillStyle = 'lightgreen'
+        ctx.fillText(text, 10, mirrorCanvas.height / 2)
+
+        --framesUntilTextScroll
+        if (--framesUntilTextScroll === 0) {
+          framesUntilTextScroll = framesPerTextScroll
+          text = text.slice(1) + text.slice(0, 1)
+        }
+      }, 100)
+
+      let signals = new SignalingServer()
+      let peers = new Peering("videos", mirror.getStream(), signals)
+
+      signals.addEventListener("connected", async (event) => {
+        await mirror.onConnected()
+        await peers.onConnected()
+        signals.sendJoin()
+      })
+
+      signals.addEventListener("join", async (event) => {
+        let offer = await peers.onJoin(event.detail)
+        remotePeerId = event.detail.peerId
+        console.log('join remotePeerId', remotePeerId);
+        signals.sendOffer(event.detail.peerId, offer)
+      })
+
+      signals.addEventListener("leave", async (event) => {
+        await peers.onLeave(event.detail)
+      })
+
+      signals.addEventListener("offer", async (event) => {
+        remotePeerId = event.detail.peerId
+        console.log('offer remotePeerId', remotePeerId);
+        let answer = await peers.onOffer(event.detail)
+        signals.sendAnswer(event.detail.peerId, answer)
+      })
+
+      signals.addEventListener("icecandidate", async (event) => {
+        peers.onICECandidate(event.detail)
+      })
+
+      signals.addEventListener("answer", async (event) => {
+        await peers.onAnswer(event.detail)
+      })
+
+      signals.addEventListener("disconnected", async (event) => {
+        await mirror.onDisconnected()
+        await peers.onDisconnected()
+      })
+
+      let isHTTPS = location.protocol !== 'https:'
+      signals.connect((isHTTPS ? "ws" : "wss") + "://" + location.host + "/room")
+      window.addEventListener("unload", function () {
+        signals.sendLeave()
+      })
+    })
+  </script>
+</body>
+
+</html>

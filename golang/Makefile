@@ -35,3 +35,9 @@ run: build
 
 run-debug: build
 	ENV=local ./backend
+
+run-pretty: build
+	# open http://localhost:3001
+	ENV=local ./backend 2>&1 | jq --raw-output '[("# " + .level + (" " * 10))[0:10], (.func + (" " * 20))[0:20], .msg] | @tsv'
+
+
