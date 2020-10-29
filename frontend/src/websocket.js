@@ -13,8 +13,13 @@ const WebSocketContext = createContext(null)
 export { WebSocketContext }
 
 const hostUrl = new URL(window.location)
+let wsHost = `${hostUrl.hostname}:3001`
+if (hostUrl.hostname === 'club.pedanticorderliness.com') {
+  wsHost = 'club-backend.pedanticorderliness.com'
+}
+
 const isHTTPS = hostUrl.protocol === 'https:'
-const url = `${isHTTPS ? 'wss' : 'ws'}://${hostUrl.hostname}:3001/room`
+const url = `${isHTTPS ? 'wss' : 'ws'}://${wsHost}/room`
 
 export default ({ children }) => {
   let websocket
